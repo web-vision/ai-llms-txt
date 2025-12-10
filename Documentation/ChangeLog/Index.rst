@@ -4,7 +4,7 @@
 ChangeLog
 =========
 
-Version 0.1.3
+Version 0.1.5
 ==============
 
 Release Date: 2025-10-29
@@ -91,7 +91,7 @@ Install via Composer:
 
 .. code-block:: bash
 
-   composer require web-vision/llms-txt
+   composer require web-vision/ai-llms-txt
 
 After installation, the extension is ready to use with default settings. Visit ?type=1699 or ?type=1701
 or ``/.well-known/llms.txt`` if you have configured RouterEnhancers, to access the generated links.

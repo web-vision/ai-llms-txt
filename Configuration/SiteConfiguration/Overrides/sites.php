@@ -1,5 +1,10 @@
 <?php
 
+use TYPO3\CMS\Core\Information\Typo3Version;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
+
+$version = (string) GeneralUtility::makeInstance(Typo3Version::class)->getMajorVersion();
+
 $GLOBALS['SiteConfiguration']['site']['columns']['llmsTxtEnabled'] = [
     'label' => 'LLL:EXT:ai_llms_txt/Resources/Private/Language/locallang.xlf:site.llmsTxtEnabled',
     'description' => 'LLL:EXT:ai_llms_txt/Resources/Private/Language/locallang.xlf:site.llmsTxtEnabled.description',
@@ -43,7 +48,7 @@ $GLOBALS['SiteConfiguration']['site']['columns']['llmsTxtAdditionalInfo'] = [
     'config' => [
         'type' => 'text',
         'rows' => 10,
-        'renderType' => 'codeEditor',
+        'renderType' => $version >= '13' ? 'codeEditor' : 'text',
         'eval' => 'trim',
     ],
 ];

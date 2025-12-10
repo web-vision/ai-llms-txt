@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace WebVision\AiLlmsTxt\Controller;
 
 use Psr\Http\Message\ServerRequestInterface;
+use TYPO3\CMS\Core\Information\Typo3Version;
 use WebVision\AiLlmsTxt\Repository\PageRepository;
 use WebVision\AiLlmsTxt\Service\ConfigurationService;
 use WebVision\AiLlmsTxt\Service\LlmsTxtGeneratorService;
@@ -34,7 +35,7 @@ class LlmsTxtController
     public function generateAction(string $content, array $conf, ServerRequestInterface $request): string
     {
         try {
-            $currentPageId = $request->getAttribute('frontend.page.information')->getId();
+            $currentPageId = $this->getCurrentPageId($request);
             return $this->llmsTxtGenerator->generateLlmsTxt($currentPageId);
         } catch (\Exception $e) {
             // Return error message in llms.txt format
@@ -80,7 +81,7 @@ class LlmsTxtController
         $cObject = GeneralUtility::makeInstance(ContentObjectRenderer::class);
         $cObject->start([], 'pages');
 
-        $pageId = $request->getAttribute('frontend.page.information')->getId();
+        $pageId = $this->getCurrentPageId($request);
 
         $page = $this->pageRepository->findById($pageId);
 
@@ -112,5 +113,19 @@ class LlmsTxtController
         }
 
         return $html;
+    }
+
+    protected function getCurrentPageId(ServerRequestInterface $request): int
+    {
+        $version =  (string) GeneralUtility::makeInstance(Typo3Version::class)->getMajorVersion();
+
+        if (version_compare($version, '14', '<')) {
+            if (isset($GLOBALS['TSFE']) && isset($GLOBALS['TSFE']->id)) {
+                return (int) $GLOBALS['TSFE']->id;
+            }
+            throw new \RuntimeException('Could not determine current page ID in TYPO3 v12 context.', 1765368300);
+        }
+
+        return (int)$request->getAttribute('frontend.page.information')->getId();
     }
 }
