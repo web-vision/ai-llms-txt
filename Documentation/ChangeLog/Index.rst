@@ -3,9 +3,18 @@
 =========
 ChangeLog
 =========
-
-Version 0.1.5
+Version 0.1.7
 ==============
+
+Release Date: 2025-12-18
+
+Latest Changes
+--------------
+
+**Changed**
+
+* Update PageRepository to exclude specific doktypes and fetch their children
+
 
 Release Date: 2025-10-29
 
