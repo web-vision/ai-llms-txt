@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace WebVision\AiLlmsTxt\Service;
 
+use TYPO3\CMS\Core\Site\SiteFinder;
 use WebVision\AiLlmsTxt\Builder\NavigationBuilder;
 use WebVision\AiLlmsTxt\Repository\PageRepository;
-use TYPO3\CMS\Core\Site\SiteFinder;
 
 /**
  * Application Service for generating llms.txt content
@@ -19,7 +19,8 @@ class LlmsTxtGeneratorService
         private readonly PageRepository $pageRepository,
         private readonly NavigationBuilder $navigationBuilder,
         private readonly SiteFinder $siteFinder
-    ) {}
+    ) {
+    }
 
     /**
      * Generate complete llms.txt content
@@ -40,7 +41,7 @@ class LlmsTxtGeneratorService
             $lines[] =  "# $title";
         }
 
-         $lines[] = '';
+        $lines[] = '';
 
         $description = $this->configurationService->getDescriptionOverride() ?: $homePage['description'] ?? '';
         if (!empty($description)) {

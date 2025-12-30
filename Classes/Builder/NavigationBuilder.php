@@ -16,12 +16,14 @@ class NavigationBuilder
     public function __construct(
         private readonly PageRepository $pageRepository,
         private readonly UrlGeneratorService $urlGenerator
-    ) {}
+    ) {
+    }
 
     /**
      * Build hierarchical navigation structure
      */
-    public function build(int $rootPageUid, int $maxDepth = 2): array {
+    public function build(int $rootPageUid, int $maxDepth = 2): array
+    {
         $structure = [];
 
         // Get main navigation pages (level 1)

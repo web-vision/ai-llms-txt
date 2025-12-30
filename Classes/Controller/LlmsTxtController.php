@@ -6,12 +6,12 @@ namespace WebVision\AiLlmsTxt\Controller;
 
 use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Core\Information\Typo3Version;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer;
 use WebVision\AiLlmsTxt\Repository\PageRepository;
 use WebVision\AiLlmsTxt\Service\ConfigurationService;
 use WebVision\AiLlmsTxt\Service\LlmsTxtGeneratorService;
 use WebVision\AiLlmsTxt\Service\MarkdownConverterService;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer;
 
 /**
  * Controller for serving llms.txt content via TypoScript PAGE object
@@ -26,7 +26,8 @@ class LlmsTxtController
         private readonly ConfigurationService $configurationService,
         private readonly MarkdownConverterService $markdownConverter,
         private readonly PageRepository $pageRepository
-    ) {}
+    ) {
+    }
 
     /**
      * Generate llms.txt content for TypoScript USER object
@@ -85,7 +86,7 @@ class LlmsTxtController
 
         $page = $this->pageRepository->findById($pageId);
 
-        $html = "";
+        $html = '';
 
         if (!empty($page['title'])) {
             $html .= '<h1>' . htmlspecialchars($page['title']) . '</h1>';
@@ -107,7 +108,6 @@ class LlmsTxtController
         ];
         $renderedContent = $cObject->cObjGetSingle('CONTENT', $contentConfiguration);
 
-
         if (!empty($renderedContent)) {
             $html .= $renderedContent;
         }
@@ -117,11 +117,11 @@ class LlmsTxtController
 
     protected function getCurrentPageId(ServerRequestInterface $request): int
     {
-        $version =  (string) GeneralUtility::makeInstance(Typo3Version::class)->getMajorVersion();
+        $version =  (string)GeneralUtility::makeInstance(Typo3Version::class)->getMajorVersion();
 
         if (version_compare($version, '14', '<')) {
             if (isset($GLOBALS['TSFE']) && isset($GLOBALS['TSFE']->id)) {
-                return (int) $GLOBALS['TSFE']->id;
+                return (int)$GLOBALS['TSFE']->id;
             }
             throw new \RuntimeException('Could not determine current page ID in TYPO3 v12 context.', 1765368300);
         }

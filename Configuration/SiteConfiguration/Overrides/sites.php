@@ -3,7 +3,7 @@
 use TYPO3\CMS\Core\Information\Typo3Version;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
-$version = (string) GeneralUtility::makeInstance(Typo3Version::class)->getMajorVersion();
+$version = (string)GeneralUtility::makeInstance(Typo3Version::class)->getMajorVersion();
 
 $GLOBALS['SiteConfiguration']['site']['columns']['llmsTxtEnabled'] = [
     'label' => 'LLL:EXT:ai_llms_txt/Resources/Private/Language/locallang.xlf:site.llmsTxtEnabled',

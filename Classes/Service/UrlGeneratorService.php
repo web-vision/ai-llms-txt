@@ -10,7 +10,8 @@ class UrlGeneratorService
 {
     public function __construct(
         private readonly SiteFinder $siteFinder
-    ) {}
+    ) {
+    }
 
     /**
      * Generate absolute URL for a markdown page

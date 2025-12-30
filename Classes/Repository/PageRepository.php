@@ -17,7 +17,8 @@ class PageRepository
 {
     public function __construct(
         private readonly ConnectionPool $connectionPool
-    ) {}
+    ) {
+    }
 
     public function findById(int $pageId): array
     {
@@ -55,7 +56,8 @@ class PageRepository
             ->where(
                 $queryBuilder->expr()->eq('pid', $queryBuilder->createNamedParameter($parentUid)),
                 $queryBuilder->expr()->eq('nav_hide', $queryBuilder->createNamedParameter(0)),
-                $queryBuilder->expr()->eq('no_index', $queryBuilder->createNamedParameter(0)),            )
+                $queryBuilder->expr()->eq('no_index', $queryBuilder->createNamedParameter(0)),
+            )
             ->orderBy('sorting')
             ->executeQuery();
 

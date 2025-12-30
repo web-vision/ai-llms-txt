@@ -15,8 +15,8 @@ class ConfigurationService
 {
     public function __construct(
         private readonly SiteFinder $siteFinder
-    ) {}
-
+    ) {
+    }
 
     protected function getCurrentSite(): ?Site
     {

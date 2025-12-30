@@ -14,7 +14,8 @@ class MarkdownConverterService
 {
     public function __construct(
         private readonly HtmlCleanerService $htmlCleanerService
-    ) {}
+    ) {
+    }
 
     /**
      * Convert HTML content to clean Markdown
