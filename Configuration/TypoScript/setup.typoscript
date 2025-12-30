@@ -1,5 +1,5 @@
 page {
-     headerData {
+    headerData {
         1761744920 = TEXT
         1761744920.value = <link rel="alternate" type="text/plain" href="/llms.txt" />
     }
@@ -26,4 +26,3 @@ llmstxt {
         userFunc = WebVision\AiLlmsTxt\Controller\LlmsTxtController->generateAction
     }
 }
-
