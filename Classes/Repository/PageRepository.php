@@ -40,7 +40,6 @@ class PageRepository
      * Doktypes that should be excluded but their children should still be fetched
      */
     private const EXCLUDED_DOKTYPES = [
-        CorePageRepository::DOKTYPE_RECYCLER,
         CorePageRepository::DOKTYPE_SYSFOLDER,
         CorePageRepository::DOKTYPE_SPACER,
         CorePageRepository::DOKTYPE_SHORTCUT,
