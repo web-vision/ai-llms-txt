@@ -33,3 +33,6 @@ Build/testing-docker/.env
 # Local development
 .env
 .env.local
+node_modules/
+test-results/
+playwright-report/
