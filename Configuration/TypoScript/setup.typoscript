@@ -11,8 +11,10 @@ llmstxt {
 
     config {
         disableAllHeaderCode = 1
-        additionalHeaders.10.header = Content-Type: text/plain; charset=utf-8
-        additionalHeaders.10.replace = 1
+        additionalHeaders.10 {
+            header = Content-Type: text/plain; charset=utf-8
+            replace = 1
+        }
         xhtml_cleaning = 0
         admPanel = 0
         debug = 0
