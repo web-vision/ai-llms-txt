@@ -55,9 +55,7 @@ class PageRepository
             ->where(
                 $queryBuilder->expr()->eq('pid', $queryBuilder->createNamedParameter($parentUid)),
                 $queryBuilder->expr()->eq('nav_hide', $queryBuilder->createNamedParameter(0)),
-                $queryBuilder->expr()->eq('no_index', $queryBuilder->createNamedParameter(0)),
-                $queryBuilder->expr()->neq('doktype', $queryBuilder->createNamedParameter(CorePageRepository::DOKTYPE_RECYCLER)),
-            )
+                $queryBuilder->expr()->eq('no_index', $queryBuilder->createNamedParameter(0)),            )
             ->orderBy('sorting')
             ->executeQuery();
 
