@@ -1,0 +1,19 @@
+paths:
+  - Configuration
+
+filePatterns:
+  - "*.tsconfig"
+  - "*.typoscript"
+  - ext_conf_template.txt
+  - ext_typoscript_*.txt
+
+sniffs:
+  - class: Indentation
+    parameters:
+      indentPerLevel: 4
+  - class: RepeatingRValue
+    disabled: true
+  # @todo Remove this until commented out (dead) code has been removed from TypoScript files to let this reported in
+  # @todo the future. Currently keeping it as working documentation. Temporary disable.
+  - class: DeadCode
+    disabled: true

@@ -17,7 +17,7 @@
         "docs": "https://github.com/web-vision/ai-llms-txt#readme"
     },
     "require": {
-        "php": "^8.2",
+        "php": "^8.2 || ^8.3 || ^8.4",
         "league/html-to-markdown": "^5.1",
         "typo3/cms-backend": "^12.4 || ^13.4 || ^14.0",
         "typo3/cms-core": "^12.4 || ^13.4 || ^14.0",
@@ -26,7 +26,8 @@
         "typo3/cms-seo": "^12.4 || ^13.4 || ^14.0"
     },
     "require-dev": {
-        "friendsofphp/php-cs-fixer": "^3.0",
+        "friendsofphp/php-cs-fixer": "^3.70",
+        "helmich/typo3-typoscript-lint": "^3.1.0",
         "phpstan/phpstan": "^1.10",
         "phpunit/phpunit": "^10.0 || ^11.0",
         "typo3/cms-fluid-styled-content": "^12.4 || ^13.4 || ^14.0",

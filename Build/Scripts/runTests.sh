@@ -1,10 +1,8 @@
 #!/usr/bin/env bash
 
 #
-# LLMS TXT extension test runner based on docker/podman.
-# Adapted from TYPO3 core testing and web-vision/deepltranslate-core
+# web-vision/deepl-write test runner based on docker/podman.
 #
-
 if [ "${CI}" != "true" ]; then
     trap 'echo "runTests.sh SIGINT signal emitted";cleanUp;exit 2' SIGINT
 fi
@@ -45,14 +43,14 @@ handleDbmsOptions() {
             if [ "${DATABASE_DRIVER}" != "mysqli" ] && [ "${DATABASE_DRIVER}" != "pdo_mysql" ]; then
                 echo "Invalid combination -d ${DBMS} -a ${DATABASE_DRIVER}" >&2
                 echo >&2
-                echo "Use \"Build/Scripts/runTests.sh -h\" to display help and valid options" >&2
+                echo "Use \".Build/Scripts/runTests.sh -h\" to display help and valid options" >&2
                 exit 1
             fi
             [ -z "${DBMS_VERSION}" ] && DBMS_VERSION="10.4"
             if ! [[ ${DBMS_VERSION} =~ ^(10.4|10.5|10.6|10.7|10.8|10.9|10.10|10.11|11.0|11.1)$ ]]; then
                 echo "Invalid combination -d ${DBMS} -i ${DBMS_VERSION}" >&2
                 echo >&2
-                echo "Use \"Build/Scripts/runTests.sh -h\" to display help and valid options" >&2
+                echo "Use \".Build/Scripts/runTests.sh -h\" to display help and valid options" >&2
                 exit 1
             fi
             ;;
@@ -61,14 +59,14 @@ handleDbmsOptions() {
             if [ "${DATABASE_DRIVER}" != "mysqli" ] && [ "${DATABASE_DRIVER}" != "pdo_mysql" ]; then
                 echo "Invalid combination -d ${DBMS} -a ${DATABASE_DRIVER}" >&2
                 echo >&2
-                echo "Use \"Build/Scripts/runTests.sh -h\" to display help and valid options" >&2
+                echo "Use \".Build/Scripts/runTests.sh -h\" to display help and valid options" >&2
                 exit 1
             fi
             [ -z "${DBMS_VERSION}" ] && DBMS_VERSION="8.0"
             if ! [[ ${DBMS_VERSION} =~ ^(8.0|8.1|8.2|8.3|8.4)$ ]]; then
                 echo "Invalid combination -d ${DBMS} -i ${DBMS_VERSION}" >&2
                 echo >&2
-                echo "Use \"Build/Scripts/runTests.sh -h\" to display help and valid options" >&2
+                echo "Use \".Build/Scripts/runTests.sh -h\" to display help and valid options" >&2
                 exit 1
             fi
             ;;
@@ -76,14 +74,14 @@ handleDbmsOptions() {
             if [ -n "${DATABASE_DRIVER}" ]; then
                 echo "Invalid combination -d ${DBMS} -a ${DATABASE_DRIVER}" >&2
                 echo >&2
-                echo "Use \"Build/Scripts/runTests.sh -h\" to display help and valid options" >&2
+                echo "Use \".Build/Scripts/runTests.sh -h\" to display help and valid options" >&2
                 exit 1
             fi
             [ -z "${DBMS_VERSION}" ] && DBMS_VERSION="10"
             if ! [[ ${DBMS_VERSION} =~ ^(10|11|12|13|14|15|16)$ ]]; then
                 echo "Invalid combination -d ${DBMS} -i ${DBMS_VERSION}" >&2
                 echo >&2
-                echo "Use \"Build/Scripts/runTests.sh -h\" to display help and valid options" >&2
+                echo "Use \".Build/Scripts/runTests.sh -h\" to display help and valid options" >&2
                 exit 1
             fi
             ;;
@@ -91,20 +89,20 @@ handleDbmsOptions() {
             if [ -n "${DATABASE_DRIVER}" ]; then
                 echo "Invalid combination -d ${DBMS} -a ${DATABASE_DRIVER}" >&2
                 echo >&2
-                echo "Use \"Build/Scripts/runTests.sh -h\" to display help and valid options" >&2
+                echo "Use \".Build/Scripts/runTests.sh -h\" to display help and valid options" >&2
                 exit 1
             fi
             if [ -n "${DBMS_VERSION}" ]; then
                 echo "Invalid combination -d ${DBMS} -i ${DATABASE_DRIVER}" >&2
                 echo >&2
-                echo "Use \"Build/Scripts/runTests.sh -h\" to display help and valid options" >&2
+                echo "Use \".Build/Scripts/runTests.sh -h\" to display help and valid options" >&2
                 exit 1
             fi
             ;;
         *)
             echo "Invalid option -d ${DBMS}" >&2
             echo >&2
-            echo "Use \"Build/Scripts/runTests.sh -h\" to display help and valid options" >&2
+            echo "Use \".Build/Scripts/runTests.sh -h\" to display help and valid options" >&2
             exit 1
             ;;
     esac
@@ -119,6 +117,7 @@ cleanCacheFiles() {
 }
 
 cleanTestFiles() {
+    # test related
     echo -n "Clean test related files ... "
     rm -rf \
         .Build/Web/typo3temp/var/tests/
@@ -135,133 +134,154 @@ cleanRenderedDocumentationFiles() {
 loadHelp() {
     # Load help text into $HELP
     read -r -d '' HELP <<EOF
-LLMS TXT extension test runner. Execute unit, functional and other test suites in
-a container based test environment. Handles execution of single test files,
-sending xdebug information to a local IDE and more.
+TYPO3 core test runner. Execute acceptance, unit, functional and other test suites in
+a container based test environment. Handles execution of single test files, sending
+xdebug information to a local IDE and more.
 
 Usage: $0 [options] [file]
 
 Options:
-    -s <...>        Specifies which test suite to run
-        - cgl: cgl test and fix all php files
-        - checkBom: check UTF-8 files do not contain BOM
-        - checkExceptionCodes: Check for duplicate exception codes
-        - checkRst: test .rst files for integrity
-        - checkTestMethodsPrefix: check tests methods do not start with "test"
-        - clean: clean up build, cache and testing related files and folders
-        - cleanCache: clean up cache related files and folders
-        - cleanRenderedDocumentation: clean up rendered documentation files and folders (Documentation-GENERATED-temp)
-        - composer: "composer" with all remaining arguments dispatched.
-        - composerUpdate: "composer update", handy if host has no PHP
-        - functional: functional tests
-        - lintPhp: PHP linting
-        - phpstan: phpstan analyze
-        - phpstanGenerateBaseline: regenerate phpstan baseline, handy after phpstan updates
-        - renderDocumentation: render extension documentation using official TYPO3 container
-        - unit: PHP unit tests
+    -s <...>
+        Specifies which test suite to run
+            - cgl: cgl test and fix all php files
+            - checkBom: check UTF-8 files do not contain BOM
+            - checkExceptionCodes: Check for duplicate exception codes
+            - checkRst: test .rst files for integrity
+            - checkTestMethodsPrefix: check tests methods do not start with "test"
+            - clean: clean up build, cache and testing related files and folders
+            - cleanCache: clean up cache related files and folders
+            - cleanRenderedDocumentation: clean up rendered documentation files and folders (Documentation-GENERATED-temp)
+            - clean: clean up build and testing related files
+            - composer: "composer" with all remaining arguments dispatched.
+            - composerUpdate: "composer update", handy if host has no PHP
+            - functional: functional tests
+            - lintPhp: PHP linting
+            - lintTypoScript: TypoScript linting
+            - renderDocumentation: This uses the official rendering container to render the extension documentation.
+            - phpstan: phpstan analyze
+            - phpstanGenerateBaseline: regenerate phpstan baseline, handy after phpstan updates
+            - unit: PHP unit tests
 
-    -b <docker|podman>        Container environment:
-        - docker
-        - podman
+    -b <docker|podman>
+        Container environment:
+            - docker
+            - podman
+
         If not specified, podman will be used if available. Otherwise, docker is used.
 
-    -a <mysqli|pdo_mysql>        Only with -s functional
+    -a <mysqli|pdo_mysql>
+        Only with -s functional|functionalDeprecated
         Specifies to use another driver, following combinations are available:
-        - mysql
-            - mysqli (default)
-            - pdo_mysql
-        - mariadb
-            - mysqli (default)
-            - pdo_mysql
+            - mysql
+                - mysqli (default)
+                - pdo_mysql
+            - mariadb
+                - mysqli (default)
+                - pdo_mysql
 
-    -d <sqlite|mariadb|mysql|postgres>        Only with -s functional
+    -d <sqlite|mariadb|mysql|postgres>
+        Only with -s functional|functionalDeprecated|acceptance|acceptanceInstall
         Specifies on which DBMS tests are performed
-        - sqlite: (default): use sqlite
-        - mariadb: use mariadb
-        - mysql: use MySQL
-        - postgres: use postgres
+            - sqlite: (default): use sqlite
+            - mariadb: use mariadb
+            - mysql: use MySQL
+            - postgres: use postgres
 
-    -i version        Specify a specific database version
+    -i version
+        Specify a specific database version
         With "-d mariadb":
-        - 10.4   short-term, maintained until 2024-06-18 (default)
-        - 10.5   short-term, maintained until 2025-06-24
-        - 10.6   long-term, maintained until 2026-06
-        - 10.11  long-term, maintained until 2028-02
-        - 11.0   short-term, maintained until 2024-06
-        - 11.1   short-term, maintained until 2024-08
+            - 10.4   short-term, maintained until 2024-06-18 (default)
+            - 10.5   short-term, maintained until 2025-06-24
+            - 10.6   long-term, maintained until 2026-06
+            - 10.7   short-term, no longer maintained
+            - 10.8   short-term, maintained until 2023-05
+            - 10.9   short-term, maintained until 2023-08
+            - 10.10  short-term, maintained until 2023-11
+            - 10.11  long-term, maintained until 2028-02
+            - 11.0   development series
+            - 11.1   short-term development series
         With "-d mysql":
-        - 8.0   maintained until 2026-04 (default)
-        - 8.1   maintained until 2025-04
-        - 8.2   maintained until 2026-01
-        - 8.3   maintained until 2027-04
-        - 8.4   maintained until 2032-04
+            - 8.0   maintained until 2026-04 (default)
+            - 8.1   unmaintained since 2023-10
+            - 8.2   unmaintained since 2024-01
+            - 8.3   maintained until 2024-04
+            - 8.4   maintained until 2032-04 LTS
         With "-d postgres":
-        - 10    unmaintained since 2022-11
-        - 11    unmaintained since 2023-11
-        - 12    maintained until 2024-11
-        - 13    maintained until 2025-11
-        - 14    maintained until 2026-11
-        - 15    maintained until 2027-11
-        - 16    maintained until 2028-11
+            - 10    unmaintained since 2022-11-10 (default)
+            - 11    maintained until 2023-11-09
+            - 12    maintained until 2024-11-14
+            - 13    maintained until 2025-11-13
+            - 14    maintained until 2026-11-12
+            - 15    maintained until 2027-11-11
+            - 16    maintained until 2028-11-09
 
-    -p <8.3|8.4>        Specifies the PHP minor version to be used
-        - 8.3: (default) use PHP 8.3
-        - 8.4: use PHP 8.4
+    -t <12|13>
+        Only with -s composerInstall|composerInstallMin|composerInstallMax
+        Specifies the TYPO3 CORE Version to be used
+            - 12: (default) use TYPO3 v12
+            - 12: use TYPO3 v13
 
-    -t <13>        Only with -s functional|unit|phpstan
-        Specifies the TYPO3 core major version to be used
-        - 13: (default) use TYPO3 v13
+    -p <8.1|8.2|8.3|8.4>
+        Specifies the PHP minor version to be used
+            - 8.1: use PHP 8.1
+            - 8.2: (default) use PHP 8.2
+            - 8.3: use PHP 8.3
+            - 8.4: use PHP 8.4
 
-    -e "<phpunit options>"        Only with -s functional|unit
-        Additional options to send to phpunit (unit & functional tests). For phpunit,
-        options starting with "--" need to be added after options starting with "-".
-        Example -e "-v --filter SomeTestMethodName"
+    -x
+        Only with -s functional|functionalDeprecated|unit|unitDeprecated|unitRandom|acceptance|acceptanceInstall
+        Send information to host instance for test or system under test break points. This is especially
+        useful if a local PhpStorm instance is listening on default xdebug port 9003. A different port
+        can be selected with -y
 
-    -x        Only with -s functional|unit
-        Send information to host instance for test or system under test break points.
-        This is especially useful if a local PhpStorm instance is listening on default xdebug port 9003.
-        A different port can be selected with -y
-
-    -y <port>        Send xdebug information to a different port than default 9003 if an IDE like PhpStorm
+    -y <port>
+        Send xdebug information to a different port than default 9003 if an IDE like PhpStorm
         is not listening on default port.
 
-    -n        Only with -s cgl
+    -o <number>
+        Only with -s unitRandom
+        Set specific random seed to replay a random run in this order again. The phpunit randomizer
+        outputs the used seed at the end (in gitlab core testing logs, too). Use that number to
+        replay the unit tests in that order.
+
+    -n
+        Only with -s cgl
         Activate dry-run in CGL check that does not actively change files and only prints broken ones.
 
-    -u        Update existing typo3/core-testing-*:latest container images and remove dangling local volumes.
+    -u
+        Update existing typo3/core-testing-*:latest container images and remove dangling local volumes.
         New images are published once in a while and only the latest ones are supported by core testing.
         Use this if weird test errors occur. Also removes obsolete image versions of typo3/core-testing-*.
 
-    -h        Show this help.
+    -h
+        Show this help.
 
 Examples:
-    # Run all unit tests using PHP 8.3
+    # Run all core unit tests using PHP 8.1
     ./Build/Scripts/runTests.sh
     ./Build/Scripts/runTests.sh -s unit
 
-    # Run all unit tests and enable xdebug (have a PhpStorm listening on port 9003!)
+    # Run all core units tests and enable xdebug (have a PhpStorm listening on port 9003!)
     ./Build/Scripts/runTests.sh -x
 
-    # Run unit tests in phpunit verbose mode with xdebug on PHP 8.3 and filter for test canGenerateLlmsTxt
-    ./Build/Scripts/runTests.sh -x -p 8.3 -e "-v --filter canGenerateLlmsTxt"
+    # Run unit tests in phpunit verbose mode with xdebug on PHP 8.1 and filter for test canRetrieveValueWithGP
+    ./Build/Scripts/runTests.sh -x -p 8.1 -e "-v --filter canRetrieveValueWithGP"
 
     # Run functional tests in phpunit with a filtered test method name in a specified file
-    ./Build/Scripts/runTests.sh -s functional -e "--filter testLlmsTxtGeneration" Tests/Functional/Service/LlmsTxtGeneratorServiceTest.php
+    # example will currently execute two tests, both of which start with the search term
+    ./Build/Scripts/runTests.sh -s functional -e "--filter deleteContent" typo3/sysext/core/Tests/Functional/DataHandling/Regular/Modify/ActionTest.php
 
-    # Run functional tests on postgres with xdebug, php 8.3
-    ./Build/Scripts/runTests.sh -x -p 8.3 -s functional -d postgres
+    # Run functional tests on postgres with xdebug, php 8.1 and execute a restricted set of tests
+    ./Build/Scripts/runTests.sh -x -p 8.1 -s functional -d postgres typo3/sysext/core/Tests/Functional/Authentication
 
-    # Run functional tests on postgres 15
-    ./Build/Scripts/runTests.sh -s functional -d postgres -i 15
+    # Run functional tests on postgres 11
+    ./Build/Scripts/runTests.sh -s functional -d postgres -k 11
 
-    # Run phpstan analysis
-    ./Build/Scripts/runTests.sh -s phpstan
+    # Run restricted set of application acceptance tests
+    ./Build/Scripts/runTests.sh -s acceptance typo3/sysext/core/Tests/Acceptance/Application/Login/BackendLoginCest.php:loginButtonMouseOver
 
-    # Render documentation
-    ./Build/Scripts/runTests.sh -s renderDocumentation
-
-    # Clean up test files
-    ./Build/Scripts/runTests.sh -s clean
+    # Run installer tests of a new instance on sqlite
+    ./Build/Scripts/runTests.sh -s acceptanceInstall -d sqlite
 EOF
 }
 
@@ -273,11 +293,12 @@ fi
 
 # Option defaults
 TEST_SUITE="unit"
-CORE_VERSION="13"
+CORE_VERSION="12"
 DBMS="sqlite"
-PHP_VERSION="8.3"
+PHP_VERSION="8.2"
 PHP_XDEBUG_ON=0
 PHP_XDEBUG_PORT=9003
+PHPUNIT_RANDOM=""
 CGLCHECK_DRY_RUN=0
 DATABASE_DRIVER=""
 DBMS_VERSION=""
@@ -287,17 +308,18 @@ CONTAINER_HOST="host.docker.internal"
 # Option parsing updates above default vars
 # Reset in case getopts has been used previously in the shell
 OPTIND=1
-
 # Array for invalid options
 INVALID_OPTIONS=()
-
-# Simple option parsing, where "-s" accepts options like "unit"
-while getopts ":s:b:a:d:i:p:t:e:xy:nuh" OPT; do
+# Simple option parsing based on getopts (! not getopt)
+while getopts "a:b:s:d:i:p:t:xy:o:nhu" OPT; do
     case ${OPT} in
         s)
             TEST_SUITE=${OPTARG}
             ;;
         b)
+            if ! [[ ${OPTARG} =~ ^(docker|podman)$ ]]; then
+                INVALID_OPTIONS+=("${OPTARG}")
+            fi
             CONTAINER_BIN=${OPTARG}
             ;;
         a)
@@ -311,18 +333,15 @@ while getopts ":s:b:a:d:i:p:t:e:xy:nuh" OPT; do
             ;;
         p)
             PHP_VERSION=${OPTARG}
-            if ! [[ ${PHP_VERSION} =~ ^(8.3|8.4)$ ]]; then
+            if ! [[ ${PHP_VERSION} =~ ^(8.1|8.2|8.3|8.4)$ ]]; then
                 INVALID_OPTIONS+=("p ${OPTARG}")
             fi
             ;;
         t)
             CORE_VERSION=${OPTARG}
-            if ! [[ ${CORE_VERSION} =~ ^(13)$ ]]; then
+            if ! [[ ${CORE_VERSION} =~ ^(12|13)$ ]]; then
                 INVALID_OPTIONS+=("t ${OPTARG}")
             fi
-            ;;
-        e)
-            EXTRA_TEST_OPTIONS=${OPTARG}
             ;;
         x)
             PHP_XDEBUG_ON=1
@@ -330,16 +349,19 @@ while getopts ":s:b:a:d:i:p:t:e:xy:nuh" OPT; do
         y)
             PHP_XDEBUG_PORT=${OPTARG}
             ;;
+        o)
+            PHPUNIT_RANDOM="--random-order-seed=${OPTARG}"
+            ;;
         n)
             CGLCHECK_DRY_RUN=1
-            ;;
-        u)
-            UPDATE_CONTAINERS=1
             ;;
         h)
             loadHelp
             echo "${HELP}"
             exit 0
+            ;;
+        u)
+            TEST_SUITE=update
             ;;
         \?)
             INVALID_OPTIONS+=("${OPTARG}")
@@ -353,17 +375,17 @@ done
 # Exit on invalid options
 if [ ${#INVALID_OPTIONS[@]} -ne 0 ]; then
     echo "Invalid option(s):" >&2
-    for INVALID_OPTION in "${INVALID_OPTIONS[@]}"; do
-        echo "-${INVALID_OPTION}" >&2
+    for I in "${INVALID_OPTIONS[@]}"; do
+        echo "-"${I} >&2
     done
     echo >&2
-    echo "Use \"Build/Scripts/runTests.sh -h\" to display help and valid options" >&2
+    echo "call \".Build/Scripts/runTests.sh -h\" to display help and valid options"
     exit 1
 fi
 
 handleDbmsOptions
 
-COMPOSER_ROOT_VERSION="1.x.x-dev"
+COMPOSER_ROOT_VERSION="5.x.x-dev"
 CONTAINER_INTERACTIVE="-it --init"
 HOST_UID=$(id -u)
 USERSET=""
@@ -378,9 +400,10 @@ cd "$THIS_SCRIPT_DIR" || exit 1
 cd ../../ || exit 1
 ROOT_DIR="${PWD}"
 
-# Create .cache dir: composer needs this.
+# Create .cache dir: composer need this.
 mkdir -p .Build/.cache
 mkdir -p .Build/Web/typo3temp/var/tests
+
 
 IS_CORE_CI=0
 # ENV var "CI" is set by gitlab-ci. We use it here to distinct 'local' and 'CI' environment.
@@ -402,24 +425,40 @@ fi
 IMAGE_PHP="ghcr.io/typo3/core-testing-$(echo "php${PHP_VERSION}" | sed -e 's/\.//'):latest"
 IMAGE_ALPINE="docker.io/alpine:3.8"
 IMAGE_DOCS="ghcr.io/typo3-documentation/render-guides:latest"
+IMAGE_SELENIUM="docker.io/selenium/standalone-chrome:4.0.0-20211102"
 IMAGE_MARIADB="docker.io/mariadb:${DBMS_VERSION}"
 IMAGE_MYSQL="docker.io/mysql:${DBMS_VERSION}"
 IMAGE_POSTGRES="docker.io/postgres:${DBMS_VERSION}-alpine"
+IMAGE_DEEPL="ghcr.io/web-vision/wv-deeplmockapi-server:latest"
+
+
+# Detect arm64 and use a seleniarm image.
+# In a perfect world selenium would have a arm64 integrated, but that is not on the horizon.
+# So for the time being we have to use seleniarm image.
+ARCH=$(uname -m)
+if [ ${ARCH} = "arm64" ]; then
+    IMAGE_SELENIUM="docker.io/seleniarm/standalone-chromium:4.1.2-20220227"
+fi
+echo "Architecture" ${ARCH} "requires" ${IMAGE_SELENIUM} "to run acceptance tests."
 
 # Set $1 to first mass argument, this is the optional test file or test directory to execute
 shift $((OPTIND - 1))
 
 SUFFIX=$(echo $RANDOM)
-NETWORK="llms-txt-${SUFFIX}"
+NETWORK="wv-deepl-write-${SUFFIX}"
 ${CONTAINER_BIN} network create ${NETWORK} >/dev/null
 
 if [ "${CONTAINER_BIN}" == "docker" ]; then
-    # docker needs the add-host for xdebug remote debugging. podman has host.containers.internal built in
+    # docker needs the add-host for xdebug remote debugging. podman has host.container.internal built in
     CONTAINER_COMMON_PARAMS="${CONTAINER_INTERACTIVE} --rm --network ${NETWORK} --add-host ${CONTAINER_HOST}:host-gateway ${USERSET} -v ${ROOT_DIR}:${ROOT_DIR} -w ${ROOT_DIR}"
+    CONTAINER_SIMPLE_PARAMS="${CONTAINER_INTERACTIVE} --rm --network ${NETWORK} --add-host ${CONTAINER_HOST}:host-gateway ${USERSET} -v ${ROOT_DIR}:${ROOT_DIR} -w ${ROOT_DIR}"
+    DOCUMENTATION_COMMON_PARAMS="${CONTAINER_INTERACTIVE} --rm ${USERSET} -v ${ROOT_DIR}:/project"
 else
     # podman
     CONTAINER_HOST="host.containers.internal"
-    CONTAINER_COMMON_PARAMS="${CONTAINER_INTERACTIVE} --rm --network ${NETWORK} -v ${ROOT_DIR}:${ROOT_DIR} -w ${ROOT_DIR}"
+    CONTAINER_COMMON_PARAMS="${CONTAINER_INTERACTIVE} ${CI_PARAMS} --rm --network ${NETWORK} -v ${ROOT_DIR}:${ROOT_DIR} -w ${ROOT_DIR}"
+    CONTAINER_SIMPLE_PARAMS="${CONTAINER_INTERACTIVE} ${CI_PARAMS} --rm -v ${ROOT_DIR}:${ROOT_DIR} -w ${ROOT_DIR}"
+    DOCUMENTATION_COMMON_PARAMS="${CONTAINER_INTERACTIVE} ${CI_PARAMS} --rm -v ${ROOT_DIR}:${ROOT_DIR} -v ${ROOT_DIR}:/project"
 fi
 
 if [ ${PHP_XDEBUG_ON} -eq 0 ]; then
@@ -434,31 +473,31 @@ fi
 case ${TEST_SUITE} in
     cgl)
         if [ "${CGLCHECK_DRY_RUN}" -eq 1 ]; then
-            COMMAND="php -dxdebug.mode=off .Build/bin/php-cs-fixer fix --config .php-cs-fixer.dist.php -v --dry-run --using-cache no --diff"
+            COMMAND="php -dxdebug.mode=off .Build/bin/php-cs-fixer fix --config Build/php-cs-fixer/php-cs-rules.php -v --dry-run --using-cache no --diff"
         else
-            COMMAND="php -dxdebug.mode=off .Build/bin/php-cs-fixer fix --config .php-cs-fixer.dist.php --using-cache no"
+            COMMAND="php -dxdebug.mode=off .Build/bin/php-cs-fixer fix --config Build/php-cs-fixer/php-cs-rules.php --using-cache no"
         fi
         ${CONTAINER_BIN} run ${CONTAINER_COMMON_PARAMS} --name cgl-${SUFFIX} -e COMPOSER_CACHE_DIR=.Build/.cache/composer -e COMPOSER_ROOT_VERSION=${COMPOSER_ROOT_VERSION} ${IMAGE_PHP} /bin/sh -c "${COMMAND}"
         SUITE_EXIT_CODE=$?
         ;;
     checkBom)
         COMMAND="Build/Scripts/checkUtf8Bom.sh"
-        ${CONTAINER_BIN} run ${CONTAINER_COMMON_PARAMS} --name checkbom-${SUFFIX} -e COMPOSER_CACHE_DIR=.Build/.cache/composer -e COMPOSER_ROOT_VERSION=${COMPOSER_ROOT_VERSION} ${IMAGE_PHP} /bin/sh -c "${COMMAND}"
+        ${CONTAINER_BIN} run ${CONTAINER_COMMON_PARAMS} --name cgl-${SUFFIX} -e COMPOSER_CACHE_DIR=.Build/.cache/composer -e COMPOSER_ROOT_VERSION=${COMPOSER_ROOT_VERSION} ${IMAGE_PHP} /bin/sh -c "${COMMAND}"
         SUITE_EXIT_CODE=$?
         ;;
     checkRst)
         COMMAND="php -dxdebug.mode=off Build/Scripts/validateRstFiles.php"
-        ${CONTAINER_BIN} run ${CONTAINER_COMMON_PARAMS} --name checkrst-${SUFFIX} -e COMPOSER_CACHE_DIR=.Build/.cache/composer -e COMPOSER_ROOT_VERSION=${COMPOSER_ROOT_VERSION} ${IMAGE_PHP} /bin/sh -c "${COMMAND}"
+        ${CONTAINER_BIN} run ${CONTAINER_COMMON_PARAMS} --name cgl-${SUFFIX} -e COMPOSER_CACHE_DIR=.Build/.cache/composer -e COMPOSER_ROOT_VERSION=${COMPOSER_ROOT_VERSION} ${IMAGE_PHP} /bin/sh -c "${COMMAND}"
         SUITE_EXIT_CODE=$?
         ;;
     checkExceptionCodes)
         COMMAND="Build/Scripts/duplicateExceptionCodeCheck.sh"
-        ${CONTAINER_BIN} run ${CONTAINER_COMMON_PARAMS} --name checkexceptioncodes-${SUFFIX} -e COMPOSER_CACHE_DIR=.Build/.cache/composer -e COMPOSER_ROOT_VERSION=${COMPOSER_ROOT_VERSION} ${IMAGE_PHP} /bin/sh -c "${COMMAND}"
+        ${CONTAINER_BIN} run ${CONTAINER_COMMON_PARAMS} --name cgl-${SUFFIX} -e COMPOSER_CACHE_DIR=.Build/.cache/composer -e COMPOSER_ROOT_VERSION=${COMPOSER_ROOT_VERSION} ${IMAGE_PHP} /bin/sh -c "${COMMAND}"
         SUITE_EXIT_CODE=$?
         ;;
     checkTestMethodsPrefix)
         COMMAND="php -dxdebug.mode=off Build/Scripts/testMethodPrefixChecker.php"
-        ${CONTAINER_BIN} run ${CONTAINER_COMMON_PARAMS} --name checktestmethodsprefix-${SUFFIX} -e COMPOSER_CACHE_DIR=.Build/.cache/composer -e COMPOSER_ROOT_VERSION=${COMPOSER_ROOT_VERSION} ${IMAGE_PHP} /bin/sh -c "${COMMAND}"
+        ${CONTAINER_BIN} run ${CONTAINER_COMMON_PARAMS} --name cgl-${SUFFIX} -e COMPOSER_CACHE_DIR=.Build/.cache/composer -e COMPOSER_ROOT_VERSION=${COMPOSER_ROOT_VERSION} ${IMAGE_PHP} /bin/sh -c "${COMMAND}"
         SUITE_EXIT_CODE=$?
         ;;
     clean)
@@ -477,23 +516,26 @@ case ${TEST_SUITE} in
         ;;
     composer)
         COMMAND=(composer "$@")
-        ${CONTAINER_BIN} run ${CONTAINER_COMMON_PARAMS} --name composer-command-${SUFFIX} -e COMPOSER_CACHE_DIR=.Build/.cache/composer -e COMPOSER_ROOT_VERSION=${COMPOSER_ROOT_VERSION} ${IMAGE_PHP} "${COMMAND[@]}"
+        ${CONTAINER_BIN} run ${CONTAINER_SIMPLE_PARAMS} --name composer-command-${SUFFIX} -e COMPOSER_CACHE_DIR=.Build/.cache/composer -e COMPOSER_ROOT_VERSION=${COMPOSER_ROOT_VERSION} ${IMAGE_PHP} "${COMMAND[@]}"
         SUITE_EXIT_CODE=$?
         ;;
     composerUpdate)
-        COMMAND=(composer update)
-        ${CONTAINER_BIN} run ${CONTAINER_COMMON_PARAMS} --name composer-update-${SUFFIX} -e COMPOSER_CACHE_DIR=.Build/.cache/composer -e COMPOSER_ROOT_VERSION=${COMPOSER_ROOT_VERSION} ${IMAGE_PHP} "${COMMAND[@]}"
+        COMMAND=(Build/Scripts/composer-for-core-version.sh ${CORE_VERSION})
+        ${CONTAINER_BIN} run ${CONTAINER_SIMPLE_PARAMS} --name composer-command-${SUFFIX} -e COMPOSER_CACHE_DIR=.Build/.cache/composer -e COMPOSER_ROOT_VERSION=${COMPOSER_ROOT_VERSION} ${IMAGE_PHP} "${COMMAND[@]}"
         SUITE_EXIT_CODE=$?
         ;;
     functional)
         PHPUNIT_CONFIG_FILE="Build/phpunit/FunctionalTests.xml"
-        COMMAND=(.Build/bin/phpunit -c ${PHPUNIT_CONFIG_FILE} --exclude-group not-${DBMS} ${EXTRA_TEST_OPTIONS} "$@")
+        COMMAND=(.Build/bin/phpunit -c ${PHPUNIT_CONFIG_FILE} --exclude-group not-${DBMS} "$@")
+        echo "Using deepl-mockserver"
+        ${CONTAINER_BIN} run --rm ${CI_PARAMS} --name deepl-func-${SUFFIX} --network ${NETWORK} -d ${IMAGE_DEEPL} >/dev/null
+        waitFor deepl-func-${SUFFIX} 3000
         case ${DBMS} in
             mariadb)
                 echo "Using driver: ${DATABASE_DRIVER}"
                 ${CONTAINER_BIN} run --name mariadb-func-${SUFFIX} --network ${NETWORK} -d -e MYSQL_ROOT_PASSWORD=funcp --tmpfs /var/lib/mysql/:rw,noexec,nosuid ${IMAGE_MARIADB} >/dev/null
                 waitFor mariadb-func-${SUFFIX} 3306
-                CONTAINERPARAMS="-e typo3DatabaseDriver=${DATABASE_DRIVER} -e typo3DatabaseName=func_test -e typo3DatabaseUsername=root -e typo3DatabaseHost=mariadb-func-${SUFFIX} -e typo3DatabasePassword=funcp"
+                CONTAINERPARAMS="-e typo3DatabaseDriver=${DATABASE_DRIVER} -e typo3DatabaseName=func_test -e typo3DatabaseUsername=root -e typo3DatabaseHost=mariadb-func-${SUFFIX} -e typo3DatabasePassword=funcp -e DEEPL_API_KEY=mock_server -e DEEPL_HOST=deepl-func-${SUFFIX} -e DEEPL_SERVER_URL=deepl-func-${SUFFIX}:3000 -e DEEPL_MOCK_SERVER_PORT=3000 -e DEEPL_PORT='3000' -e DEEPL_SCHEME='http' -e DEEPL_MOCKSERVER_USED=1"
                 ${CONTAINER_BIN} run ${CONTAINER_COMMON_PARAMS} --name functional-${SUFFIX} ${XDEBUG_MODE} -e XDEBUG_CONFIG="${XDEBUG_CONFIG}" ${CONTAINERPARAMS} ${IMAGE_PHP} "${COMMAND[@]}"
                 SUITE_EXIT_CODE=$?
                 ;;
@@ -501,28 +543,33 @@ case ${TEST_SUITE} in
                 echo "Using driver: ${DATABASE_DRIVER}"
                 ${CONTAINER_BIN} run --name mysql-func-${SUFFIX} --network ${NETWORK} -d -e MYSQL_ROOT_PASSWORD=funcp --tmpfs /var/lib/mysql/:rw,noexec,nosuid ${IMAGE_MYSQL} >/dev/null
                 waitFor mysql-func-${SUFFIX} 3306
-                CONTAINERPARAMS="-e typo3DatabaseDriver=${DATABASE_DRIVER} -e typo3DatabaseName=func_test -e typo3DatabaseUsername=root -e typo3DatabaseHost=mysql-func-${SUFFIX} -e typo3DatabasePassword=funcp"
+                CONTAINERPARAMS="-e typo3DatabaseDriver=${DATABASE_DRIVER} -e typo3DatabaseName=func_test -e typo3DatabaseUsername=root -e typo3DatabaseHost=mysql-func-${SUFFIX} -e typo3DatabasePassword=funcp -e DEEPL_API_KEY=mock_server -e DEEPL_HOST=deepl-func-${SUFFIX} -e DEEPL_PORT=3000 -e DEEPL_SERVER_URL=deepl-func-${SUFFIX}:3000 -e DEEPL_MOCK_SERVER_PORT=3000 -e DEEPL_SCHEME=http -e DEEPL_MOCKSERVER_USED=1"
                 ${CONTAINER_BIN} run ${CONTAINER_COMMON_PARAMS} --name functional-${SUFFIX} ${XDEBUG_MODE} -e XDEBUG_CONFIG="${XDEBUG_CONFIG}" ${CONTAINERPARAMS} ${IMAGE_PHP} "${COMMAND[@]}"
                 SUITE_EXIT_CODE=$?
                 ;;
             postgres)
                 ${CONTAINER_BIN} run --name postgres-func-${SUFFIX} --network ${NETWORK} -d -e POSTGRES_PASSWORD=funcp -e POSTGRES_USER=funcu --tmpfs /var/lib/postgresql/data:rw,noexec,nosuid ${IMAGE_POSTGRES} >/dev/null
                 waitFor postgres-func-${SUFFIX} 5432
-                CONTAINERPARAMS="-e typo3DatabaseDriver=pdo_pgsql -e typo3DatabaseName=bamboo -e typo3DatabaseUsername=funcu -e typo3DatabaseHost=postgres-func-${SUFFIX} -e typo3DatabasePassword=funcp"
+                CONTAINERPARAMS="-e typo3DatabaseDriver=pdo_pgsql -e typo3DatabaseName=bamboo -e typo3DatabaseUsername=funcu -e typo3DatabaseHost=postgres-func-${SUFFIX} -e typo3DatabasePassword=funcp -e DEEPL_API_KEY=mock_server -e DEEPL_HOST=deepl-func-${SUFFIX} -e DEEPL_PORT=3000 -e DEEPL_SERVER_URL=deepl-func-${SUFFIX}:3000 -e DEEPL_MOCK_SERVER_PORT=3000 -e DEEPL_SCHEME=http -e DEEPL_MOCKSERVER_USED=1"
                 ${CONTAINER_BIN} run ${CONTAINER_COMMON_PARAMS} --name functional-${SUFFIX} ${XDEBUG_MODE} -e XDEBUG_CONFIG="${XDEBUG_CONFIG}" ${CONTAINERPARAMS} ${IMAGE_PHP} "${COMMAND[@]}"
                 SUITE_EXIT_CODE=$?
                 ;;
             sqlite)
                 # create sqlite tmpfs mount typo3temp/var/tests/functional-sqlite-dbs/ to avoid permission issues
                 mkdir -p "${ROOT_DIR}/.Build/Web/typo3temp/var/tests/functional-sqlite-dbs/"
-                CONTAINERPARAMS="-e typo3DatabaseDriver=pdo_sqlite --tmpfs ${ROOT_DIR}/.Build/Web/typo3temp/var/tests/functional-sqlite-dbs/:rw,noexec,nosuid"
+                CONTAINERPARAMS="-e typo3DatabaseDriver=pdo_sqlite --tmpfs ${ROOT_DIR}/.Build/Web/typo3temp/var/tests/functional-sqlite-dbs/:rw,noexec,nosuid -e DEEPL_API_KEY=mock_server -e DEEPL_HOST=deepl-func-${SUFFIX} -e DEEPL_PORT=3000 -e DEEPL_SERVER_URL=deepl-func-${SUFFIX}:3000 -e DEEPL_MOCK_SERVER_PORT=3000 -e DEEPL_SCHEME=http -e DEEPL_MOCKSERVER_USED=1"
                 ${CONTAINER_BIN} run ${CONTAINER_COMMON_PARAMS} --name functional-${SUFFIX} ${XDEBUG_MODE} -e XDEBUG_CONFIG="${XDEBUG_CONFIG}" ${CONTAINERPARAMS} ${IMAGE_PHP} "${COMMAND[@]}"
                 SUITE_EXIT_CODE=$?
                 ;;
         esac
         ;;
     lintPhp)
-        COMMAND="find . -name \\*.php ! -path \"./.Build/*\" ! -path \"./.cache/*\" -print0 | xargs -0 -n1 -P4 php -dxdebug.mode=off -l >/dev/null"
+        COMMAND="find . -name \\*.php ! -path "./.Build/\\*" ! -path "./.cache/\\*" -print0 | xargs -0 -n1 -P4 php -dxdebug.mode=off -l >/dev/null"
+        ${CONTAINER_BIN} run ${CONTAINER_COMMON_PARAMS} --name lint-php-${SUFFIX} -e COMPOSER_CACHE_DIR=.Build/.cache/composer -e COMPOSER_ROOT_VERSION=${COMPOSER_ROOT_VERSION} ${IMAGE_PHP} /bin/sh -c "${COMMAND}"
+        SUITE_EXIT_CODE=$?
+        ;;
+    lintTypoScript)
+        COMMAND="php -dxdebug.mode=off .Build/bin/typoscript-lint --ansi --fail-on-warnings --config=./Build/typoscript-lint/typoscript-lint.yml"
         ${CONTAINER_BIN} run ${CONTAINER_COMMON_PARAMS} --name lint-php-${SUFFIX} -e COMPOSER_CACHE_DIR=.Build/.cache/composer -e COMPOSER_ROOT_VERSION=${COMPOSER_ROOT_VERSION} ${IMAGE_PHP} /bin/sh -c "${COMMAND}"
         SUITE_EXIT_CODE=$?
         ;;
@@ -544,8 +591,14 @@ case ${TEST_SUITE} in
         ;;
     unit)
         PHPUNIT_CONFIG_FILE="Build/phpunit/UnitTests.xml"
-        COMMAND=(.Build/bin/phpunit -c ${PHPUNIT_CONFIG_FILE} ${EXTRA_TEST_OPTIONS} "$@")
+        COMMAND=(.Build/bin/phpunit -c ${PHPUNIT_CONFIG_FILE} "$@")
         ${CONTAINER_BIN} run ${CONTAINER_COMMON_PARAMS} --name unit-${SUFFIX} ${XDEBUG_MODE} -e XDEBUG_CONFIG="${XDEBUG_CONFIG}" ${IMAGE_PHP} "${COMMAND[@]}"
+        SUITE_EXIT_CODE=$?
+        ;;
+    unitRandom)
+        PHPUNIT_CONFIG_FILE="Build/phpunit/UnitTests.xml"
+        COMMAND=(.Build/bin/phpunit -c ${PHPUNIT_CONFIG_FILE} --order-by=random ${PHPUNIT_RANDOM} "$@")
+        ${CONTAINER_BIN} run ${CONTAINER_COMMON_PARAMS} --name unit-random-${SUFFIX} ${XDEBUG_MODE} -e XDEBUG_CONFIG="${XDEBUG_CONFIG}" ${IMAGE_PHP} "${COMMAND[@]}"
         SUITE_EXIT_CODE=$?
         ;;
     update)
@@ -556,6 +609,14 @@ case ${TEST_SUITE} in
         # remove "dangling" typo3/core-testing-* images (those tagged as <none>)
         echo "> remove \"dangling\" ghcr.io/typo3/core-testing-* images (those tagged as <none>)"
         ${CONTAINER_BIN} images --filter "reference=ghcr.io/typo3/core-testing-*" --filter "dangling=true" --format "{{.ID}}" | xargs -I {} ${CONTAINER_BIN} rmi -f {}
+        echo ""
+        # pull ghcr.io/web-vision/ versions of those ones that exist locally
+        echo "> pull ghcr.io/web-vision/* versions of those ones that exist locally"
+        ${CONTAINER_BIN} images "ghcr.io/web-vision/*" --format "{{.Repository}}:{{.Tag}}" | xargs -I {} ${CONTAINER_BIN} pull {}
+        echo ""
+        # remove "dangling" ghcr.io/web-vision/ images (those tagged as <none>)
+        echo "> remove \"dangling\" ghcr.io/web-vision/* images (those tagged as <none>)"
+        ${CONTAINER_BIN} images --filter "reference=ghcr.io/web-vision/*" --filter "dangling=true" --format "{{.ID}}" | xargs -I {} ${CONTAINER_BIN} rmi -f {}
         echo ""
         ;;
     *)
@@ -582,7 +643,7 @@ else
 fi
 echo "PHP: ${PHP_VERSION}" >&2
 echo "TYPO3: ${CORE_VERSION}" >&2
-if [[ ${TEST_SUITE} =~ ^(functional)$ ]]; then
+if [[ ${TEST_SUITE} =~ ^(functional|functionalDeprecated|acceptance|acceptanceInstall)$ ]]; then
     case "${DBMS}" in
         mariadb|mysql|postgres)
             echo "DBMS: ${DBMS}  version ${DBMS_VERSION}  driver ${DATABASE_DRIVER}" >&2

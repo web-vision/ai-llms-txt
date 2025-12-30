@@ -1,68 +1,96 @@
-#!/usr/bin/env php
 <?php
 
 declare(strict_types=1);
 
-/**
- * This file is part of the LLMS TXT extension for TYPO3 CMS.
- *
- * For the full copyright and license information, please read the
- * LICENSE file that was distributed with this source code.
- *
- * The TYPO3 project - inspiring people to share!
- */
+use PhpParser\Node;
+use PhpParser\NodeTraverser;
+use PhpParser\NodeVisitorAbstract;
+use PhpParser\ParserFactory;
+use Symfony\Component\Console\Output\ConsoleOutput;
+
+require_once __DIR__ . '/../../.Build/vendor/autoload.php';
 
 /**
- * Check that test methods do not start with "test" prefix
- * 
- * Modern PHPUnit uses the @test annotation or Test suffix instead of test prefix
+ * This script checks tests do not start with "test" like
+ * "public function testSomething". Instead, they should be
+ *  like "public function SomethingIsLike()" and have a @test annotation.
  */
+class NodeVisitor extends NodeVisitorAbstract
+{
+    public array $matches = [];
 
-$testFiles = [];
-$directoryIterator = new RecursiveDirectoryIterator('./Tests');
-$recursiveIterator = new RecursiveIteratorIterator($directoryIterator);
-
-foreach ($recursiveIterator as $file) {
-    if ($file->isFile() && $file->getExtension() === 'php') {
-        $testFiles[] = $file->getPathname();
-    }
-}
-
-if (empty($testFiles)) {
-    echo "No test files found in Tests/\n";
-    exit(0);
-}
-
-$errors = 0;
-
-foreach ($testFiles as $file) {
-    $content = file_get_contents($file);
-    if ($content === false) {
-        echo "ERROR: Could not read file: $file\n";
-        $errors++;
-        continue;
-    }
-
-    $lines = explode("\n", $content);
-    $lineNumber = 0;
-
-    foreach ($lines as $line) {
-        $lineNumber++;
-
-        // Check for methods starting with "test" but not "Test" (case sensitive)
-        if (preg_match('/^\s*public\s+function\s+test[a-z]/i', $line)) {
-            echo "ERROR: Test method should not start with 'test' prefix in $file:$lineNumber\n";
-            echo "       Use @test annotation or 'Test' suffix instead: $line\n";
-            $errors++;
+    public function enterNode(Node $node): void
+    {
+        if (($node instanceof Node\Stmt\ClassMethod) && str_starts_with($node->name->name, 'test')) {
+            $this->matches[$node->getLine()] = $node->name->name;
         }
     }
 }
 
-if ($errors > 0) {
-    echo "\nFound $errors test methods with incorrect naming.\n";
-    echo "Use @test annotation or 'Test' suffix for test methods instead of 'test' prefix.\n";
-    exit(1);
+if ((new \TYPO3\CMS\Core\Information\Typo3Version())->getMajorVersion() >= 13) {
+    $parser = (new ParserFactory())->createForVersion(\PhpParser\PhpVersion::fromComponents(8, 1));
 } else {
-    echo "All test method names are correct.\n";
-    exit(0);
+    $parser = (new ParserFactory())->create(ParserFactory::ONLY_PHP7);
 }
+
+
+$finder = new Symfony\Component\Finder\Finder();
+$folders = [];
+if (is_dir(__DIR__ . '/../../Tests/Unit/')) {
+    $folders[] = __DIR__ . '/../../Tests/Unit/';
+}
+if (is_dir(__DIR__ . '/../../Tests/Functional/')) {
+    $folders[] = __DIR__ . '/../../Tests/Functional/';
+}
+$finder->files()
+    ->in($folders)
+    ->name('/Test\.php$/');
+
+$output = new ConsoleOutput();
+
+$errors = [];
+foreach ($finder as $file) {
+    try {
+        $ast = $parser->parse($file->getContents());
+    } catch (Error $error) {
+        $output->writeln('<error>Parse error: ' . $error->getMessage() . '</error>');
+        exit(1);
+    }
+
+    $visitor = new NodeVisitor();
+
+    $traverser = new NodeTraverser();
+    $traverser->addVisitor($visitor);
+
+    $ast = $traverser->traverse($ast);
+
+    if (!empty($visitor->matches)) {
+        $errors[$file->getRealPath()] = $visitor->matches;
+        $output->write('<error>F</error>');
+    } else {
+        $output->write('<fg=green>.</>');
+    }
+}
+
+$output->writeln('');
+
+if (!empty($errors)) {
+    $output->writeln('');
+
+    foreach ($errors as $file => $matchesPerLine) {
+        $output->writeln('');
+        $output->writeln('<error>At least on method starts with "test" in ' . $file . '</error>');
+
+        /**
+         * @var array $matchesPerLine
+         * @var int $line
+         * @var array $matches
+         */
+        foreach ($matchesPerLine as $line => $methodName) {
+            $output->writeln('Method:' . $methodName . ' Line:' . $line);
+        }
+    }
+    exit(1);
+}
+
+exit(0);
