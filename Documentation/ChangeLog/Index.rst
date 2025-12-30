@@ -3,6 +3,20 @@
 =========
 ChangeLog
 =========
+Version 0.1.8
+==============
+
+Release Date: 2025-12-30
+
+Latest Changes
+--------------
+**Fixed**
+* Corrected the exclusion of specific doktypes in PageRepository to ensure proper fetching of child pages.
+
+
+=========
+ChangeLog
+=========
 Version 0.1.7
 ==============
 
