@@ -50,13 +50,18 @@ class PageRepository
     {
         $queryBuilder = $this->connectionPool->getQueryBuilderForTable('pages');
 
+        $queryBuilder->getRestrictions()->removeAll()
+            ->add(GeneralUtility::makeInstance(FrontendRestrictionContainer::class));
+
         $result = $queryBuilder
-            ->select('uid', 'pid', 'title', 'description', 'abstract', 'nav_title', 'doktype')
+            ->select(
+                'uid', 'pid', 'title', 'description', 'abstract', 'nav_title', 'doktype', 'sys_language_uid'
+            )
             ->from('pages')
             ->where(
-                $queryBuilder->expr()->eq('pid', $queryBuilder->createNamedParameter($parentUid)),
-                $queryBuilder->expr()->eq('nav_hide', $queryBuilder->createNamedParameter(0)),
-                $queryBuilder->expr()->eq('no_index', $queryBuilder->createNamedParameter(0)),
+            $queryBuilder->expr()->eq('pid', $queryBuilder->createNamedParameter($parentUid)),
+            $queryBuilder->expr()->eq('nav_hide', $queryBuilder->createNamedParameter(0)),
+            $queryBuilder->expr()->eq('no_index', $queryBuilder->createNamedParameter(0)),
             )
             ->orderBy('sorting')
             ->executeQuery();
@@ -80,6 +85,7 @@ class PageRepository
                 'description' => $row['description'],
                 'abstract' => $row['abstract'],
                 'doktype' => $row['doktype'],
+                'sys_language_uid' => $row['sys_language_uid'],
             ];
         }
 

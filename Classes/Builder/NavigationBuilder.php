@@ -33,7 +33,7 @@ class NavigationBuilder
             $section = [
                 'title' => $mainPage['title'],
                 'description' => $mainPage['description'] ?: $mainPage['abstract'] ?: '',
-                'url' => $this->urlGenerator->generatePageUrl($mainPage['uid']),
+                'url' => $this->urlGenerator->generatePageUrl($mainPage),
                 'pages' => [],
             ];
 
@@ -45,7 +45,7 @@ class NavigationBuilder
                     $section['pages'][] = [
                         'uid' => $subPage['uid'],
                         'title' => $subPage['title'],
-                        'url' => $this->urlGenerator->generatePageUrl($subPage['uid']),
+                        'url' => $this->urlGenerator->generatePageUrl($subPage),
                         'description' => $subPage['description'] ?: $subPage['abstract'] ?: '',
                     ];
                 }

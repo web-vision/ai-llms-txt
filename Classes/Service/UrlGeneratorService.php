@@ -16,11 +16,20 @@ class UrlGeneratorService
     /**
      * Generate absolute URL for a markdown page
      */
-    public function generatePageUrl(int $pageUid): string
+    public function generatePageUrl(array $page): string
     {
-        $site = $this->siteFinder->getSiteByPageId($pageUid);
-        //@todo: What about language handling? For now we ignore it. As LLMs dont seem to care about it.
-        $url = (string)$site->getRouter()->generateUri($pageUid);
-        return $url . '.md';
+        $site = $this->siteFinder->getSiteByPageId($page['uid']);
+        $siteLanguage = $page['sys_language_uid'] ?? $site->getDefaultLanguage();
+
+        $uri = (string)$site->getRouter()->generateUri(
+            $page['uid'],
+            ['_language' => $siteLanguage],
+            '',
+            \TYPO3\CMS\Core\Routing\RouterInterface::ABSOLUTE_URL
+        );
+
+        return "{$uri}.md";
     }
+
+
 }
