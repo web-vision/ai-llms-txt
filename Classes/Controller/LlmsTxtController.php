@@ -120,7 +120,9 @@ class LlmsTxtController
         $version =  (string)GeneralUtility::makeInstance(Typo3Version::class)->getMajorVersion();
 
         if (version_compare($version, '14', '<')) {
+            // @extensionScannerIgnoreLine
             if (isset($GLOBALS['TSFE']) && isset($GLOBALS['TSFE']->id)) {
+                // @extensionScannerIgnoreLine
                 return (int)$GLOBALS['TSFE']->id;
             }
             throw new \RuntimeException('Could not determine current page ID in TYPO3 v12 context.', 1765368300);
