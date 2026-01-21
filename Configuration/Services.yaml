@@ -10,3 +10,9 @@ services:
 
   WebVision\AiLlmsTxt\Controller\LlmsTxtController:
     public: true
+
+  WebVision\AiLlmsTxt\Command\DownloadMarkdownCommand:
+    tags:
+      - name: 'console.command'
+        command: 'ai-llms:download-markdown'
+        description: 'Download TYPO3 pages as Markdown files'
