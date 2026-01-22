@@ -16,7 +16,6 @@ use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Resource\Exception\InvalidPathException;
 use TYPO3\CMS\Core\Site\Entity\Site;
 use TYPO3\CMS\Core\Site\SiteFinder;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\PathUtility;
 use WebVision\AiLlmsTxt\Repository\PageRepository;
 use WebVision\AiLlmsTxt\Service\MarkdownConverterService;
@@ -373,16 +372,16 @@ final class DownloadMarkdownCommand extends Command
         $uri = $site->getRouter()->generateUri((int)$page['uid']);
 
         $frontmatter = "---\n";
-        $frontmatter .= "uid: " . $page['uid'] . "\n";
-        $frontmatter .= "title: \"" . addslashes($page['title']) . "\"\n";
+        $frontmatter .= 'uid: ' . $page['uid'] . "\n";
+        $frontmatter .= 'title: "' . addslashes($page['title']) . "\"\n";
 
         if (!empty($page['description'])) {
-            $frontmatter .= "description: \"" . addslashes($page['description']) . "\"\n";
+            $frontmatter .= 'description: "' . addslashes($page['description']) . "\"\n";
         }
 
-        $frontmatter .= "url: \"" . $uri . "\"\n";
-        $frontmatter .= "site: \"" . $site->getIdentifier() . "\"\n";
-        $frontmatter .= "exported: \"" . date('Y-m-d\TH:i:s\Z') . "\"\n";
+        $frontmatter .= 'url: "' . $uri . "\"\n";
+        $frontmatter .= 'site: "' . $site->getIdentifier() . "\"\n";
+        $frontmatter .= 'exported: "' . date('Y-m-d\TH:i:s\Z') . "\"\n";
         $frontmatter .= "---\n\n";
 
         return $frontmatter . $content;

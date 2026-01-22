@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace WebVision\AiLlmsTxt\Controller;
 
 use Psr\Http\Message\ServerRequestInterface;
-use TYPO3\CMS\Core\Information\Typo3Version;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer;
 use WebVision\AiLlmsTxt\Repository\PageRepository;

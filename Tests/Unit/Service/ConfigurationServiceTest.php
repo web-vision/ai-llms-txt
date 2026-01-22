@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace WebVision\AiLlmsTxt\Tests\Unit\Service;
 
-use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
 use Psr\Http\Message\ServerRequestInterface;
@@ -41,7 +40,7 @@ final class ConfigurationServiceTest extends UnitTestCase
         $this->subject->setRequest($this->requestMock);
 
         // If request is set, getSiteUrl should work without exception
-        self::assertSame('https://example.com/', $this->subject->getSiteUrl());
+        static::assertSame('https://example.com/', $this->subject->getSiteUrl());
     }
 
     #[Test]
@@ -67,7 +66,7 @@ final class ConfigurationServiceTest extends UnitTestCase
         $GLOBALS['TYPO3_REQUEST'] = $this->requestMock;
 
         // Should use global request as fallback
-        self::assertSame('https://global.example.com/', $this->subject->getSiteUrl());
+        static::assertSame('https://global.example.com/', $this->subject->getSiteUrl());
 
         unset($GLOBALS['TYPO3_REQUEST']);
     }
@@ -77,7 +76,7 @@ final class ConfigurationServiceTest extends UnitTestCase
     {
         $this->setupRequestWithSiteConfiguration([]);
 
-        self::assertTrue($this->subject->isEnabled());
+        static::assertTrue($this->subject->isEnabled());
     }
 
     #[Test]
@@ -87,7 +86,7 @@ final class ConfigurationServiceTest extends UnitTestCase
             'llmsTxtEnabled' => false,
         ]);
 
-        self::assertFalse($this->subject->isEnabled());
+        static::assertFalse($this->subject->isEnabled());
     }
 
     #[Test]
@@ -97,7 +96,7 @@ final class ConfigurationServiceTest extends UnitTestCase
             'llmsTxtEnabled' => true,
         ]);
 
-        self::assertTrue($this->subject->isEnabled());
+        static::assertTrue($this->subject->isEnabled());
     }
 
     #[Test]
@@ -105,7 +104,7 @@ final class ConfigurationServiceTest extends UnitTestCase
     {
         $this->setupRequestWithSiteConfiguration([]);
 
-        self::assertNull($this->subject->getTitleOverride());
+        static::assertNull($this->subject->getTitleOverride());
     }
 
     #[Test]
@@ -115,7 +114,7 @@ final class ConfigurationServiceTest extends UnitTestCase
             'llmsTxtTitle' => '',
         ]);
 
-        self::assertNull($this->subject->getTitleOverride());
+        static::assertNull($this->subject->getTitleOverride());
     }
 
     #[Test]
@@ -125,7 +124,7 @@ final class ConfigurationServiceTest extends UnitTestCase
             'llmsTxtTitle' => '  My Custom Title  ',
         ]);
 
-        self::assertSame('My Custom Title', $this->subject->getTitleOverride());
+        static::assertSame('My Custom Title', $this->subject->getTitleOverride());
     }
 
     #[Test]
@@ -133,7 +132,7 @@ final class ConfigurationServiceTest extends UnitTestCase
     {
         $this->setupRequestWithSiteConfiguration([]);
 
-        self::assertNull($this->subject->getDescriptionOverride());
+        static::assertNull($this->subject->getDescriptionOverride());
     }
 
     #[Test]
@@ -143,7 +142,7 @@ final class ConfigurationServiceTest extends UnitTestCase
             'llmsTxtDescription' => '  My description  ',
         ]);
 
-        self::assertSame('My description', $this->subject->getDescriptionOverride());
+        static::assertSame('My description', $this->subject->getDescriptionOverride());
     }
 
     #[Test]
@@ -151,7 +150,7 @@ final class ConfigurationServiceTest extends UnitTestCase
     {
         $this->setupRequestWithSiteConfiguration([]);
 
-        self::assertNull($this->subject->getAdditionalInfo());
+        static::assertNull($this->subject->getAdditionalInfo());
     }
 
     #[Test]
@@ -161,7 +160,7 @@ final class ConfigurationServiceTest extends UnitTestCase
             'llmsTxtAdditionalInfo' => '  Additional content  ',
         ]);
 
-        self::assertSame('Additional content', $this->subject->getAdditionalInfo());
+        static::assertSame('Additional content', $this->subject->getAdditionalInfo());
     }
 
     #[Test]
@@ -169,7 +168,7 @@ final class ConfigurationServiceTest extends UnitTestCase
     {
         $this->setupRequestWithSiteConfiguration([]);
 
-        self::assertNull($this->subject->getContactEmail());
+        static::assertNull($this->subject->getContactEmail());
     }
 
     #[Test]
@@ -179,7 +178,7 @@ final class ConfigurationServiceTest extends UnitTestCase
             'llmsTxtContactEmail' => '  contact@example.com  ',
         ]);
 
-        self::assertSame('contact@example.com', $this->subject->getContactEmail());
+        static::assertSame('contact@example.com', $this->subject->getContactEmail());
     }
 
     #[Test]
@@ -187,7 +186,7 @@ final class ConfigurationServiceTest extends UnitTestCase
     {
         $this->setupRequestWithSiteConfiguration([]);
 
-        self::assertSame([], $this->subject->getKeywords());
+        static::assertSame([], $this->subject->getKeywords());
     }
 
     #[Test]
@@ -197,7 +196,7 @@ final class ConfigurationServiceTest extends UnitTestCase
             'llmsTxtKeywords' => '',
         ]);
 
-        self::assertSame([], $this->subject->getKeywords());
+        static::assertSame([], $this->subject->getKeywords());
     }
 
     #[Test]
@@ -207,7 +206,7 @@ final class ConfigurationServiceTest extends UnitTestCase
             'llmsTxtKeywords' => ' TYPO3 , CMS , Extension ',
         ]);
 
-        self::assertSame(['TYPO3', 'CMS', 'Extension'], $this->subject->getKeywords());
+        static::assertSame(['TYPO3', 'CMS', 'Extension'], $this->subject->getKeywords());
     }
 
     #[Test]
@@ -215,7 +214,7 @@ final class ConfigurationServiceTest extends UnitTestCase
     {
         $this->setupRequestWithSiteConfiguration([]);
 
-        self::assertSame(2, $this->subject->getMaxDepth());
+        static::assertSame(2, $this->subject->getMaxDepth());
     }
 
     #[Test]
@@ -225,7 +224,7 @@ final class ConfigurationServiceTest extends UnitTestCase
             'llmsTxtMaxDepth' => 5,
         ]);
 
-        self::assertSame(5, $this->subject->getMaxDepth());
+        static::assertSame(5, $this->subject->getMaxDepth());
     }
 
     #[Test]
@@ -235,7 +234,7 @@ final class ConfigurationServiceTest extends UnitTestCase
             'llmsTxtMaxDepth' => '3',
         ]);
 
-        self::assertSame(3, $this->subject->getMaxDepth());
+        static::assertSame(3, $this->subject->getMaxDepth());
     }
 
     #[Test]
@@ -246,7 +245,7 @@ final class ConfigurationServiceTest extends UnitTestCase
 
         $this->subject->setRequest($this->requestMock);
 
-        self::assertSame('my-site', $this->subject->getSiteName());
+        static::assertSame('my-site', $this->subject->getSiteName());
     }
 
     #[Test]
@@ -257,7 +256,7 @@ final class ConfigurationServiceTest extends UnitTestCase
 
         $this->subject->setRequest($this->requestMock);
 
-        self::assertSame('https://www.example.com/subdir/', $this->subject->getSiteUrl());
+        static::assertSame('https://www.example.com/subdir/', $this->subject->getSiteUrl());
     }
 
     /**

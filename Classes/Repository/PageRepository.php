@@ -55,13 +55,20 @@ class PageRepository
 
         $result = $queryBuilder
             ->select(
-                'uid', 'pid', 'title', 'description', 'abstract', 'nav_title', 'doktype', 'sys_language_uid'
+                'uid',
+                'pid',
+                'title',
+                'description',
+                'abstract',
+                'nav_title',
+                'doktype',
+                'sys_language_uid'
             )
             ->from('pages')
             ->where(
-            $queryBuilder->expr()->eq('pid', $queryBuilder->createNamedParameter($parentUid)),
-            $queryBuilder->expr()->eq('nav_hide', $queryBuilder->createNamedParameter(0)),
-            $queryBuilder->expr()->eq('no_index', $queryBuilder->createNamedParameter(0)),
+                $queryBuilder->expr()->eq('pid', $queryBuilder->createNamedParameter($parentUid)),
+                $queryBuilder->expr()->eq('nav_hide', $queryBuilder->createNamedParameter(0)),
+                $queryBuilder->expr()->eq('no_index', $queryBuilder->createNamedParameter(0)),
             )
             ->orderBy('sorting')
             ->executeQuery();

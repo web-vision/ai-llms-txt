@@ -31,5 +31,4 @@ class UrlGeneratorService
         return "{$uri}.md";
     }
 
-
 }

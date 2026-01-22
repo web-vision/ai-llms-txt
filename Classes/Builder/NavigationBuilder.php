@@ -80,7 +80,7 @@ class NavigationBuilder
         foreach ($navigationStructure as $section) {
             $lang = $section['language'] ?? 'default';
             if (!isset($byLanguage[$lang])) {
-            $byLanguage[$lang] = [];
+                $byLanguage[$lang] = [];
             }
             $byLanguage[$lang][] = $section;
         }
@@ -92,18 +92,18 @@ class NavigationBuilder
             $lines[] = "## {$language}";
 
             foreach ($sections as $section) {
-            // Section header
-            if (!empty($section['url'])) {
-                $lines[] = "+ [{$section['title']}]({$section['url']})";
-            }
-
-            foreach ($section['pages'] as $page) {
-                if (!empty($page['description'])) {
-                $lines[] = "  - [{$page['title']}]({$page['url']}): {$page['description']}";
-                } else {
-                $lines[] = "  - [{$page['title']}]({$page['url']})";
+                // Section header
+                if (!empty($section['url'])) {
+                    $lines[] = "+ [{$section['title']}]({$section['url']})";
                 }
-            }
+
+                foreach ($section['pages'] as $page) {
+                    if (!empty($page['description'])) {
+                        $lines[] = "  - [{$page['title']}]({$page['url']}): {$page['description']}";
+                    } else {
+                        $lines[] = "  - [{$page['title']}]({$page['url']})";
+                    }
+                }
             }
 
             $lines[] = ''; // Empty line between language sections
