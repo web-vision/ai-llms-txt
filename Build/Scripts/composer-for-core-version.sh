@@ -48,6 +48,18 @@ update_v13() {
         "typo3/minimal"
 }
 
+update_v14() {
+    echo -e "💪 Enforce TYPO3 v14"
+    php -dxdebug.mode=off $(which composer) require --dev --no-update \
+        "phpunit/phpunit":"^11.5"
+    php -dxdebug.mode=off $(which composer) require --no-update \
+        "typo3/minimal":"^14.0"
+    echo -e "🔥 Update to selected dependencies"
+    php -dxdebug.mode=off $(which composer) install
+    php -dxdebug.mode=off $(which composer) remove --no-update \
+        "typo3/minimal"
+}
+
 case "$1" in
 12)
     composer_cleanup
@@ -57,8 +69,12 @@ case "$1" in
     composer_cleanup
     update_v13
     ;;
+14)
+    composer_cleanup
+    update_v14
+    ;;
 *)
-    echo -e "🌀 Usage: ddev update-to (12)" >&2
+    echo -e "🌀 Usage: composer-for-core-version.sh (12|13|14)" >&2
     exit 0
     ;;
 esac

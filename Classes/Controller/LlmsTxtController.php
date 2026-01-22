@@ -35,8 +35,10 @@ class LlmsTxtController
     #[\TYPO3\CMS\Core\Attribute\AsAllowedCallable]
     public function generateAction(string $content, array $conf, ServerRequestInterface $request): string
     {
+        $this->configurationService->setRequest($request);
+
         try {
-            $currentPageId = $this->getCurrentPageId($request);
+            $currentPageId = $this->configurationService->getCurrentPageId();
             return $this->llmsTxtGenerator->generateLlmsTxt($currentPageId);
         } catch (\Exception $e) {
             // Return error message in llms.txt format
@@ -52,8 +54,10 @@ class LlmsTxtController
     #[\TYPO3\CMS\Core\Attribute\AsAllowedCallable]
     public function renderPageAsMarkdown(string $content, array $conf, ServerRequestInterface $request): string
     {
+        $this->configurationService->setRequest($request);
+
         try {
-            $pageHtml = $this->getRenderedPageContent($request);
+            $pageHtml = $this->getRenderedPageContent();
 
             if (empty($pageHtml)) {
                 return "# Error\n\nNo page content could be rendered.\n";
@@ -76,13 +80,12 @@ class LlmsTxtController
      * Get the fully rendered page content from TYPO3's frontend rendering
      * This captures ALL content elements from all column positions
      */
-    protected function getRenderedPageContent(ServerRequestInterface $request): string
+    protected function getRenderedPageContent(): string
     {
-
         $cObject = GeneralUtility::makeInstance(ContentObjectRenderer::class);
         $cObject->start([], 'pages');
 
-        $pageId = $this->getCurrentPageId($request);
+        $pageId = $this->configurationService->getCurrentPageId();
 
         $page = $this->pageRepository->findById($pageId);
 
@@ -113,21 +116,5 @@ class LlmsTxtController
         }
 
         return $html;
-    }
-
-    protected function getCurrentPageId(ServerRequestInterface $request): int
-    {
-        $version =  (string)GeneralUtility::makeInstance(Typo3Version::class)->getMajorVersion();
-
-        if (version_compare($version, '14', '<')) {
-            // @extensionScannerIgnoreLine
-            if (isset($GLOBALS['TSFE']) && isset($GLOBALS['TSFE']->id)) {
-                // @extensionScannerIgnoreLine
-                return (int)$GLOBALS['TSFE']->id;
-            }
-            throw new \RuntimeException('Could not determine current page ID in TYPO3 v12 context.', 1765368300);
-        }
-
-        return (int)$request->getAttribute('frontend.page.information')->getId();
     }
 }
