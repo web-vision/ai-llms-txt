@@ -264,7 +264,7 @@ final class DownloadMarkdownCommand extends Command
     private function ensureDirectoryExists(string $path): void
     {
         if (!is_dir($path) && !mkdir($path, 0755, true) && !is_dir($path)) {
-            throw new InvalidPathException(sprintf('Failed to create directory: %s', $path));
+            throw new InvalidPathException(sprintf('Failed to create directory: %s', $path), 1769076608);
         }
     }
 
