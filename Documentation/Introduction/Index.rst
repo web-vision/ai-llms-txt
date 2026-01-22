@@ -21,8 +21,8 @@ Key Features
 * **Site navigation structure** - Automatically includes your site's navigation hierarchy in the llms.txt file
 * **Configurable metadata** - Add topics, contact information, and custom descriptions
 * **Markdown export** - Convert any TYPO3 page to Markdown format via .md suffix
-* **TYPO3 v13 compatibility** - Built specifically for TYPO3 v13 using modern PHP practices
-* **Flexible configuration** - Control depth, content, and behavior through TypoScript
+* **TYPO3 v12, v13 & v14 compatibility** - Supports all current LTS versions using modern PHP practices
+* **Flexible configuration** - Control depth, content, and behavior through Site Configuration
 * **Frontend rendering integration** - Leverages TYPO3's native content rendering pipeline
 
 What is llms.txt?

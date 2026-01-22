@@ -3,8 +3,34 @@
 =========
 ChangeLog
 =========
+
+Version 0.2.0
+=============
+
+Release Date: 2026-01-22
+
+Changes
+-------
+
+**Added**
+
+* Unit tests for ConfigurationService with full coverage (24 tests)
+* TYPO3 v14 LTS support in test runner scripts
+* Comprehensive test suite runnable across TYPO3 12, 13, and 14
+
+**Changed**
+
+* Refactored ConfigurationService to use TYPO3 core request injection pattern
+* Request is now injected once via ``setRequest()`` instead of passing to each method
+* Added fallback to ``$GLOBALS['TYPO3_REQUEST']`` for backward compatibility
+* Improved code architecture following TYPO3 ContentObjectRenderer pattern
+
+**Removed**
+
+* Removed DownloadMarkdownCommand from Services.yaml (command not yet implemented)
+
 Version 0.1.8 - 0.1.9
-==============
+=====================
 
 Release Date: 2025-12-30
 

@@ -36,3 +36,5 @@ Build/testing-docker/.env
 node_modules/
 test-results/
 playwright-report/
+config/
+*.sql.gz

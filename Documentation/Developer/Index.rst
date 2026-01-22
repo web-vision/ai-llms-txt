@@ -7,7 +7,7 @@ Developer
 Architecture Overview
 ======================
 
-The LLMS TXT Generator extension follows modern TYPO3 v13 development practices.
+The LLMS TXT Generator extension follows modern TYPO3 development practices and supports TYPO3 v12, v13, and v14 LTS.
 
 Core Components
 ===============
@@ -16,7 +16,9 @@ Services
 --------
 
 **ConfigurationService**
-  Handles all TypoScript configuration reading and provides typed access to configuration values.
+  Handles all site configuration reading and provides typed access to configuration values.
+  Uses the TYPO3 core request injection pattern - request is set once via ``setRequest()``
+  and all methods access it internally.
 
 **LlmsTxtGeneratorService**
   Main application service that orchestrates the generation of llms.txt content by coordinating other services.
@@ -82,11 +84,26 @@ WebVision\\LlmsTxt\\Service\\LlmsTxtGeneratorService
 WebVision\\LlmsTxt\\Service\\ConfigurationService
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+.. php:method:: setRequest(ServerRequestInterface $request): void
+
+   Sets the request for the service. Must be called before using other methods.
+   Follows the TYPO3 core pattern used by ContentObjectRenderer.
+
+   :param ServerRequestInterface $request: The current PSR-7 request
+
 .. php:method:: isEnabled(): bool
 
    Checks if llms.txt generation is enabled.
 
    :returns: True if enabled, false otherwise
+
+.. php:method:: getCurrentPageId(): int
+
+   Gets the current page ID from the request. Handles TYPO3 v12/v13 via TSFE
+   and v14+ via frontend.page.information request attribute.
+
+   :returns: Current page ID
+   :throws: RuntimeException if page ID cannot be determined
 
 .. php:method:: getMaxDepth(): int
 
@@ -150,12 +167,38 @@ Testing
 Unit Testing
 ------------
 
-tbd.
+The extension includes comprehensive unit tests, particularly for the ConfigurationService.
+Tests can be run against all supported TYPO3 versions:
+
+.. code-block:: bash
+
+   # Run unit tests with TYPO3 v12
+   Build/Scripts/runTests.sh -s unit -t 12
+
+   # Run unit tests with TYPO3 v13
+   Build/Scripts/runTests.sh -s unit -t 13
+
+   # Run unit tests with TYPO3 v14
+   Build/Scripts/runTests.sh -s unit -t 14
+
+   # Run with specific PHP version
+   Build/Scripts/runTests.sh -s unit -t 14 -p 8.3
+
+The ConfigurationService tests cover:
+
+* Request injection and retrieval
+* Fallback to ``$GLOBALS['TYPO3_REQUEST']``
+* All configuration getters (isEnabled, getMaxDepth, getTitleOverride, etc.)
+* Default values and type casting
 
 Functional Testing
 ------------------
 
-tbd.
+Functional tests can be run using:
+
+.. code-block:: bash
+
+   Build/Scripts/runTests.sh -s functional
 
 Performance Considerations
 ==========================

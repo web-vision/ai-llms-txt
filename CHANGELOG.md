@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-01-22
+
+### Added
+- Unit tests for ConfigurationService with full coverage
+- TYPO3 v14 LTS support in test runner scripts
+- Comprehensive test suite runnable across TYPO3 12, 13, and 14
+
+### Changed
+- Refactored ConfigurationService to use TYPO3 core request injection pattern
+- Request is now injected once via `setRequest()` instead of passing to each method
+- Added fallback to `$GLOBALS['TYPO3_REQUEST']` for backward compatibility
+- Improved code architecture following TYPO3 ContentObjectRenderer pattern
+
+### WIP
+- Started implementation of DownloadMarkdownCommand for CLI access to Markdown export
+
+## [0.1.9] - 2025-10-29
+
 ### Added
 - Initial release of LLMS TXT Generator extension
 - Complete llms.txt generation according to llmstxt.org specification
@@ -16,31 +34,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - TypoScript-based configuration for all settings
 - Route enhancers for user-friendly URLs
 - Comprehensive documentation following TYPO3 standards
+- Support for TYPO3 v12, v13, and v14 LTS
 
-### Changed
-- N/A (initial release)
-
-### Deprecated
-- N/A (initial release)
-
-### Removed
-- N/A (initial release)
-
-### Fixed
-- N/A (initial release)
-
-### Security
-- N/A (initial release)
-
-## [1.0.0] - 2025-10-29
-
-### Added
-- Initial release of LLMS TXT Generator extension for TYPO3 v13
-- Complete implementation of llmstxt.org specification
-- HTML-to-Markdown conversion using league/html-to-markdown
-- Service-oriented architecture with dependency injection
-- Comprehensive test foundation
-- Full documentation with installation and configuration guides
-
-[Unreleased]: https://github.com/web-vision/llms-txt/compare/v1.0.0...HEAD
-[1.0.0]: https://github.com/web-vision/llms-txt/releases/tag/v1.0.0
+[Unreleased]: https://github.com/web-vision/ai-llms-txt/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/web-vision/ai-llms-txt/compare/v0.1.9...v0.2.0
+[0.1.9]: https://github.com/web-vision/ai-llms-txt/releases/tag/v0.1.9
