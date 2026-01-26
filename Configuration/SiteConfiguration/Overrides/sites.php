@@ -81,7 +81,7 @@ $GLOBALS['SiteConfiguration']['site']['columns']['llmsTxtMaxDepth'] = [
         'default' => 2,
         'range' => [
             'lower' => 1,
-            'upper' => 5,
+            'upper' => 10,
         ],
     ],
 ];
