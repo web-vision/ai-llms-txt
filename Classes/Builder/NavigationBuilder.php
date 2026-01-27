@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace WebVision\AiLlmsTxt\Builder;
 
 use TYPO3\CMS\Core\Exception\SiteNotFoundException;
+use TYPO3\CMS\Core\Site\Entity\SiteLanguage;
 use TYPO3\CMS\Core\Site\SiteFinder;
 use WebVision\AiLlmsTxt\Repository\PageRepository;
 use WebVision\AiLlmsTxt\Service\UrlGeneratorService;
@@ -12,6 +13,7 @@ use WebVision\AiLlmsTxt\Service\UrlGeneratorService;
 /**
  * Builder for creating hierarchical navigation structures
  * Uses the Builder pattern to construct complex navigation data
+ * Leverages Core's PageRepository for proper language fallback handling
  */
 class NavigationBuilder
 {
@@ -23,19 +25,25 @@ class NavigationBuilder
     }
 
     /**
-     * Build hierarchical navigation structure
+     * Build hierarchical navigation structure with language fallback support
      * Uses batch queries to minimize database calls for large sites
      *
      * @param int $rootPageUid The root page UID to start building from
      * @param int $maxDepth Maximum depth of navigation (1 = only main pages, 2+ = include children)
+     * @param SiteLanguage|null $siteLanguage The site language for proper fallback handling (optional for BC)
      * @return array<int, array{title: string, description: string, url: string, children: array, language: string}>
      */
-    public function build(int $rootPageUid, int $maxDepth = 2): array
+    public function build(int $rootPageUid, int $maxDepth = 2, ?SiteLanguage $siteLanguage = null): array
     {
         $structure = [];
 
-        // Get main navigation pages (level 1)
-        $mainPages = $this->pageRepository->findNavigationByParent($rootPageUid);
+        // Get main navigation pages (level 1) with fallback support if language provided
+        if ($siteLanguage !== null) {
+            $mainPages = $this->pageRepository->findNavigationByParentWithFallback($rootPageUid, $siteLanguage);
+        } else {
+            // Fallback for BC: fetch all languages without overlay
+            $mainPages = $this->pageRepository->findNavigationByParent($rootPageUid);
+        }
 
         foreach ($mainPages as $mainPage) {
             $section = [
@@ -52,7 +60,8 @@ class NavigationBuilder
                 $section['children'] = $this->buildChildrenOptimized(
                     [$parentUidForChildren],
                     (int)$mainPage['sys_language_uid'],
-                    $maxDepth - 1
+                    $maxDepth - 1,
+                    $siteLanguage
                 );
             }
 
@@ -67,18 +76,27 @@ class NavigationBuilder
      * Fetches all children for given parent UIDs in a single query per depth level
      *
      * @param array<int> $parentUids Array of parent UIDs to fetch children for
-     * @param int $languageUid Language UID to filter by
+     * @param int $languageUid Language UID to filter by (used when no SiteLanguage)
      * @param int $remainingDepth Remaining depth levels to fetch
+     * @param SiteLanguage|null $siteLanguage The site language for proper fallback handling
      * @return array<int, array{uid: int, title: string, url: string, description: string, language: string, children: array}>
      */
-    protected function buildChildrenOptimized(array $parentUids, int $languageUid, int $remainingDepth): array
-    {
+    protected function buildChildrenOptimized(
+        array $parentUids,
+        int $languageUid,
+        int $remainingDepth,
+        ?SiteLanguage $siteLanguage = null
+    ): array {
         if (empty($parentUids) || $remainingDepth < 1) {
             return [];
         }
 
         // Batch fetch all children for all parent UIDs in one query
-        $batchedPages = $this->pageRepository->findNavigationByParentsBatch($parentUids, $languageUid);
+        if ($siteLanguage !== null) {
+            $batchedPages = $this->pageRepository->findNavigationByParentsBatchWithFallback($parentUids, $siteLanguage);
+        } else {
+            $batchedPages = $this->pageRepository->findNavigationByParentsBatch($parentUids, $languageUid);
+        }
 
         $children = [];
         $nextLevelParentUids = [];
@@ -111,7 +129,8 @@ class NavigationBuilder
             $nextLevelChildren = $this->buildChildrenOptimized(
                 array_keys($nextLevelParentUids),
                 $languageUid,
-                $remainingDepth - 1
+                $remainingDepth - 1,
+                $siteLanguage
             );
 
             // Assign children to their parents
@@ -129,43 +148,6 @@ class NavigationBuilder
             unset($child['parentUid']);
             return $child;
         }, array_values($children));
-    }
-
-    /**
-     * Build children recursively with depth tracking (legacy method, kept for compatibility)
-     *
-     * @return array<int, array{uid: int, title: string, url: string, description: string, language: string, children: array}>
-     * @deprecated Use buildChildrenOptimized for better performance on large sites
-     */
-    protected function buildChildren(int $parentUid, int $languageUid, int $remainingDepth): array
-    {
-        $children = [];
-        $subPages = $this->pageRepository->findNavigationByParentAndLanguage($parentUid, $languageUid);
-
-        foreach ($subPages as $subPage) {
-            $child = [
-                'uid' => $subPage['uid'],
-                'title' => $subPage['title'],
-                'url' => $this->urlGenerator->generatePageUrl($subPage),
-                'description' => $subPage['description'] ?: $subPage['abstract'] ?: '',
-                'language' => $this->getLanguageTitle($subPage),
-                'children' => [],
-            ];
-
-            // Recursively fetch deeper levels if depth allows
-            if ($remainingDepth > 1) {
-                $childParentUid = !empty($subPage['l10n_parent']) ? (int)$subPage['l10n_parent'] : (int)$subPage['uid'];
-                $child['children'] = $this->buildChildren(
-                    $childParentUid,
-                    (int)$subPage['sys_language_uid'],
-                    $remainingDepth - 1
-                );
-            }
-
-            $children[] = $child;
-        }
-
-        return $children;
     }
 
     protected function getLanguageTitle(array $page): string

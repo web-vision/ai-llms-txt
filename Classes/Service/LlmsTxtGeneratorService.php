@@ -98,9 +98,11 @@ class LlmsTxtGeneratorService
         $lines[] = '';
 
         $maxDepth = $this->configurationService->getMaxDepth();
+        $siteLanguage = $site->getDefaultLanguage();
         $navigationStructure = $this->navigationBuilder->build(
             $site->getRootPageId(),
-            $maxDepth
+            $maxDepth,
+            $siteLanguage
         );
         $navigationLines = $this->navigationBuilder->formatAsMarkdown($navigationStructure);
         $lines = array_merge($lines, $navigationLines);

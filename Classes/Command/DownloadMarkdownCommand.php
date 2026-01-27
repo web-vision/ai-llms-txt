@@ -270,7 +270,10 @@ final class DownloadMarkdownCommand extends Command
 
     private function getVisiblePages(Site $site): array
     {
-        return $this->pageRepository->findNavigationByParent($site->getRootPageId());
+        return $this->pageRepository->findNavigationByParentWithFallback(
+            $site->getRootPageId(),
+            $site->getDefaultLanguage()
+        );
     }
 
     private function fetchPageContent(Site $site, array $page): ?string
