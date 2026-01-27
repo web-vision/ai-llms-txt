@@ -23,6 +23,11 @@ class PageRepository
     private const MAX_RECURSION_DEPTH = 50;
 
     /**
+     * Maximum pages to load in a single batch query (performance limit)
+     */
+    private const MAX_BATCH_SIZE = 1000;
+
+    /**
      * Doktypes that should be excluded but their children should still be fetched
      */
     private const EXCLUDED_DOKTYPES = [
@@ -194,5 +199,58 @@ class PageRepository
             'sys_language_uid' => (int)$row['sys_language_uid'],
             'l10n_parent' => (int)$row['l10n_parent'],
         ];
+    }
+
+    /**
+     * Batch fetch all navigation pages for multiple parent UIDs in a single query
+     * This significantly reduces database queries for large sites (solves N+1 problem)
+     *
+     * @param array<int> $parentUids Array of parent page UIDs
+     * @param int|null $languageUid Language UID to filter by (null = all languages)
+     * @return array<int, array<int, array>> Pages grouped by parent UID
+     */
+    public function findNavigationByParentsBatch(array $parentUids, ?int $languageUid = null): array
+    {
+        if (empty($parentUids)) {
+            return [];
+        }
+
+        // Limit batch size to prevent memory issues
+        $parentUids = array_slice($parentUids, 0, self::MAX_BATCH_SIZE);
+
+        $queryBuilder = $this->connectionPool->getQueryBuilderForTable('pages');
+        $queryBuilder->getRestrictions()->removeAll()
+            ->add(GeneralUtility::makeInstance(FrontendRestrictionContainer::class));
+
+        $queryBuilder
+            ->select(...self::NAVIGATION_FIELDS)
+            ->from('pages')
+            ->where(
+                $queryBuilder->expr()->in('pid', $queryBuilder->createNamedParameter($parentUids, Connection::PARAM_INT_ARRAY)),
+                $queryBuilder->expr()->eq('nav_hide', $queryBuilder->createNamedParameter(0, Connection::PARAM_INT)),
+                $queryBuilder->expr()->eq('no_index', $queryBuilder->createNamedParameter(0, Connection::PARAM_INT))
+            )
+            ->orderBy('pid')
+            ->addOrderBy('sorting');
+
+        if ($languageUid !== null) {
+            $queryBuilder->andWhere(
+                $queryBuilder->expr()->eq('sys_language_uid', $queryBuilder->createNamedParameter($languageUid, Connection::PARAM_INT))
+            );
+        }
+
+        $result = $queryBuilder->executeQuery();
+
+        // Group results by parent UID
+        $grouped = [];
+        while ($row = $result->fetchAssociative()) {
+            $pid = (int)$row['pid'];
+            if (!isset($grouped[$pid])) {
+                $grouped[$pid] = [];
+            }
+            $grouped[$pid][] = $this->mapRowToPageArray($row);
+        }
+
+        return $grouped;
     }
 }

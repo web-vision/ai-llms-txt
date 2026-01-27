@@ -133,10 +133,17 @@ class ConfigurationService
         return array_map('trim', explode(',', $keywords));
     }
 
+    /**
+     * Maximum allowed depth to prevent performance issues on large sites
+     */
+    private const MAX_ALLOWED_DEPTH = 10;
+
     public function getMaxDepth(): int
     {
         $site = $this->getCurrentSite();
+        $configuredDepth = (int)($site->getConfiguration()['llmsTxtMaxDepth'] ?? 2);
 
-        return (int)($site->getConfiguration()['llmsTxtMaxDepth'] ?? 2);
+        // Cap at maximum allowed depth to prevent performance issues
+        return min(max(1, $configuredDepth), self::MAX_ALLOWED_DEPTH);
     }
 }
