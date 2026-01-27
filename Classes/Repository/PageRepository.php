@@ -4,16 +4,21 @@ declare(strict_types=1);
 
 namespace WebVision\AiLlmsTxt\Repository;
 
+use TYPO3\CMS\Core\Context\Context;
+use TYPO3\CMS\Core\Context\LanguageAspect;
+use TYPO3\CMS\Core\Context\LanguageAspectFactory;
 use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
 use TYPO3\CMS\Core\Database\Query\Restriction\FrontendRestrictionContainer;
 use TYPO3\CMS\Core\Domain\Repository\PageRepository as CorePageRepository;
+use TYPO3\CMS\Core\Site\Entity\SiteLanguage;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
  * Repository for fetching page data
  * Handles all database queries related to pages using the Repository pattern
+ * Uses Core's PageRepository for proper language fallback handling
  */
 class PageRepository
 {
@@ -52,7 +57,8 @@ class PageRepository
     ];
 
     public function __construct(
-        private readonly ConnectionPool $connectionPool
+        private readonly ConnectionPool $connectionPool,
+        private readonly Context $context
     ) {
     }
 
@@ -81,6 +87,9 @@ class PageRepository
     /**
      * Find navigation pages by parent UID (all languages)
      *
+     * Note: For language-aware fetching with proper fallback handling,
+     * use findNavigationByParentWithFallback() instead.
+     *
      * @param int $parentUid Parent page UID
      * @return array<int, array{uid: int, pid: int, title: string, description: string, abstract: string, doktype: int, sys_language_uid: int, l10n_parent: int}>
      */
@@ -95,6 +104,8 @@ class PageRepository
      * @param int $parentUid Parent page UID
      * @param int $languageUid Language UID to filter by
      * @return array<int, array{uid: int, pid: int, title: string, description: string, abstract: string, doktype: int, sys_language_uid: int, l10n_parent: int}>
+     *
+     * @deprecated since 0.3.0, will be removed in 1.0.0. Use findNavigationByParentWithFallback() with SiteLanguage for proper language fallback handling.
      */
     public function findNavigationByParentAndLanguage(int $parentUid, int $languageUid = 0): array
     {
@@ -252,5 +263,133 @@ class PageRepository
         }
 
         return $grouped;
+    }
+
+    /**
+     * Find navigation pages with proper language fallback handling
+     * Uses Core's PageRepository for overlay logic
+     *
+     * @param int $parentUid Parent page UID
+     * @param SiteLanguage $siteLanguage The site language to fetch pages for
+     * @return array<int, array{uid: int, pid: int, title: string, description: string, abstract: string, doktype: int, sys_language_uid: int, l10n_parent: int}>
+     */
+    public function findNavigationByParentWithFallback(int $parentUid, SiteLanguage $siteLanguage): array
+    {
+        // Fetch default language pages first
+        $defaultLanguagePages = $this->findNavigationPages($parentUid, 0, []);
+
+        if (empty($defaultLanguagePages)) {
+            return [];
+        }
+
+        // If default language requested, return as-is
+        if ($siteLanguage->getLanguageId() === 0) {
+            return $defaultLanguagePages;
+        }
+
+        // Create Core PageRepository with proper language context for overlays
+        $corePageRepository = $this->createCorePageRepository($siteLanguage);
+
+        // Apply language overlays using Core's method
+        $overlaidPages = $corePageRepository->getPagesOverlay($defaultLanguagePages);
+
+        // Filter pages based on language visibility
+        $languageAspect = LanguageAspectFactory::createFromSiteLanguage($siteLanguage);
+        $result = [];
+
+        foreach ($overlaidPages as $page) {
+            if ($corePageRepository->isPageSuitableForLanguage($page, $languageAspect)) {
+                $result[] = $this->mapRowToPageArray($page);
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * Batch fetch pages with language fallback for multiple parents
+     *
+     * @param array<int> $parentUids Parent page UIDs
+     * @param SiteLanguage $siteLanguage The site language
+     * @return array<int, array<int, array>> Pages grouped by parent UID with overlays applied
+     */
+    public function findNavigationByParentsBatchWithFallback(array $parentUids, SiteLanguage $siteLanguage): array
+    {
+        if (empty($parentUids)) {
+            return [];
+        }
+
+        // Limit batch size
+        $parentUids = array_slice($parentUids, 0, self::MAX_BATCH_SIZE);
+
+        // Fetch default language pages
+        $defaultLanguagePages = $this->findNavigationByParentsBatch($parentUids, 0);
+
+        if (empty($defaultLanguagePages)) {
+            return [];
+        }
+
+        // If default language requested, return as-is
+        if ($siteLanguage->getLanguageId() === 0) {
+            return $defaultLanguagePages;
+        }
+
+        // Flatten pages for overlay processing
+        $allPages = [];
+        $pageToParentMap = [];
+        foreach ($defaultLanguagePages as $pid => $pages) {
+            foreach ($pages as $page) {
+                $allPages[] = $page;
+                $pageToParentMap[$page['uid']] = $pid;
+            }
+        }
+
+        if (empty($allPages)) {
+            return [];
+        }
+
+        // Create Core PageRepository with proper language context
+        $corePageRepository = $this->createCorePageRepository($siteLanguage);
+
+        // Apply overlays
+        $overlaidPages = $corePageRepository->getPagesOverlay($allPages);
+
+        // Filter and regroup by parent
+        $languageAspect = LanguageAspectFactory::createFromSiteLanguage($siteLanguage);
+        $result = [];
+
+        foreach ($overlaidPages as $page) {
+            if (!$corePageRepository->isPageSuitableForLanguage($page, $languageAspect)) {
+                continue;
+            }
+
+            // Get original UID for parent mapping (before overlay)
+            $originalUid = $page['_TRANSLATION_SOURCE']->uid ?? $page['uid'];
+            $pid = $pageToParentMap[$originalUid] ?? (int)$page['pid'];
+
+            if (!isset($result[$pid])) {
+                $result[$pid] = [];
+            }
+
+            $result[$pid][] = $this->mapRowToPageArray($page);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Create a Core PageRepository instance configured for the given site language
+     * This handles language overlays with proper fallback chain
+     */
+    protected function createCorePageRepository(SiteLanguage $siteLanguage): CorePageRepository
+    {
+        // Clone context to avoid modifying global state
+        $context = clone $this->context;
+        $context->setAspect(
+            'language',
+            LanguageAspectFactory::createFromSiteLanguage($siteLanguage)
+        );
+
+        return GeneralUtility::makeInstance(CorePageRepository::class, $context);
     }
 }
