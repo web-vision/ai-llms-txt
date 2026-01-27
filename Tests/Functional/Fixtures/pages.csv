@@ -1,0 +1,26 @@
+"pages"
+,"uid","pid","title","slug","description","abstract","doktype","nav_hide","sorting","sys_language_uid","l10n_parent","hidden","deleted","no_index"
+,1,0,"Root Page","/","Root page description","Root page abstract",1,0,256,0,0,0,0,0
+,2,1,"About Us","/about-us","About our company","Learn about our company",1,0,256,0,0,0,0,0
+,3,1,"Products","/products","Our product range","Browse our products",1,0,512,0,0,0,0,0
+,4,1,"Contact","/contact","Contact us","Get in touch",1,0,768,0,0,0,0,0
+,5,2,"Team","/about-us/team","Meet our team","Our talented team members",1,0,256,0,0,0,0,0
+,6,2,"History","/about-us/history","Company history","Our journey",1,0,512,0,0,0,0,0
+,7,3,"Category A","/products/category-a","Category A products","Products in category A",1,0,256,0,0,0,0,0
+,8,3,"Category B","/products/category-b","Category B products","Products in category B",1,0,512,0,0,0,0,0
+,9,1,"Hidden Page","/hidden","Hidden from navigation","This page is hidden",1,1,1024,0,0,0,0,0
+,10,1,"Deleted Page","/deleted","Deleted page","This page is deleted",1,0,1280,0,0,0,1,0
+,11,1,"Folder","/folder","A folder",,254,0,1536,0,0,0,0,0
+,12,11,"Page in Folder","/folder/page","Page inside folder","Content inside folder",1,0,256,0,0,0,0,0
+,13,7,"Sub Product","/products/category-a/sub","Sub product","A sub product item",1,0,256,0,0,0,0,0
+,100,0,"Root Page","/de","Hauptseite Beschreibung","Hauptseite Abstract",1,0,256,1,1,0,0,0
+,101,1,"Über uns","/de/ueber-uns","Über unser Unternehmen","Erfahren Sie mehr über uns",1,0,256,1,2,0,0,0
+,102,1,"Produkte","/de/produkte","Unser Produktsortiment","Durchstöbern Sie unsere Produkte",1,0,512,1,3,0,0,0
+,103,1,"Kontakt","/de/kontakt","Kontaktieren Sie uns","Nehmen Sie Kontakt auf",1,0,768,1,4,0,0,0
+,104,2,"Team","/de/ueber-uns/team","Lernen Sie unser Team kennen","Unsere talentierten Teammitglieder",1,0,256,1,5,0,0,0
+,105,2,"Geschichte","/de/ueber-uns/geschichte","Firmengeschichte","Unsere Reise",1,0,512,1,6,0,0,0
+,106,3,"Kategorie A","/de/produkte/kategorie-a","Produkte der Kategorie A","Produkte in Kategorie A",1,0,256,1,7,0,0,0
+,107,3,"Kategorie B","/de/produkte/kategorie-b","Produkte der Kategorie B","Produkte in Kategorie B",1,0,512,1,8,0,0,0
+,200,0,"Root Page","/fr","Description de la page racine","Résumé de la page racine",1,0,256,2,1,0,0,0
+,201,1,"À propos","/fr/a-propos","À propos de notre entreprise","En savoir plus sur nous",1,0,256,2,2,0,0,0
+,202,1,"Produits","/fr/produits","Notre gamme de produits","Parcourez nos produits",1,0,512,2,3,0,0,0

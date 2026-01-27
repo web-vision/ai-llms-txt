@@ -24,6 +24,7 @@ class NavigationBuilder
 
     /**
      * Build hierarchical navigation structure
+     * Uses batch queries to minimize database calls for large sites
      *
      * @param int $rootPageUid The root page UID to start building from
      * @param int $maxDepth Maximum depth of navigation (1 = only main pages, 2+ = include children)
@@ -45,12 +46,11 @@ class NavigationBuilder
                 'language' => $this->getLanguageTitle($mainPage),
             ];
 
-            // Get subpages if depth allows
+            // Get subpages if depth allows - use optimized batch method
             if ($maxDepth > 1) {
-                // For translated pages, use l10n_parent to find children (they are stored under the default language parent)
                 $parentUidForChildren = !empty($mainPage['l10n_parent']) ? (int)$mainPage['l10n_parent'] : (int)$mainPage['uid'];
-                $section['children'] = $this->buildChildren(
-                    $parentUidForChildren,
+                $section['children'] = $this->buildChildrenOptimized(
+                    [$parentUidForChildren],
                     (int)$mainPage['sys_language_uid'],
                     $maxDepth - 1
                 );
@@ -63,9 +63,79 @@ class NavigationBuilder
     }
 
     /**
-     * Build children recursively with depth tracking
+     * Build children using batch queries to reduce N+1 problem
+     * Fetches all children for given parent UIDs in a single query per depth level
+     *
+     * @param array<int> $parentUids Array of parent UIDs to fetch children for
+     * @param int $languageUid Language UID to filter by
+     * @param int $remainingDepth Remaining depth levels to fetch
+     * @return array<int, array{uid: int, title: string, url: string, description: string, language: string, children: array}>
+     */
+    protected function buildChildrenOptimized(array $parentUids, int $languageUid, int $remainingDepth): array
+    {
+        if (empty($parentUids) || $remainingDepth < 1) {
+            return [];
+        }
+
+        // Batch fetch all children for all parent UIDs in one query
+        $batchedPages = $this->pageRepository->findNavigationByParentsBatch($parentUids, $languageUid);
+
+        $children = [];
+        $nextLevelParentUids = [];
+
+        foreach ($parentUids as $parentUid) {
+            $subPages = $batchedPages[$parentUid] ?? [];
+
+            foreach ($subPages as $subPage) {
+                $childKey = count($children);
+                $children[$childKey] = [
+                    'uid' => $subPage['uid'],
+                    'parentUid' => $parentUid,
+                    'title' => $subPage['title'],
+                    'url' => $this->urlGenerator->generatePageUrl($subPage),
+                    'description' => $subPage['description'] ?: $subPage['abstract'] ?: '',
+                    'language' => $this->getLanguageTitle($subPage),
+                    'children' => [],
+                ];
+
+                // Collect parent UIDs for next level
+                if ($remainingDepth > 1) {
+                    $childParentUid = !empty($subPage['l10n_parent']) ? (int)$subPage['l10n_parent'] : (int)$subPage['uid'];
+                    $nextLevelParentUids[$childParentUid] = $childKey;
+                }
+            }
+        }
+
+        // Recursively fetch next level with batch query
+        if ($remainingDepth > 1 && !empty($nextLevelParentUids)) {
+            $nextLevelChildren = $this->buildChildrenOptimized(
+                array_keys($nextLevelParentUids),
+                $languageUid,
+                $remainingDepth - 1
+            );
+
+            // Assign children to their parents
+            foreach ($nextLevelChildren as $child) {
+                $parentKey = $nextLevelParentUids[$child['parentUid']] ?? null;
+                if ($parentKey !== null && isset($children[$parentKey])) {
+                    unset($child['parentUid']);
+                    $children[$parentKey]['children'][] = $child;
+                }
+            }
+        }
+
+        // Clean up parentUid from final result
+        return array_map(function ($child) {
+            unset($child['parentUid']);
+            return $child;
+        }, array_values($children));
+    }
+
+    /**
+     * Build children recursively with depth tracking (legacy method, kept for compatibility)
      *
      * @return array<int, array{uid: int, title: string, url: string, description: string, language: string, children: array}>
+     * @deprecated Use buildChildrenOptimized for better performance on large sites
      */
     protected function buildChildren(int $parentUid, int $languageUid, int $remainingDepth): array
     {
@@ -131,12 +201,15 @@ class NavigationBuilder
         }
 
         foreach ($byLanguage as $language => $sections) {
-            $lines[] = "## {$language}";
+            $escapedLanguage = $this->escapeMarkdown($language);
+            $lines[] = "## {$escapedLanguage}";
 
             foreach ($sections as $section) {
-                // Section header
+                // Section header with proper escaping
                 if (!empty($section['url'])) {
-                    $lines[] = "+ [{$section['title']}]({$section['url']})";
+                    $title = $this->escapeMarkdown($section['title'] ?? '');
+                    $url = $this->escapeUrl($section['url'] ?? '');
+                    $lines[] = "+ [{$title}]({$url})";
                 }
 
                 $this->formatChildrenAsMarkdown($section['children'] ?? [], $lines, 1);
@@ -159,10 +232,14 @@ class NavigationBuilder
         $indent = str_repeat('  ', $depth);
 
         foreach ($children as $page) {
-            if (!empty($page['description'])) {
-                $lines[] = "{$indent}- [{$page['title']}]({$page['url']}): {$page['description']}";
+            $title = $this->escapeMarkdown($page['title'] ?? '');
+            $url = $this->escapeUrl($page['url'] ?? '');
+            $description = $this->escapeMarkdown($page['description'] ?? '');
+
+            if (!empty($description)) {
+                $lines[] = "{$indent}- [{$title}]({$url}): {$description}";
             } else {
-                $lines[] = "{$indent}- [{$page['title']}]({$page['url']})";
+                $lines[] = "{$indent}- [{$title}]({$url})";
             }
 
             // Recursively format nested children
@@ -170,5 +247,24 @@ class NavigationBuilder
                 $this->formatChildrenAsMarkdown($page['children'], $lines, $depth + 1);
             }
         }
+    }
+
+    /**
+     * Escape special markdown characters in text
+     */
+    protected function escapeMarkdown(string $text): string
+    {
+        // Escape markdown special characters: [ ] ( ) \ ` * _ { } # + - . !
+        // The replacement pattern needs 4 backslashes to produce a literal backslash + captured char
+        return preg_replace('/([\[\]()\\\`*_{}#+\-.!])/', '\\\\$1', $text) ?? $text;
+    }
+
+    /**
+     * Escape URL for safe use in markdown links
+     */
+    protected function escapeUrl(string $url): string
+    {
+        // Escape parentheses in URLs which break markdown link syntax
+        return str_replace(['(', ')'], ['%28', '%29'], $url);
     }
 }
