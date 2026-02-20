@@ -63,18 +63,26 @@ class PageRepository
     }
 
     /**
-     * Find a page by its UID
+     * Find a page by its UID with optional language support
      *
-     * @return array{uid: int, title: string, subtitle: string, description: string, abstract: string}|array{}
+     * @return array{uid: int, title: string, subtitle: string, seo_title: string, description: string, abstract: string}|array{}
      */
-    public function findById(int $pageId): array
+    public function findById(int $pageId, int $languageUid = 0): array
     {
+        // Fetch localized page if language is specified
+        if ($languageUid > 0) {
+            $localizedPage = $this->getLocalizedPage($pageId, $languageUid);
+            if (!empty($localizedPage)) {
+                return $localizedPage;
+            }
+        }
+
         $queryBuilder = $this->connectionPool->getQueryBuilderForTable('pages');
         $queryBuilder->getRestrictions()->removeAll()
             ->add(GeneralUtility::makeInstance(FrontendRestrictionContainer::class));
 
         $result = $queryBuilder
-            ->select('uid', 'title', 'subtitle', 'description', 'abstract')
+            ->select('uid', 'title', 'subtitle', 'seo_title', 'description', 'abstract')
             ->from('pages')
             ->where(
                 $queryBuilder->expr()->eq('uid', $queryBuilder->createNamedParameter($pageId, Connection::PARAM_INT))
@@ -82,6 +90,49 @@ class PageRepository
             ->executeQuery();
 
         return $result->fetchAssociative() ?: [];
+    }
+
+    /**
+     * Fetch localized page by l10n_parent and sys_language_uid
+     * Falls back to unrestricted query if FrontendRestrictionContainer filters result
+     *
+     * @return array{uid: int, title: string, subtitle: string, seo_title: string, description: string, abstract: string}|array{}
+     */
+    private function getLocalizedPage(int $pageId, int $languageUid): array
+    {
+        // First try with FrontendRestrictionContainer
+        $queryBuilder = $this->connectionPool->getQueryBuilderForTable('pages');
+        $queryBuilder->getRestrictions()->removeAll()
+            ->add(GeneralUtility::makeInstance(FrontendRestrictionContainer::class));
+
+        $result = $queryBuilder
+            ->select('uid', 'title', 'subtitle', 'seo_title', 'description', 'abstract')
+            ->from('pages')
+            ->where(
+                $queryBuilder->expr()->eq('l10n_parent', $queryBuilder->createNamedParameter($pageId, Connection::PARAM_INT)),
+                $queryBuilder->expr()->eq('sys_language_uid', $queryBuilder->createNamedParameter($languageUid, Connection::PARAM_INT))
+            )
+            ->executeQuery();
+
+        $localizedPage = $result->fetchAssociative();
+        if ($localizedPage) {
+            return $localizedPage;
+        }
+
+        // Fallback: query without FrontendRestrictionContainer
+        $queryBuilder2 = $this->connectionPool->getQueryBuilderForTable('pages');
+        $queryBuilder2->getRestrictions()->removeAll();
+
+        $result2 = $queryBuilder2
+            ->select('uid', 'title', 'subtitle', 'seo_title', 'description', 'abstract')
+            ->from('pages')
+            ->where(
+                $queryBuilder2->expr()->eq('l10n_parent', $queryBuilder2->createNamedParameter($pageId, Connection::PARAM_INT)),
+                $queryBuilder2->expr()->eq('sys_language_uid', $queryBuilder2->createNamedParameter($languageUid, Connection::PARAM_INT))
+            )
+            ->executeQuery();
+
+        return $result2->fetchAssociative() ?: [];
     }
 
     /**

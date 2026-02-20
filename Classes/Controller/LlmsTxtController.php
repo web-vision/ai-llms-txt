@@ -85,13 +85,17 @@ class LlmsTxtController
         $cObject->start([], 'pages');
 
         $pageId = $this->configurationService->getCurrentPageId();
+        // Get current language UID for proper localization
+        $languageUid = $this->getLanguageUid();
 
-        $page = $this->pageRepository->findById($pageId);
+        $page = $this->pageRepository->findById($pageId, $languageUid);
 
         $html = '';
 
-        if (!empty($page['title'])) {
-            $html .= '<h1>' . htmlspecialchars($page['title']) . '</h1>';
+        // Use seo_title if available, otherwise fall back to title
+        $displayTitle = !empty($page['seo_title']) ? $page['seo_title'] : $page['title'];
+        if (!empty($displayTitle)) {
+            $html .= '<h1>' . htmlspecialchars($displayTitle) . '</h1>';
         }
 
         if (!empty($page['description'])) {
@@ -115,5 +119,30 @@ class LlmsTxtController
         }
 
         return $html;
+    }
+
+    /**
+     * Get the current language UID from TYPO3 frontend environment
+     * Checks sys_language_uid first, falls back to page['sys_language_uid']
+     */
+    protected function getLanguageUid(): int
+    {
+        // Try to get language from TSFE->sys_language_uid
+        if (isset($GLOBALS['TSFE']) && isset($GLOBALS['TSFE']->sys_language_uid)) {
+            $langUid = (int)$GLOBALS['TSFE']->sys_language_uid;
+            if ($langUid > 0) {
+                return $langUid;
+            }
+        }
+
+        // Fallback: get language from current page data
+        if (isset($GLOBALS['TSFE']) && isset($GLOBALS['TSFE']->page)) {
+            $page = $GLOBALS['TSFE']->page;
+            if (is_array($page) && isset($page['sys_language_uid'])) {
+                return (int)$page['sys_language_uid'];
+            }
+        }
+
+        return 0;
     }
 }
