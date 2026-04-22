@@ -19,20 +19,20 @@
     "require": {
         "php": "^8.2 || ^8.3 || ^8.4",
         "league/html-to-markdown": "^5.1",
-        "typo3/cms-backend": "^12.4 || ^13.4 || ^14.1",
-        "typo3/cms-core": "^12.4 || ^13.4 || ^14.1",
-        "typo3/cms-extbase": "^12.4 || ^13.4 || ^14.1",
-        "typo3/cms-fluid": "^12.4 || ^13.4 || ^14.1",
-        "typo3/cms-seo": "^12.4 || ^13.4 || ^14.1"
+        "typo3/cms-backend": "^12.4 || ^13.4 || ^14.3",
+        "typo3/cms-core": "^12.4 || ^13.4 || ^14.3",
+        "typo3/cms-extbase": "^12.4 || ^13.4 || ^14.3",
+        "typo3/cms-fluid": "^12.4 || ^13.4 || ^14.3",
+        "typo3/cms-seo": "^12.4 || ^13.4 || ^14.3"
     },
     "require-dev": {
         "friendsofphp/php-cs-fixer": "^3.70",
         "helhum/typo3-console": "^8.3",
         "helmich/typo3-typoscript-lint": "^3.1.0",
         "phpstan/phpstan": "^1.10",
-        "phpunit/phpunit": "^10.0 || ^11.0",
-        "typo3/cms-fluid-styled-content": "^12.4 || ^13.4 || ^14.1",
-        "typo3/cms-tstemplate": "^12.4 || ^13.4 || ^14.1",
+        "phpunit/phpunit": "^10.5 || ^11.0",
+        "typo3/cms-fluid-styled-content": "^12.4 || ^13.4 || ^14.3",
+        "typo3/cms-tstemplate": "^12.4 || ^13.4 || ^14.3",
         "typo3/coding-standards": "^0.8",
         "typo3/testing-framework": "^8.0 || ^9.3"
     },
@@ -52,7 +52,9 @@
             "extension-key": "ai_llms_txt",
 			"ignore-as-root": false,
 			"web-dir": ".Build/Web",
-			"app-dir": ".Build"
+            "package": {
+                "providesPackages": {}
+            }
 		}
     },
     "scripts": {
@@ -85,5 +87,6 @@
         "vendor-dir": ".Build/vendor",
         "bin-dir": ".Build/bin",
         "optimize-autoloader": true
-    }
+    },
+    "version": "0.2.1"
 }
