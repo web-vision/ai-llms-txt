@@ -1,2 +1,171 @@
 parameters:
 	ignoreErrors:
+		-
+			message: "#^Cannot unset offset 'parentUid' on array\\{uid\\: int, title\\: string, url\\: string, description\\: string, language\\: string, children\\: array\\}\\.$#"
+			count: 1
+			path: ../../../Classes/Builder/NavigationBuilder.php
+
+		-
+			message: "#^Method WebVision\\\\AiLlmsTxt\\\\Builder\\\\NavigationBuilder\\:\\:build\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: ../../../Classes/Builder/NavigationBuilder.php
+
+		-
+			message: "#^Method WebVision\\\\AiLlmsTxt\\\\Builder\\\\NavigationBuilder\\:\\:buildChildrenOptimized\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: ../../../Classes/Builder/NavigationBuilder.php
+
+		-
+			message: "#^Method WebVision\\\\AiLlmsTxt\\\\Builder\\\\NavigationBuilder\\:\\:formatAsMarkdown\\(\\) has parameter \\$navigationStructure with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: ../../../Classes/Builder/NavigationBuilder.php
+
+		-
+			message: "#^Method WebVision\\\\AiLlmsTxt\\\\Builder\\\\NavigationBuilder\\:\\:formatChildrenAsMarkdown\\(\\) has parameter \\$children with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: ../../../Classes/Builder/NavigationBuilder.php
+
+		-
+			message: "#^Method WebVision\\\\AiLlmsTxt\\\\Builder\\\\NavigationBuilder\\:\\:getLanguageTitle\\(\\) has parameter \\$page with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: ../../../Classes/Builder/NavigationBuilder.php
+
+		-
+			message: "#^Offset 'parentUid' does not exist on array\\{uid\\: int, title\\: string, url\\: string, description\\: string, language\\: string, children\\: array\\}\\.$#"
+			count: 1
+			path: ../../../Classes/Builder/NavigationBuilder.php
+
+		-
+			message: "#^Method WebVision\\\\AiLlmsTxt\\\\Command\\\\DownloadMarkdownCommand\\:\\:addFrontmatter\\(\\) has parameter \\$page with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: ../../../Classes/Command/DownloadMarkdownCommand.php
+
+		-
+			message: "#^Method WebVision\\\\AiLlmsTxt\\\\Command\\\\DownloadMarkdownCommand\\:\\:fetchPageContent\\(\\) has parameter \\$page with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: ../../../Classes/Command/DownloadMarkdownCommand.php
+
+		-
+			message: "#^Method WebVision\\\\AiLlmsTxt\\\\Command\\\\DownloadMarkdownCommand\\:\\:generateFilename\\(\\) has parameter \\$page with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: ../../../Classes/Command/DownloadMarkdownCommand.php
+
+		-
+			message: "#^Method WebVision\\\\AiLlmsTxt\\\\Command\\\\DownloadMarkdownCommand\\:\\:generateFilename\\(\\) has parameter \\$usedFilenames with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: ../../../Classes/Command/DownloadMarkdownCommand.php
+
+		-
+			message: "#^Method WebVision\\\\AiLlmsTxt\\\\Command\\\\DownloadMarkdownCommand\\:\\:getVisiblePages\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: ../../../Classes/Command/DownloadMarkdownCommand.php
+
+		-
+			message: "#^Parameter \\#1 \\$string of function trim expects string, string\\|null given\\.$#"
+			count: 1
+			path: ../../../Classes/Command/DownloadMarkdownCommand.php
+
+		-
+			message: "#^Property WebVision\\\\AiLlmsTxt\\\\Command\\\\DownloadMarkdownCommand\\:\\:\\$markdownConverter is never read, only written\\.$#"
+			count: 1
+			path: ../../../Classes/Command/DownloadMarkdownCommand.php
+
+		-
+			message: "#^Property WebVision\\\\AiLlmsTxt\\\\Command\\\\DownloadMarkdownCommand\\:\\:\\$urlGenerator is never read, only written\\.$#"
+			count: 1
+			path: ../../../Classes/Command/DownloadMarkdownCommand.php
+
+		-
+			message: "#^Method WebVision\\\\AiLlmsTxt\\\\Controller\\\\LlmsTxtController\\:\\:generateAction\\(\\) has parameter \\$conf with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: ../../../Classes/Controller/LlmsTxtController.php
+
+		-
+			message: "#^Method WebVision\\\\AiLlmsTxt\\\\Controller\\\\LlmsTxtController\\:\\:renderPageAsMarkdown\\(\\) has parameter \\$conf with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: ../../../Classes/Controller/LlmsTxtController.php
+
+		-
+			message: "#^Method WebVision\\\\AiLlmsTxt\\\\Repository\\\\PageRepository\\:\\:findNavigationByParentsBatch\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: ../../../Classes/Repository/PageRepository.php
+
+		-
+			message: "#^Method WebVision\\\\AiLlmsTxt\\\\Repository\\\\PageRepository\\:\\:findNavigationByParentsBatchInternal\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: ../../../Classes/Repository/PageRepository.php
+
+		-
+			message: "#^Method WebVision\\\\AiLlmsTxt\\\\Repository\\\\PageRepository\\:\\:findNavigationByParentsBatchWithFallback\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: ../../../Classes/Repository/PageRepository.php
+
+		-
+			message: "#^Method WebVision\\\\AiLlmsTxt\\\\Repository\\\\PageRepository\\:\\:mapRowToPageArray\\(\\) has parameter \\$row with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: ../../../Classes/Repository/PageRepository.php
+
+		-
+			message: "#^Cannot call method getBase\\(\\) on TYPO3\\\\CMS\\\\Core\\\\Site\\\\Entity\\\\Site\\|null\\.$#"
+			count: 1
+			path: ../../../Classes/Service/ConfigurationService.php
+
+		-
+			message: "#^Cannot call method getConfiguration\\(\\) on TYPO3\\\\CMS\\\\Core\\\\Site\\\\Entity\\\\Site\\|null\\.$#"
+			count: 9
+			path: ../../../Classes/Service/ConfigurationService.php
+
+		-
+			message: "#^Cannot call method getIdentifier\\(\\) on TYPO3\\\\CMS\\\\Core\\\\Site\\\\Entity\\\\Site\\|null\\.$#"
+			count: 1
+			path: ../../../Classes/Service/ConfigurationService.php
+
+		-
+			message: "#^Method WebVision\\\\AiLlmsTxt\\\\Service\\\\ConfigurationService\\:\\:getKeywords\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: ../../../Classes/Service/ConfigurationService.php
+
+		-
+			message: "#^Parameter \\#1 \\$string of function trim expects string, string\\|null given\\.$#"
+			count: 1
+			path: ../../../Classes/Service/HtmlCleanerService.php
+
+		-
+			message: "#^Parameter \\#3 \\$subject of function preg_replace expects array\\|string, string\\|null given\\.$#"
+			count: 10
+			path: ../../../Classes/Service/HtmlCleanerService.php
+
+		-
+			message: "#^Method WebVision\\\\AiLlmsTxt\\\\Service\\\\LlmsTxtGeneratorService\\:\\:buildMetadataSection\\(\\) return type has no value type specified in iterable type array\\.$#"
+			count: 1
+			path: ../../../Classes/Service/LlmsTxtGeneratorService.php
+
+		-
+			message: "#^Method WebVision\\\\AiLlmsTxt\\\\Service\\\\UrlGeneratorService\\:\\:generatePageUrl\\(\\) has parameter \\$page with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: ../../../Classes/Service/UrlGeneratorService.php
+
+		-
+			message: "#^Offset 'children' does not exist on array\\{\\}\\|array\\{title\\: 'About Us', description\\: string, url\\: string, children\\: array, language\\: 'Default language'\\}\\.$#"
+			count: 2
+			path: ../../../Tests/Functional/Builder/NavigationBuilderBugTest.php
+
+		-
+			message: "#^Offset 'children' does not exist on array\\{\\}\\|array\\{title\\: 'Über uns', description\\: string, url\\: string, children\\: array, language\\: 'Language 2'\\}\\.$#"
+			count: 2
+			path: ../../../Tests/Functional/Builder/NavigationBuilderBugTest.php
+
+		-
+			message: "#^Offset 'uid' does not exist on array\\{\\}\\|array\\{uid\\: int, title\\: string, subtitle\\: string, seo_title\\: string, description\\: string, abstract\\: string\\}\\.$#"
+			count: 3
+			path: ../../../Tests/Functional/Repository/PageRepositoryTest.php
+
+		-
+			message: "#^Method WebVision\\\\AiLlmsTxt\\\\Tests\\\\Functional\\\\Service\\\\LlmsTxtGeneratorServiceTest\\:\\:writeSiteConfiguration\\(\\) has parameter \\$additionalConfig with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: ../../../Tests/Functional/Service/LlmsTxtGeneratorServiceTest.php
+
+		-
+			message: "#^Method WebVision\\\\AiLlmsTxt\\\\Tests\\\\Unit\\\\Service\\\\ConfigurationServiceTest\\:\\:setupRequestWithSiteConfiguration\\(\\) has parameter \\$configuration with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: ../../../Tests/Unit/Service/ConfigurationServiceTest.php
