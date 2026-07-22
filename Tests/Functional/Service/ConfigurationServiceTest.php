@@ -22,6 +22,10 @@ final class ConfigurationServiceTest extends FunctionalTestCase
         'web-vision/ai-llms-txt',
     ];
 
+    protected array $coreExtensionsToLoad = [
+        'seo',
+    ];
+
     private ConfigurationService $subject;
 
     protected function setUp(): void
@@ -34,14 +38,14 @@ final class ConfigurationServiceTest extends FunctionalTestCase
     #[Test]
     public function configurationServiceCanBeInstantiated(): void
     {
-        self::assertInstanceOf(ConfigurationService::class, $this->subject);
+        static::assertInstanceOf(ConfigurationService::class, $this->subject);
     }
 
     #[Test]
     public function classImplementsRequestAwareInterface(): void
     {
         // Check that setRequest method exists (from RequestAwareInterface)
-        self::assertTrue(method_exists($this->subject, 'setRequest'));
+        static::assertTrue(method_exists($this->subject, 'setRequest'));
     }
 
     #[Test]
@@ -61,7 +65,7 @@ final class ConfigurationServiceTest extends FunctionalTestCase
         ];
 
         foreach ($expectedMethods as $method) {
-            self::assertTrue(
+            static::assertTrue(
                 method_exists($this->subject, $method),
                 sprintf('Method %s should exist on ConfigurationService', $method)
             );

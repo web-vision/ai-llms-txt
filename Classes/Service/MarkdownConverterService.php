@@ -31,7 +31,7 @@ class MarkdownConverterService
 
         $converter = new HtmlConverter([
             'strip_tags' => true,
-            'remove_nodes' => 'img picture figure source video audio iframe script style footer aside',
+            'remove_nodes' => 'img picture source video audio iframe script style footer aside',
             'preserve_comments' => false,
             'hard_break' => true,
             'strip_placeholder_links' => false,
