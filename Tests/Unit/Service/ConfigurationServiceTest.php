@@ -259,6 +259,62 @@ final class ConfigurationServiceTest extends UnitTestCase
         static::assertSame('https://www.example.com/subdir/', $this->subject->getSiteUrl());
     }
 
+    #[Test]
+    public function getExcludeDoktypesReturnsEmptyArrayWhenNotSet(): void
+    {
+        $this->setupRequestWithSiteConfiguration([]);
+
+        static::assertSame([], $this->subject->getExcludeDoktypes());
+    }
+
+    #[Test]
+    public function getExcludeDoktypesReturnsEmptyArrayWhenEmpty(): void
+    {
+        $this->setupRequestWithSiteConfiguration([
+            'llmsTxtExcludeDoktypes' => '',
+        ]);
+
+        static::assertSame([], $this->subject->getExcludeDoktypes());
+    }
+
+    #[Test]
+    public function getExcludeDoktypesReturnsTrimmedIntegerArray(): void
+    {
+        $this->setupRequestWithSiteConfiguration([
+            'llmsTxtExcludeDoktypes' => ' 3 , 199 , 254 ',
+        ]);
+
+        static::assertSame([3, 199, 254], $this->subject->getExcludeDoktypes());
+    }
+
+    #[Test]
+    public function getCacheLifetimeReturnsZeroWhenNotSet(): void
+    {
+        $this->setupRequestWithSiteConfiguration([]);
+
+        static::assertSame(0, $this->subject->getCacheLifetime());
+    }
+
+    #[Test]
+    public function getCacheLifetimeReturnsConfiguredValue(): void
+    {
+        $this->setupRequestWithSiteConfiguration([
+            'llmsTxtCacheLifetime' => 900,
+        ]);
+
+        static::assertSame(900, $this->subject->getCacheLifetime());
+    }
+
+    #[Test]
+    public function getCacheLifetimeRejectsNegativeValues(): void
+    {
+        $this->setupRequestWithSiteConfiguration([
+            'llmsTxtCacheLifetime' => -100,
+        ]);
+
+        static::assertSame(0, $this->subject->getCacheLifetime());
+    }
+
     /**
      * Helper to set up request with site configuration
      */

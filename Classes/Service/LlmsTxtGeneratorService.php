@@ -19,11 +19,6 @@ use WebVision\AiLlmsTxt\Repository\PageRepository;
 class LlmsTxtGeneratorService
 {
     /**
-     * Cache lifetime in seconds (1 hour default)
-     */
-    private const CACHE_LIFETIME = 3600;
-
-    /**
      * Cache identifier prefix
      */
     private const CACHE_PREFIX = 'llmstxt_';
@@ -38,12 +33,17 @@ class LlmsTxtGeneratorService
 
     /**
      * Generate complete llms.txt content
-     * Uses caching when available to improve performance
+     * Uses caching when a cache lifetime is configured (disabled by default)
      */
     public function generateLlmsTxt(int $currentPageId): string
     {
         if (!$this->configurationService->isEnabled()) {
             return "# LLMS.TXT generation is disabled for this site\n";
+        }
+
+        $cacheLifetime = $this->configurationService->getCacheLifetime();
+        if ($cacheLifetime <= 0) {
+            return $this->generateContent($currentPageId);
         }
 
         $site = $this->siteFinder->getSiteByPageId($currentPageId);
@@ -63,7 +63,7 @@ class LlmsTxtGeneratorService
 
         // Store in cache if available
         if ($cache !== null) {
-            $cache->set($cacheIdentifier, $content, ['pages'], self::CACHE_LIFETIME);
+            $cache->set($cacheIdentifier, $content, ['pages'], $cacheLifetime);
         }
 
         return $content;

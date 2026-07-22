@@ -104,11 +104,13 @@ class PageRepository
      * use findNavigationByParentWithFallback() instead.
      *
      * @param int $parentUid Parent page UID
+     * @param array<int, int> $excludeDoktypes Additional doktypes to exclude, on top of the
+     *   always-excluded structural doktypes (sysfolder/spacer/shortcut)
      * @return array<int, array{uid: int, pid: int, title: string, description: string, abstract: string, doktype: int, sys_language_uid: int, l10n_parent: int}>
      */
-    public function findNavigationByParent(int $parentUid): array
+    public function findNavigationByParent(int $parentUid, array $excludeDoktypes = []): array
     {
-        return $this->findNavigationPages($parentUid, null, []);
+        return $this->findNavigationPages($parentUid, null, $excludeDoktypes, []);
     }
 
     /**
@@ -122,7 +124,7 @@ class PageRepository
      */
     public function findNavigationByParentAndLanguage(int $parentUid, int $languageUid = 0): array
     {
-        return $this->findNavigationPages($parentUid, $languageUid, []);
+        return $this->findNavigationPages($parentUid, $languageUid, [], []);
     }
 
     /**
@@ -130,6 +132,7 @@ class PageRepository
      *
      * @param int $parentUid Parent page UID
      * @param int|null $languageUid Language UID to filter by (null = all languages)
+     * @param array<int, int> $excludeDoktypes Additional doktypes to exclude
      * @param array<int, bool> $visitedUids UIDs already visited to prevent infinite recursion
      * @param int $currentDepth Current recursion depth
      * @return array<int, array{uid: int, pid: int, title: string, description: string, abstract: string, doktype: int, sys_language_uid: int, l10n_parent: int}>
@@ -137,6 +140,7 @@ class PageRepository
     protected function findNavigationPages(
         int $parentUid,
         ?int $languageUid,
+        array $excludeDoktypes,
         array $visitedUids,
         int $currentDepth = 0
     ): array {
@@ -150,17 +154,20 @@ class PageRepository
         }
         $visitedUids[$parentUid] = true;
 
+        $excludedSet = array_merge(self::EXCLUDED_DOKTYPES, $excludeDoktypes);
+
         $queryBuilder = $this->createNavigationQueryBuilder($parentUid, $languageUid);
         $result = $queryBuilder->executeQuery();
 
         $pages = [];
         while ($row = $result->fetchAssociative()) {
-            // Skip folders, spacers, and shortcuts but fetch their subpages
-            if (in_array((int)$row['doktype'], self::EXCLUDED_DOKTYPES, true)) {
+            // Skip excluded doktypes (structural + configured) but fetch their subpages
+            if (in_array((int)$row['doktype'], $excludedSet, true)) {
                 // Recursively get children of skipped pages
                 $childPages = $this->findNavigationPages(
                     (int)$row['uid'],
                     $languageUid ?? (int)$row['sys_language_uid'],
+                    $excludeDoktypes,
                     $visitedUids,
                     $currentDepth + 1
                 );
@@ -229,14 +236,42 @@ class PageRepository
      * Batch fetch all navigation pages for multiple parent UIDs in a single query
      * This significantly reduces database queries for large sites (solves N+1 problem)
      *
+     * Pages with an excluded doktype are omitted and their own children are promoted
+     * into their parent's position (same behavior as the single-parent findNavigationPages()).
+     *
      * @param array<int> $parentUids Array of parent page UIDs
      * @param int|null $languageUid Language UID to filter by (null = all languages)
+     * @param array<int, int> $excludeDoktypes Additional doktypes to exclude
      * @return array<int, array<int, array>> Pages grouped by parent UID
      */
-    public function findNavigationByParentsBatch(array $parentUids, ?int $languageUid = null): array
+    public function findNavigationByParentsBatch(array $parentUids, ?int $languageUid = null, array $excludeDoktypes = []): array
     {
+        return $this->findNavigationByParentsBatchInternal($parentUids, $languageUid, $excludeDoktypes, []);
+    }
+
+    /**
+     * @param array<int> $parentUids
+     * @param array<int, int> $excludeDoktypes
+     * @param array<int, bool> $visitedUids UIDs already visited to prevent infinite recursion
+     * @return array<int, array<int, array>>
+     */
+    protected function findNavigationByParentsBatchInternal(
+        array $parentUids,
+        ?int $languageUid,
+        array $excludeDoktypes,
+        array $visitedUids,
+        int $currentDepth = 0
+    ): array {
+        if (empty($parentUids) || $currentDepth >= self::MAX_RECURSION_DEPTH) {
+            return [];
+        }
+
+        $parentUids = array_values(array_diff($parentUids, array_keys($visitedUids)));
         if (empty($parentUids)) {
             return [];
+        }
+        foreach ($parentUids as $parentUid) {
+            $visitedUids[$parentUid] = true;
         }
 
         // Limit batch size to prevent memory issues
@@ -265,14 +300,40 @@ class PageRepository
 
         $result = $queryBuilder->executeQuery();
 
-        // Group results by parent UID
+        $excludedSet = array_merge(self::EXCLUDED_DOKTYPES, $excludeDoktypes);
+
+        // Group results by parent UID, deferring excluded pages for child-promotion below
         $grouped = [];
+        $excludedUidToParent = [];
         while ($row = $result->fetchAssociative()) {
             $pid = (int)$row['pid'];
+            if (in_array((int)$row['doktype'], $excludedSet, true)) {
+                $excludedUidToParent[(int)$row['uid']] = $pid;
+                continue;
+            }
             if (!isset($grouped[$pid])) {
                 $grouped[$pid] = [];
             }
             $grouped[$pid][] = $this->mapRowToPageArray($row);
+        }
+
+        if (!empty($excludedUidToParent)) {
+            $promotedChildren = $this->findNavigationByParentsBatchInternal(
+                array_keys($excludedUidToParent),
+                $languageUid,
+                $excludeDoktypes,
+                $visitedUids,
+                $currentDepth + 1
+            );
+            foreach ($promotedChildren as $excludedUid => $children) {
+                $originalPid = $excludedUidToParent[$excludedUid];
+                if (!isset($grouped[$originalPid])) {
+                    $grouped[$originalPid] = [];
+                }
+                foreach ($children as $child) {
+                    $grouped[$originalPid][] = $child;
+                }
+            }
         }
 
         return $grouped;
@@ -284,12 +345,13 @@ class PageRepository
      *
      * @param int $parentUid Parent page UID
      * @param SiteLanguage $siteLanguage The site language to fetch pages for
+     * @param array<int, int> $excludeDoktypes Additional doktypes to exclude
      * @return array<int, array{uid: int, pid: int, title: string, description: string, abstract: string, doktype: int, sys_language_uid: int, l10n_parent: int}>
      */
-    public function findNavigationByParentWithFallback(int $parentUid, SiteLanguage $siteLanguage): array
+    public function findNavigationByParentWithFallback(int $parentUid, SiteLanguage $siteLanguage, array $excludeDoktypes = []): array
     {
         // Fetch default language pages first
-        $defaultLanguagePages = $this->findNavigationPages($parentUid, 0, []);
+        $defaultLanguagePages = $this->findNavigationPages($parentUid, 0, $excludeDoktypes, []);
 
         if (empty($defaultLanguagePages)) {
             return [];
@@ -324,9 +386,10 @@ class PageRepository
      *
      * @param array<int> $parentUids Parent page UIDs
      * @param SiteLanguage $siteLanguage The site language
+     * @param array<int, int> $excludeDoktypes Additional doktypes to exclude
      * @return array<int, array<int, array>> Pages grouped by parent UID with overlays applied
      */
-    public function findNavigationByParentsBatchWithFallback(array $parentUids, SiteLanguage $siteLanguage): array
+    public function findNavigationByParentsBatchWithFallback(array $parentUids, SiteLanguage $siteLanguage, array $excludeDoktypes = []): array
     {
         if (empty($parentUids)) {
             return [];
@@ -336,7 +399,7 @@ class PageRepository
         $parentUids = array_slice($parentUids, 0, self::MAX_BATCH_SIZE);
 
         // Fetch default language pages
-        $defaultLanguagePages = $this->findNavigationByParentsBatch($parentUids, 0);
+        $defaultLanguagePages = $this->findNavigationByParentsBatch($parentUids, 0, $excludeDoktypes);
 
         if (empty($defaultLanguagePages)) {
             return [];
