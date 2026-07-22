@@ -146,4 +146,34 @@ class ConfigurationService
         // Cap at maximum allowed depth to prevent performance issues
         return min(max(1, $configuredDepth), self::MAX_ALLOWED_DEPTH);
     }
+
+    /**
+     * Site-configured doktypes to exclude from navigation output, in addition to the
+     * always-excluded structural doktypes (sysfolder/spacer/shortcut) handled by PageRepository.
+     *
+     * @return array<int, int>
+     */
+    public function getExcludeDoktypes(): array
+    {
+        $site = $this->getCurrentSite();
+
+        $doktypes = $site->getConfiguration()['llmsTxtExcludeDoktypes'] ?? '';
+        if (empty($doktypes)) {
+            return [];
+        }
+
+        return array_map('intval', array_map('trim', explode(',', $doktypes)));
+    }
+
+    /**
+     * Cache lifetime in seconds for generated llms.txt content.
+     * Defaults to 0 (caching disabled) unless explicitly configured.
+     */
+    public function getCacheLifetime(): int
+    {
+        $site = $this->getCurrentSite();
+        $configuredLifetime = (int)($site->getConfiguration()['llmsTxtCacheLifetime'] ?? 0);
+
+        return max(0, $configuredLifetime);
+    }
 }

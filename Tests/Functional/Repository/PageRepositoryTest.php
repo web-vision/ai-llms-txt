@@ -276,4 +276,56 @@ final class PageRepositoryTest extends FunctionalTestCase
         static::assertSame('Über unser Unternehmen', $result['description']);
         static::assertSame('SEO Über uns', $result['seo_title']);
     }
+
+    #[Test]
+    public function findNavigationByParentExcludesConfiguredDoktypeAndPromotesItsChildren(): void
+    {
+        // Doktype 6 (Backend User Section) is not excluded by default
+        $withoutConfig = $this->subject->findNavigationByParent(3);
+        static::assertContains('Internal Notes', array_column($withoutConfig, 'title'));
+
+        $withConfig = $this->subject->findNavigationByParent(3, [6]);
+        $titles = array_column($withConfig, 'title');
+
+        static::assertNotContains('Internal Notes', $titles, 'Configured doktype should be excluded');
+        static::assertContains('Nested Under Internal Notes', $titles, 'Excluded page\'s children should be promoted');
+    }
+
+    #[Test]
+    public function findNavigationByParentUnconfiguredKeepsDefaultExclusionsUnchanged(): void
+    {
+        $result = $this->subject->findNavigationByParent(1);
+        $titles = array_column($result, 'title');
+
+        // Structural doktypes (sysfolder here) remain excluded with no config passed,
+        // exactly as before this change - additive, not a behavior change.
+        static::assertNotContains('Folder', $titles);
+        static::assertContains('Page in Folder', $titles);
+    }
+
+    #[Test]
+    public function configuredExcludeListDoesNotUnexcludeStructuralDoktypes(): void
+    {
+        // Configuring a custom list (that does not mention sysfolder=254) must not
+        // cause sysfolder pages to start appearing - structural exclusion always applies.
+        $result = $this->subject->findNavigationByParent(1, [6]);
+        $titles = array_column($result, 'title');
+
+        static::assertNotContains('Folder', $titles, 'sysfolder must stay excluded regardless of configured list');
+        static::assertContains('Page in Folder', $titles, 'sysfolder\'s children must still be promoted');
+    }
+
+    #[Test]
+    public function findNavigationByParentsBatchExcludesAndPromotesAtDeeperLevels(): void
+    {
+        // Regression: findNavigationByParentsBatch() previously had no doktype exclusion
+        // at all, so a folder at tree level 2+ would appear as a regular page instead of
+        // being skipped with its children promoted, unlike the level-1 path.
+        $result = $this->subject->findNavigationByParentsBatch([4], 0);
+
+        $contactChildren = array_column($result[4], 'title');
+
+        static::assertNotContains('Nested Folder', $contactChildren, 'Folder must be excluded even at depth 2+');
+        static::assertContains('Deep Page In Nested Folder', $contactChildren, 'Folder\'s child must be promoted to the folder\'s position');
+    }
 }

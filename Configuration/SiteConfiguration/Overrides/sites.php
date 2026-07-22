@@ -86,6 +86,28 @@ $GLOBALS['SiteConfiguration']['site']['columns']['llmsTxtMaxDepth'] = [
     ],
 ];
 
+$GLOBALS['SiteConfiguration']['site']['columns']['llmsTxtExcludeDoktypes'] = [
+    'label' => 'LLL:EXT:ai_llms_txt/Resources/Private/Language/locallang.xlf:site.llmsTxtExcludeDoktypes',
+    'description' => 'LLL:EXT:ai_llms_txt/Resources/Private/Language/locallang.xlf:site.llmsTxtExcludeDoktypes.description',
+    'config' => [
+        'type' => 'input',
+        'eval' => 'trim',
+        'placeholder' => 'LLL:EXT:ai_llms_txt/Resources/Private/Language/locallang.xlf:site.llmsTxtExcludeDoktypes.placeholder',
+    ],
+];
+
+$GLOBALS['SiteConfiguration']['site']['columns']['llmsTxtCacheLifetime'] = [
+    'label' => 'LLL:EXT:ai_llms_txt/Resources/Private/Language/locallang.xlf:site.llmsTxtCacheLifetime',
+    'description' => 'LLL:EXT:ai_llms_txt/Resources/Private/Language/locallang.xlf:site.llmsTxtCacheLifetime.description',
+    'config' => [
+        'type' => 'number',
+        'default' => 0,
+        'range' => [
+            'lower' => 0,
+        ],
+    ],
+];
+
 if (!isset($GLOBALS['SiteConfiguration']['site']['types']['0']['showitem'])) {
     $GLOBALS['SiteConfiguration']['site']['types']['0']['showitem'] = '';
 }
@@ -98,5 +120,7 @@ $GLOBALS['SiteConfiguration']['site']['types']['0']['showitem'] .= ',
         llmsTxtAdditionalInfo,
         llmsTxtContactEmail,
         llmsTxtKeywords,
-        llmsTxtMaxDepth
+        llmsTxtMaxDepth,
+        llmsTxtExcludeDoktypes,
+        llmsTxtCacheLifetime
 ';

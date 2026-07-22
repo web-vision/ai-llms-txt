@@ -11,6 +11,7 @@ use TYPO3\CMS\Core\Site\SiteFinder;
 use TYPO3\TestingFramework\Core\Functional\FunctionalTestCase;
 use WebVision\AiLlmsTxt\Builder\NavigationBuilder;
 use WebVision\AiLlmsTxt\Repository\PageRepository;
+use WebVision\AiLlmsTxt\Service\ConfigurationService;
 use WebVision\AiLlmsTxt\Service\UrlGeneratorService;
 
 /**
@@ -75,7 +76,10 @@ final class NavigationBuilderBugTest extends FunctionalTestCase
 
         $pageRepository = $this->get(PageRepository::class);
 
-        $this->subject = new NavigationBuilder($siteFinder, $pageRepository, $urlGenerator);
+        $configurationService = $this->createMock(ConfigurationService::class);
+        $configurationService->method('getExcludeDoktypes')->willReturn([]);
+
+        $this->subject = new NavigationBuilder($siteFinder, $pageRepository, $urlGenerator, $configurationService);
     }
 
     #[Test]

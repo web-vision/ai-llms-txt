@@ -8,6 +8,7 @@ use TYPO3\CMS\Core\Exception\SiteNotFoundException;
 use TYPO3\CMS\Core\Site\Entity\SiteLanguage;
 use TYPO3\CMS\Core\Site\SiteFinder;
 use WebVision\AiLlmsTxt\Repository\PageRepository;
+use WebVision\AiLlmsTxt\Service\ConfigurationService;
 use WebVision\AiLlmsTxt\Service\UrlGeneratorService;
 
 /**
@@ -20,7 +21,8 @@ class NavigationBuilder
     public function __construct(
         private readonly SiteFinder $siteFinder,
         private readonly PageRepository $pageRepository,
-        private readonly UrlGeneratorService $urlGenerator
+        private readonly UrlGeneratorService $urlGenerator,
+        private readonly ConfigurationService $configurationService
     ) {
     }
 
@@ -36,13 +38,14 @@ class NavigationBuilder
     public function build(int $rootPageUid, int $maxDepth = 2, ?SiteLanguage $siteLanguage = null): array
     {
         $structure = [];
+        $excludeDoktypes = $this->getExcludeDoktypesSafely();
 
         // Get main navigation pages (level 1) with fallback support if language provided
         if ($siteLanguage !== null) {
-            $mainPages = $this->pageRepository->findNavigationByParentWithFallback($rootPageUid, $siteLanguage);
+            $mainPages = $this->pageRepository->findNavigationByParentWithFallback($rootPageUid, $siteLanguage, $excludeDoktypes);
         } else {
             // Fallback for BC: fetch all languages without overlay
-            $mainPages = $this->pageRepository->findNavigationByParent($rootPageUid);
+            $mainPages = $this->pageRepository->findNavigationByParent($rootPageUid, $excludeDoktypes);
         }
 
         foreach ($mainPages as $mainPage) {
@@ -61,7 +64,8 @@ class NavigationBuilder
                     [$parentUidForChildren],
                     (int)$mainPage['sys_language_uid'],
                     $maxDepth - 1,
-                    $siteLanguage
+                    $siteLanguage,
+                    $excludeDoktypes
                 );
             }
 
@@ -79,13 +83,15 @@ class NavigationBuilder
      * @param int $languageUid Language UID to filter by (used when no SiteLanguage)
      * @param int $remainingDepth Remaining depth levels to fetch
      * @param SiteLanguage|null $siteLanguage The site language for proper fallback handling
+     * @param array<int, int> $excludeDoktypes Additional doktypes to exclude
      * @return array<int, array{uid: int, title: string, url: string, description: string, language: string, children: array}>
      */
     protected function buildChildrenOptimized(
         array $parentUids,
         int $languageUid,
         int $remainingDepth,
-        ?SiteLanguage $siteLanguage = null
+        ?SiteLanguage $siteLanguage = null,
+        array $excludeDoktypes = []
     ): array {
         if (empty($parentUids) || $remainingDepth < 1) {
             return [];
@@ -93,9 +99,9 @@ class NavigationBuilder
 
         // Batch fetch all children for all parent UIDs in one query
         if ($siteLanguage !== null) {
-            $batchedPages = $this->pageRepository->findNavigationByParentsBatchWithFallback($parentUids, $siteLanguage);
+            $batchedPages = $this->pageRepository->findNavigationByParentsBatchWithFallback($parentUids, $siteLanguage, $excludeDoktypes);
         } else {
-            $batchedPages = $this->pageRepository->findNavigationByParentsBatch($parentUids, $languageUid);
+            $batchedPages = $this->pageRepository->findNavigationByParentsBatch($parentUids, $languageUid, $excludeDoktypes);
         }
 
         $children = [];
@@ -130,7 +136,8 @@ class NavigationBuilder
                 array_keys($nextLevelParentUids),
                 $languageUid,
                 $remainingDepth - 1,
-                $siteLanguage
+                $siteLanguage,
+                $excludeDoktypes
             );
 
             // Assign children to their parents
@@ -144,6 +151,23 @@ class NavigationBuilder
         }
 
         return array_values($children);
+    }
+
+    /**
+     * NavigationBuilder can be used without a request context (e.g. directly in tests,
+     * or potential future CLI usage). ConfigurationService requires one, so degrade to
+     * "no additional exclusions" rather than making request context a hard requirement
+     * this class didn't have before.
+     *
+     * @return array<int, int>
+     */
+    private function getExcludeDoktypesSafely(): array
+    {
+        try {
+            return $this->configurationService->getExcludeDoktypes();
+        } catch (\RuntimeException) {
+            return [];
+        }
     }
 
     protected function getLanguageTitle(array $page): string

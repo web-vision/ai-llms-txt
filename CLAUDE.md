@@ -50,7 +50,7 @@ Run a specific test suite with Docker/Podman via `Build/Scripts/runTests.sh`:
 ### Request Flow
 
 1. TYPO3 routes a request for `llms.txt` or `*.md` to the appropriate typeNum (1699 or 1701)
-2. `LlmsTxtController` handles the request, delegates to `LlmsTxtGeneratorService` (with 1-hour cache) or directly renders a single page as Markdown
+2. `LlmsTxtController` handles the request, delegates to `LlmsTxtGeneratorService` (caching disabled by default, controllable via `llmsTxtCacheLifetime`) or directly renders a single page as Markdown
 3. For `llms.txt`, `NavigationBuilder` fetches the page tree in batches (no N+1 queries), `ConfigurationService` reads site YAML settings, and `UrlGeneratorService` produces absolute URLs
 4. For Markdown pages, TYPO3's `ContentObjectRenderer` renders the page HTML, then `HtmlCleanerService` → `MarkdownConverterService` (via `league/html-to-markdown`) converts it
 
@@ -59,7 +59,7 @@ Run a specific test suite with Docker/Podman via `Build/Scripts/runTests.sh`:
 | Class | Responsibility |
 |-------|----------------|
 | `Controller/LlmsTxtController` | Handles HTTP requests; entry point for both llms.txt and Markdown output |
-| `Service/LlmsTxtGeneratorService` | Orchestrates llms.txt generation; manages cache (hash cache, 1h TTL) |
+| `Service/LlmsTxtGeneratorService` | Orchestrates llms.txt generation; manages cache (hash cache, disabled unless `llmsTxtCacheLifetime` is configured) |
 | `Service/ConfigurationService` | Reads per-site YAML settings (`llmsTxtEnabled`, `llmsTxtMaxDepth`, etc.) |
 | `Service/MarkdownConverterService` | HTML → Markdown conversion using `league/html-to-markdown` |
 | `Service/HtmlCleanerService` | Strips TYPO3 navigation/header HTML before Markdown conversion |
@@ -80,6 +80,8 @@ llmsTxtKeywords: 'topic1, topic2'
 llmsTxtContactEmail: 'contact@example.com'
 llmsTxtAdditionalInfo: 'Extra content block'
 llmsTxtMaxDepth: 2   # 1–10, default 2
+llmsTxtExcludeDoktypes: '3, 199'   # additional doktypes to exclude, on top of the always-excluded sysfolder/spacer/shortcut
+llmsTxtCacheLifetime: 900   # seconds; 0 (default) disables caching entirely
 ```
 
 TypoScript is loaded via `ext_localconf.php` and defined in `Configuration/TypoScript/setup.typoscript` (typeNum 1699) and `markdown.typoscript` (typeNum 1701).

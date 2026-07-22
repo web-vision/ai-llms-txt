@@ -125,6 +125,21 @@
 			<trans-unit id="site.llmsTxtMaxDepth.description">
 				<source>Maximum depth of page hierarchy to include in navigation (1-5 levels)</source>
 			</trans-unit>
+			<trans-unit id="site.llmsTxtExcludeDoktypes">
+				<source>Excluded Page Types</source>
+			</trans-unit>
+			<trans-unit id="site.llmsTxtExcludeDoktypes.description">
+				<source>Comma-separated page doktypes to exclude from navigation output, in addition to the always-excluded folder/spacer/shortcut types (e.g., "3, 199" to also exclude external URL and backend user section pages). Children of excluded pages are still included, promoted to the excluded page's position.</source>
+			</trans-unit>
+			<trans-unit id="site.llmsTxtExcludeDoktypes.placeholder">
+				<source>3, 199</source>
+			</trans-unit>
+			<trans-unit id="site.llmsTxtCacheLifetime">
+				<source>Cache Lifetime</source>
+			</trans-unit>
+			<trans-unit id="site.llmsTxtCacheLifetime.description">
+				<source>How long generated llms.txt content is cached, in seconds. 0 (default) disables caching - content is regenerated on every request.</source>
+			</trans-unit>
 		</body>
 	</file>
 </xliff>
