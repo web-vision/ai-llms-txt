@@ -20,7 +20,9 @@ final class NavigationBuilderTest extends FunctionalTestCase
     protected array $testExtensionsToLoad = [
         'web-vision/ai-llms-txt',
     ];
-
+    protected array $coreExtensionsToLoad = [
+        'seo',
+    ];
     private NavigationBuilder $subject;
 
     protected function setUp(): void
@@ -54,13 +56,13 @@ final class NavigationBuilderTest extends FunctionalTestCase
 
         $result = $this->subject->formatAsMarkdown($structure);
 
-        self::assertIsArray($result);
-        self::assertNotEmpty($result);
+        static::assertIsArray($result);
+        static::assertNotEmpty($result);
 
         $markdown = implode("\n", $result);
-        self::assertStringContainsString('## EN', $markdown);
-        self::assertStringContainsString('[About Us]', $markdown);
-        self::assertStringContainsString('[Team]', $markdown);
+        static::assertStringContainsString('## EN', $markdown);
+        static::assertStringContainsString('[About Us]', $markdown);
+        static::assertStringContainsString('[Team]', $markdown);
     }
 
     #[Test]
@@ -88,7 +90,7 @@ final class NavigationBuilderTest extends FunctionalTestCase
         $markdown = implode("\n", $result);
 
         // Children should have indentation (2 spaces)
-        self::assertMatchesRegularExpression('/^  - \[/m', $markdown);
+        static::assertMatchesRegularExpression('/^  - \[/m', $markdown);
     }
 
     #[Test]
@@ -116,7 +118,7 @@ final class NavigationBuilderTest extends FunctionalTestCase
         $markdown = implode("\n", $result);
 
         // Should include description after the link
-        self::assertStringContainsString('Meet our team', $markdown);
+        static::assertStringContainsString('Meet our team', $markdown);
     }
 
     #[Test]
@@ -137,8 +139,8 @@ final class NavigationBuilderTest extends FunctionalTestCase
         $markdown = implode("\n", $result);
 
         // Brackets should be escaped with backslash in title
-        self::assertStringContainsString('\\[', $markdown);
-        self::assertStringContainsString('\\]', $markdown);
+        static::assertStringContainsString('\\[', $markdown);
+        static::assertStringContainsString('\\]', $markdown);
     }
 
     #[Test]
@@ -164,8 +166,8 @@ final class NavigationBuilderTest extends FunctionalTestCase
         $result = $this->subject->formatAsMarkdown($structure);
         $markdown = implode("\n", $result);
 
-        self::assertStringContainsString('## EN', $markdown);
-        self::assertStringContainsString('## DE', $markdown);
+        static::assertStringContainsString('## EN', $markdown);
+        static::assertStringContainsString('## DE', $markdown);
     }
 
     #[Test]
@@ -200,10 +202,10 @@ final class NavigationBuilderTest extends FunctionalTestCase
         $result = $this->subject->formatAsMarkdown($structure);
         $markdown = implode("\n", $result);
 
-        self::assertStringContainsString('Category A', $markdown);
-        self::assertStringContainsString('Sub Product', $markdown);
+        static::assertStringContainsString('Category A', $markdown);
+        static::assertStringContainsString('Sub Product', $markdown);
         // Check for deeper indentation (4 spaces for level 2)
-        self::assertMatchesRegularExpression('/^    - \[/m', $markdown);
+        static::assertMatchesRegularExpression('/^    - \[/m', $markdown);
     }
 
     #[Test]
@@ -222,7 +224,7 @@ final class NavigationBuilderTest extends FunctionalTestCase
         $result = $this->subject->formatAsMarkdown($structure);
         $markdown = implode("\n", $result);
 
-        self::assertStringContainsString('[Page without children]', $markdown);
+        static::assertStringContainsString('[Page without children]', $markdown);
     }
 
     #[Test]
@@ -230,7 +232,7 @@ final class NavigationBuilderTest extends FunctionalTestCase
     {
         $result = $this->subject->formatAsMarkdown([]);
 
-        self::assertIsArray($result);
-        self::assertEmpty($result);
+        static::assertIsArray($result);
+        static::assertEmpty($result);
     }
 }
