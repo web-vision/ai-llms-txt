@@ -28,6 +28,14 @@ class UrlGeneratorService
             \TYPO3\CMS\Core\Routing\RouterInterface::ABSOLUTE_URL
         );
 
+        // Remove any trailing slashes from the generated URI
+        $uri = rtrim($uri, '/');
+
+        // Prevent generating invalid URLs like 'https://example.com.md' for root pages
+        if (preg_match('#^https?://[^/]+$#', $uri)) {
+            $uri .= '/index';
+        }
+
         return "{$uri}.md";
     }
 
