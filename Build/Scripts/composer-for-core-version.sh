@@ -24,18 +24,6 @@ composer_update() {
     git restore composer.json
 }
 
-update_v12() {
-    echo -e "💪 Enforce TYPO3 v12"
-    php -dxdebug.mode=off $(which composer) require --dev --no-update \
-        "phpunit/phpunit":"^10.5"
-    php -dxdebug.mode=off $(which composer) require --no-update \
-        "typo3/minimal":"^12.4"
-    echo -e "🔥 Update to selected dependencies"
-    php -dxdebug.mode=off $(which composer) install
-    php -dxdebug.mode=off $(which composer) remove --no-update \
-        "typo3/minimal"
-}
-
 update_v13() {
     echo -e "💪 Enforce TYPO3 v13"
     php -dxdebug.mode=off $(which composer) require --dev --no-update \
@@ -61,10 +49,6 @@ update_v14() {
 }
 
 case "$1" in
-12)
-    composer_cleanup
-    update_v12
-    ;;
 13)
     composer_cleanup
     update_v13
@@ -74,7 +58,7 @@ case "$1" in
     update_v14
     ;;
 *)
-    echo -e "🌀 Usage: composer-for-core-version.sh (12|13|14)" >&2
+    echo -e "🌀 Usage: composer-for-core-version.sh (13|14)" >&2
     exit 0
     ;;
 esac

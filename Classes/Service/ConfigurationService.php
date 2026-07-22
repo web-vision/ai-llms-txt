@@ -69,7 +69,7 @@ class ConfigurationService
                 // @extensionScannerIgnoreLine
                 return (int)$GLOBALS['TSFE']->id;
             }
-            throw new \RuntimeException('Could not determine current page ID in TYPO3 v12 context.', 1765368300);
+            throw new \RuntimeException('Could not determine current page ID in TYPO3 <14 context.', 1765368300);
         }
 
         return (int)$request->getAttribute('frontend.page.information')->getId();
