@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace WebVision\DeeplWrite\Tests\Unit;
+namespace WebVision\AiLlmsTxt\Tests\Unit;
 
 use PHPUnit\Framework\Attributes\Test;
 use TYPO3\CMS\Core\Information\Typo3Version;
