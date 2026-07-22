@@ -169,3 +169,4 @@ parameters:
 			message: "#^Method WebVision\\\\AiLlmsTxt\\\\Tests\\\\Unit\\\\Service\\\\ConfigurationServiceTest\\:\\:setupRequestWithSiteConfiguration\\(\\) has parameter \\$configuration with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: ../../../Tests/Unit/Service/ConfigurationServiceTest.php
+
