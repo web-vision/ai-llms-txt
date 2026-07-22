@@ -19,6 +19,10 @@ final class HtmlCleanerServiceTest extends FunctionalTestCase
         'web-vision/ai-llms-txt',
     ];
 
+    protected array $coreExtensionsToLoad = [
+        'seo',
+    ];
+
     private HtmlCleanerService $subject;
 
     protected function setUp(): void
@@ -35,8 +39,8 @@ final class HtmlCleanerServiceTest extends FunctionalTestCase
 
         $result = $this->subject->cleanTypo3Html($html);
 
-        self::assertStringNotContainsString('<div></div>', $result);
-        self::assertStringContainsString('Content', $result);
+        static::assertStringNotContainsString('<div></div>', $result);
+        static::assertStringContainsString('Content', $result);
     }
 
     #[Test]
@@ -46,8 +50,8 @@ final class HtmlCleanerServiceTest extends FunctionalTestCase
 
         $result = $this->subject->cleanTypo3Html($html);
 
-        self::assertStringContainsString('Content', $result);
-        self::assertStringContainsString('More', $result);
+        static::assertStringContainsString('Content', $result);
+        static::assertStringContainsString('More', $result);
     }
 
     #[Test]
@@ -57,7 +61,7 @@ final class HtmlCleanerServiceTest extends FunctionalTestCase
 
         $result = $this->subject->cleanTypo3Html($html);
 
-        self::assertStringNotContainsString('<span></span>', $result);
+        static::assertStringNotContainsString('<span></span>', $result);
     }
 
     #[Test]
@@ -67,7 +71,7 @@ final class HtmlCleanerServiceTest extends FunctionalTestCase
 
         $result = $this->subject->cleanTypo3Html($html);
 
-        self::assertStringNotContainsString('<a href="#"></a>', $result);
+        static::assertStringNotContainsString('<a href="#"></a>', $result);
     }
 
     #[Test]
@@ -77,8 +81,8 @@ final class HtmlCleanerServiceTest extends FunctionalTestCase
 
         $result = $this->subject->cleanTypo3Html($html);
 
-        self::assertStringNotContainsString('container', $result);
-        self::assertStringContainsString('Content', $result);
+        static::assertStringNotContainsString('container', $result);
+        static::assertStringContainsString('Content', $result);
     }
 
     #[Test]
@@ -88,8 +92,8 @@ final class HtmlCleanerServiceTest extends FunctionalTestCase
 
         $result = $this->subject->cleanTypo3Html($html);
 
-        self::assertStringNotContainsString('row', $result);
-        self::assertStringContainsString('Content', $result);
+        static::assertStringNotContainsString('row', $result);
+        static::assertStringContainsString('Content', $result);
     }
 
     #[Test]
@@ -99,8 +103,8 @@ final class HtmlCleanerServiceTest extends FunctionalTestCase
 
         $result = $this->subject->cleanTypo3Html($html);
 
-        self::assertStringNotContainsString('col-md-6', $result);
-        self::assertStringContainsString('Content', $result);
+        static::assertStringNotContainsString('col-md-6', $result);
+        static::assertStringContainsString('Content', $result);
     }
 
     #[Test]
@@ -110,8 +114,8 @@ final class HtmlCleanerServiceTest extends FunctionalTestCase
 
         $result = $this->subject->cleanTypo3Html($html);
 
-        self::assertStringNotContainsString('grid', $result);
-        self::assertStringContainsString('Content', $result);
+        static::assertStringNotContainsString('grid', $result);
+        static::assertStringContainsString('Content', $result);
     }
 
     #[Test]
@@ -121,8 +125,8 @@ final class HtmlCleanerServiceTest extends FunctionalTestCase
 
         $result = $this->subject->cleanTypo3Html($html);
 
-        self::assertStringNotContainsString('layout', $result);
-        self::assertStringContainsString('Content', $result);
+        static::assertStringNotContainsString('layout', $result);
+        static::assertStringContainsString('Content', $result);
     }
 
     #[Test]
@@ -132,8 +136,8 @@ final class HtmlCleanerServiceTest extends FunctionalTestCase
 
         $result = $this->subject->cleanTypo3Html($html);
 
-        self::assertStringNotContainsString('wrapper', $result);
-        self::assertStringContainsString('Content', $result);
+        static::assertStringNotContainsString('wrapper', $result);
+        static::assertStringContainsString('Content', $result);
     }
 
     #[Test]
@@ -143,8 +147,8 @@ final class HtmlCleanerServiceTest extends FunctionalTestCase
 
         $result = $this->subject->cleanTypo3Html($html);
 
-        self::assertStringContainsString('Title', $result);
-        self::assertStringContainsString('Content', $result);
+        static::assertStringContainsString('Title', $result);
+        static::assertStringContainsString('Content', $result);
     }
 
     #[Test]
@@ -154,7 +158,7 @@ final class HtmlCleanerServiceTest extends FunctionalTestCase
 
         $result = $this->subject->cleanTypo3Html($html);
 
-        self::assertStringContainsString('Content', $result);
+        static::assertStringContainsString('Content', $result);
     }
 
     #[Test]
@@ -165,7 +169,7 @@ final class HtmlCleanerServiceTest extends FunctionalTestCase
         $result = $this->subject->cleanTypo3Html($html);
 
         // Multiple spaces should be normalized
-        self::assertStringNotContainsString('    ', $result);
+        static::assertStringNotContainsString('    ', $result);
     }
 
     #[Test]
@@ -175,7 +179,7 @@ final class HtmlCleanerServiceTest extends FunctionalTestCase
 
         $result = $this->subject->cleanTypo3Html($html);
 
-        self::assertSame($result, trim($result));
+        static::assertSame($result, trim($result));
     }
 
     #[Test]
@@ -201,14 +205,14 @@ final class HtmlCleanerServiceTest extends FunctionalTestCase
         $result = $this->subject->cleanTypo3Html($html);
 
         // Content should be preserved
-        self::assertStringContainsString('Headline', $result);
-        self::assertStringContainsString('Paragraph text', $result);
-        self::assertStringContainsString('List item 1', $result);
+        static::assertStringContainsString('Headline', $result);
+        static::assertStringContainsString('Paragraph text', $result);
+        static::assertStringContainsString('List item 1', $result);
 
         // Layout classes should be stripped
-        self::assertStringNotContainsString('container', $result);
-        self::assertStringNotContainsString('row', $result);
-        self::assertStringNotContainsString('col-12', $result);
+        static::assertStringNotContainsString('container', $result);
+        static::assertStringNotContainsString('row', $result);
+        static::assertStringNotContainsString('col-12', $result);
     }
 
     #[Test]
@@ -216,7 +220,7 @@ final class HtmlCleanerServiceTest extends FunctionalTestCase
     {
         $result = $this->subject->cleanTypo3Html('');
 
-        self::assertSame('', $result);
+        static::assertSame('', $result);
     }
 
     #[Test]
@@ -226,7 +230,7 @@ final class HtmlCleanerServiceTest extends FunctionalTestCase
 
         $result = $this->subject->cleanTypo3Html($html);
 
-        self::assertStringContainsString('Content', $result);
+        static::assertStringContainsString('Content', $result);
     }
 
     #[Test]
@@ -236,7 +240,7 @@ final class HtmlCleanerServiceTest extends FunctionalTestCase
 
         $result = $this->subject->cleanTypo3Html($html);
 
-        self::assertStringContainsString('Content', $result);
+        static::assertStringContainsString('Content', $result);
     }
 
     #[Test]
@@ -246,8 +250,8 @@ final class HtmlCleanerServiceTest extends FunctionalTestCase
 
         $result = $this->subject->cleanTypo3Html($html);
 
-        self::assertStringContainsString('our site', $result);
-        self::assertStringContainsString('https://example.com', $result);
+        static::assertStringContainsString('our site', $result);
+        static::assertStringContainsString('https://example.com', $result);
     }
 
     #[Test]
@@ -257,12 +261,12 @@ final class HtmlCleanerServiceTest extends FunctionalTestCase
 
         $result = $this->subject->cleanTypo3Html($html);
 
-        self::assertStringContainsString('H1', $result);
-        self::assertStringContainsString('H2', $result);
-        self::assertStringContainsString('H3', $result);
-        self::assertStringContainsString('H4', $result);
-        self::assertStringContainsString('H5', $result);
-        self::assertStringContainsString('H6', $result);
+        static::assertStringContainsString('H1', $result);
+        static::assertStringContainsString('H2', $result);
+        static::assertStringContainsString('H3', $result);
+        static::assertStringContainsString('H4', $result);
+        static::assertStringContainsString('H5', $result);
+        static::assertStringContainsString('H6', $result);
     }
 
     #[Test]
@@ -272,7 +276,7 @@ final class HtmlCleanerServiceTest extends FunctionalTestCase
 
         $result = $this->subject->cleanTypo3Html($html);
 
-        self::assertStringContainsString('Item 1', $result);
-        self::assertStringContainsString('First', $result);
+        static::assertStringContainsString('Item 1', $result);
+        static::assertStringContainsString('First', $result);
     }
 }

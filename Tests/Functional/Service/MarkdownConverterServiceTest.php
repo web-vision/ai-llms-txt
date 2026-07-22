@@ -4,10 +4,8 @@ declare(strict_types=1);
 
 namespace WebVision\AiLlmsTxt\Tests\Functional\Service;
 
-use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use TYPO3\TestingFramework\Core\Functional\FunctionalTestCase;
-use WebVision\AiLlmsTxt\Service\HtmlCleanerService;
 use WebVision\AiLlmsTxt\Service\MarkdownConverterService;
 
 /**
@@ -19,6 +17,10 @@ final class MarkdownConverterServiceTest extends FunctionalTestCase
 {
     protected array $testExtensionsToLoad = [
         'web-vision/ai-llms-txt',
+    ];
+
+    protected array $coreExtensionsToLoad = [
+        'seo',
     ];
 
     private MarkdownConverterService $subject;
@@ -37,9 +39,9 @@ final class MarkdownConverterServiceTest extends FunctionalTestCase
 
         $result = $this->subject->convertHtmlToMarkdown($html);
 
-        self::assertStringContainsString('# Main Title', $result);
-        self::assertStringContainsString('## Subtitle', $result);
-        self::assertStringContainsString('### Section', $result);
+        static::assertStringContainsString('# Main Title', $result);
+        static::assertStringContainsString('## Subtitle', $result);
+        static::assertStringContainsString('### Section', $result);
     }
 
     #[Test]
@@ -49,8 +51,8 @@ final class MarkdownConverterServiceTest extends FunctionalTestCase
 
         $result = $this->subject->convertHtmlToMarkdown($html);
 
-        self::assertStringContainsString('First paragraph.', $result);
-        self::assertStringContainsString('Second paragraph.', $result);
+        static::assertStringContainsString('First paragraph.', $result);
+        static::assertStringContainsString('Second paragraph.', $result);
     }
 
     #[Test]
@@ -60,7 +62,7 @@ final class MarkdownConverterServiceTest extends FunctionalTestCase
 
         $result = $this->subject->convertHtmlToMarkdown($html);
 
-        self::assertStringContainsString('[our website](https://example.com)', $result);
+        static::assertStringContainsString('[our website](https://example.com)', $result);
     }
 
     #[Test]
@@ -70,9 +72,9 @@ final class MarkdownConverterServiceTest extends FunctionalTestCase
 
         $result = $this->subject->convertHtmlToMarkdown($html);
 
-        self::assertStringContainsString('- Item 1', $result);
-        self::assertStringContainsString('- Item 2', $result);
-        self::assertStringContainsString('- Item 3', $result);
+        static::assertStringContainsString('- Item 1', $result);
+        static::assertStringContainsString('- Item 2', $result);
+        static::assertStringContainsString('- Item 3', $result);
     }
 
     #[Test]
@@ -82,9 +84,9 @@ final class MarkdownConverterServiceTest extends FunctionalTestCase
 
         $result = $this->subject->convertHtmlToMarkdown($html);
 
-        self::assertStringContainsString('1. First', $result);
-        self::assertStringContainsString('2. Second', $result);
-        self::assertStringContainsString('3. Third', $result);
+        static::assertStringContainsString('1. First', $result);
+        static::assertStringContainsString('2. Second', $result);
+        static::assertStringContainsString('3. Third', $result);
     }
 
     #[Test]
@@ -94,8 +96,8 @@ final class MarkdownConverterServiceTest extends FunctionalTestCase
 
         $result = $this->subject->convertHtmlToMarkdown($html);
 
-        self::assertStringContainsString('**bold**', $result);
-        self::assertStringContainsString('**also bold**', $result);
+        static::assertStringContainsString('**bold**', $result);
+        static::assertStringContainsString('**also bold**', $result);
     }
 
     #[Test]
@@ -105,8 +107,8 @@ final class MarkdownConverterServiceTest extends FunctionalTestCase
 
         $result = $this->subject->convertHtmlToMarkdown($html);
 
-        self::assertStringContainsString('*italic*', $result);
-        self::assertStringContainsString('*also italic*', $result);
+        static::assertStringContainsString('*italic*', $result);
+        static::assertStringContainsString('*also italic*', $result);
     }
 
     #[Test]
@@ -116,7 +118,7 @@ final class MarkdownConverterServiceTest extends FunctionalTestCase
 
         $result = $this->subject->convertHtmlToMarkdown($html);
 
-        self::assertStringContainsString('> This is a quote.', $result);
+        static::assertStringContainsString('> This is a quote.', $result);
     }
 
     #[Test]
@@ -126,7 +128,7 @@ final class MarkdownConverterServiceTest extends FunctionalTestCase
 
         $result = $this->subject->convertHtmlToMarkdown($html);
 
-        self::assertStringContainsString('`print()`', $result);
+        static::assertStringContainsString('`print()`', $result);
     }
 
     #[Test]
@@ -138,8 +140,8 @@ final class MarkdownConverterServiceTest extends FunctionalTestCase
 
         $result = $this->subject->convertHtmlToMarkdown($html);
 
-        self::assertStringContainsString('```', $result);
-        self::assertStringContainsString('function test()', $result);
+        static::assertStringContainsString('```', $result);
+        static::assertStringContainsString('function test()', $result);
     }
 
     #[Test]
@@ -149,10 +151,10 @@ final class MarkdownConverterServiceTest extends FunctionalTestCase
 
         $result = $this->subject->convertHtmlToMarkdown($html);
 
-        self::assertStringNotContainsString('<img', $result);
-        self::assertStringNotContainsString('image.jpg', $result);
-        self::assertStringContainsString('Text before', $result);
-        self::assertStringContainsString('text after', $result);
+        static::assertStringNotContainsString('<img', $result);
+        static::assertStringNotContainsString('image.jpg', $result);
+        static::assertStringContainsString('Text before', $result);
+        static::assertStringContainsString('text after', $result);
     }
 
     #[Test]
@@ -162,9 +164,9 @@ final class MarkdownConverterServiceTest extends FunctionalTestCase
 
         $result = $this->subject->convertHtmlToMarkdown($html);
 
-        self::assertStringNotContainsString('alert', $result);
-        self::assertStringNotContainsString('<script', $result);
-        self::assertStringContainsString('Content', $result);
+        static::assertStringNotContainsString('alert', $result);
+        static::assertStringNotContainsString('<script', $result);
+        static::assertStringContainsString('Content', $result);
     }
 
     #[Test]
@@ -174,9 +176,9 @@ final class MarkdownConverterServiceTest extends FunctionalTestCase
 
         $result = $this->subject->convertHtmlToMarkdown($html);
 
-        self::assertStringNotContainsString('.red', $result);
-        self::assertStringNotContainsString('<style', $result);
-        self::assertStringContainsString('Content', $result);
+        static::assertStringNotContainsString('.red', $result);
+        static::assertStringNotContainsString('<style', $result);
+        static::assertStringContainsString('Content', $result);
     }
 
     #[Test]
@@ -194,9 +196,9 @@ final class MarkdownConverterServiceTest extends FunctionalTestCase
 
         $result = $this->subject->convertHtmlToMarkdown($html);
 
-        self::assertStringContainsString('Parent 1', $result);
-        self::assertStringContainsString('Child 1.1', $result);
-        self::assertStringContainsString('Parent 2', $result);
+        static::assertStringContainsString('Parent 1', $result);
+        static::assertStringContainsString('Child 1.1', $result);
+        static::assertStringContainsString('Parent 2', $result);
     }
 
     #[Test]
@@ -204,7 +206,7 @@ final class MarkdownConverterServiceTest extends FunctionalTestCase
     {
         $result = $this->subject->convertHtmlToMarkdown('');
 
-        self::assertSame('', $result);
+        static::assertSame('', $result);
     }
 
     #[Test]
@@ -212,7 +214,7 @@ final class MarkdownConverterServiceTest extends FunctionalTestCase
     {
         $result = $this->subject->convertHtmlToMarkdown('   ');
 
-        self::assertSame('', $result);
+        static::assertSame('', $result);
     }
 
     #[Test]
@@ -222,9 +224,9 @@ final class MarkdownConverterServiceTest extends FunctionalTestCase
 
         $result = $this->subject->convertHtmlToMarkdown($html);
 
-        self::assertStringContainsString('&', $result);
-        self::assertStringContainsString('<', $result);
-        self::assertStringContainsString('>', $result);
+        static::assertStringContainsString('&', $result);
+        static::assertStringContainsString('<', $result);
+        static::assertStringContainsString('>', $result);
     }
 
     #[Test]
@@ -238,8 +240,8 @@ final class MarkdownConverterServiceTest extends FunctionalTestCase
         $result = $this->subject->convertHtmlToMarkdown($html);
 
         // Tables may be converted to pipe format or simplified
-        self::assertStringContainsString('Header 1', $result);
-        self::assertStringContainsString('Cell 1', $result);
+        static::assertStringContainsString('Header 1', $result);
+        static::assertStringContainsString('Cell 1', $result);
     }
 
     #[Test]
@@ -258,10 +260,10 @@ final class MarkdownConverterServiceTest extends FunctionalTestCase
         $result = $this->subject->convertHtmlToMarkdown($html);
 
         // Wrapper divs should be stripped, content preserved
-        self::assertStringContainsString('## Content Title', $result);
-        self::assertStringContainsString('Content text.', $result);
-        self::assertStringNotContainsString('container', $result);
-        self::assertStringNotContainsString('row', $result);
+        static::assertStringContainsString('## Content Title', $result);
+        static::assertStringContainsString('Content text.', $result);
+        static::assertStringNotContainsString('container', $result);
+        static::assertStringNotContainsString('row', $result);
     }
 
     #[Test]
@@ -271,8 +273,8 @@ final class MarkdownConverterServiceTest extends FunctionalTestCase
 
         $result = $this->subject->convertHtmlToMarkdown($html);
 
-        self::assertStringContainsString('Content', $result);
-        self::assertStringContainsString('More content', $result);
+        static::assertStringContainsString('Content', $result);
+        static::assertStringContainsString('More content', $result);
     }
 
     #[Test]
@@ -283,9 +285,9 @@ final class MarkdownConverterServiceTest extends FunctionalTestCase
         $result = $this->subject->convertHtmlToMarkdown($html);
 
         // Line breaks should be preserved in some form
-        self::assertStringContainsString('Line one', $result);
-        self::assertStringContainsString('Line two', $result);
-        self::assertStringContainsString('Line three', $result);
+        static::assertStringContainsString('Line one', $result);
+        static::assertStringContainsString('Line two', $result);
+        static::assertStringContainsString('Line three', $result);
     }
 
     #[Test]
@@ -295,7 +297,52 @@ final class MarkdownConverterServiceTest extends FunctionalTestCase
 
         $result = $this->subject->convertHtmlToMarkdown($html);
 
-        self::assertStringNotMatchesFormat('%A   Content%A', $result);
-        self::assertStringNotMatchesFormat('%AContent   %A', $result);
+        static::assertStringNotMatchesFormat('%A   Content%A', $result);
+        static::assertStringNotMatchesFormat('%AContent   %A', $result);
+    }
+
+    #[Test]
+    public function convertHtmlToMarkdownPreservesTextContentElementAfterTextmediaElement(): void
+    {
+        // Realistic fluid_styled_content markup: a textmedia CE (image + figcaption)
+        // immediately followed by a separate plain text CE, as TYPO3 concatenates them.
+        $html = '
+            <div class="frame frame-default frame-type-textmedia frame-layout-0">
+                <div class="frame-container">
+                    <div class="frame-content">
+                        <h2 class="frame-title">Image Section</h2>
+                        <figure class="image-embed-item">
+                            <a href="https://example.com/image.jpg">
+                                <picture>
+                                    <img src="image.jpg" alt="An image" />
+                                </picture>
+                            </a>
+                            <figcaption class="figure-caption">
+                                <p class="caption-text">Image caption text</p>
+                            </figcaption>
+                        </figure>
+                        <div class="ce-bodytext">
+                            <p>Text accompanying the image.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="frame frame-default frame-type-text frame-layout-0">
+                <div class="frame-container">
+                    <div class="frame-content">
+                        <h2 class="frame-title">Following Text Section</h2>
+                        <div class="ce-bodytext">
+                            <p>This text must survive after the preceding image element.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        ';
+
+        $result = $this->subject->convertHtmlToMarkdown($html);
+
+        static::assertStringContainsString('Following Text Section', $result);
+        static::assertStringContainsString('This text must survive after the preceding image element.', $result);
+        static::assertStringContainsString('Text accompanying the image.', $result);
     }
 }

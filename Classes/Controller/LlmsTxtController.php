@@ -56,7 +56,7 @@ class LlmsTxtController
         $this->configurationService->setRequest($request);
 
         try {
-            $pageHtml = $this->getRenderedPageContent();
+            $pageHtml = $this->getRenderedPageContent($request);
 
             if (empty($pageHtml)) {
                 return "# Error\n\nNo page content could be rendered.\n";
@@ -79,19 +79,21 @@ class LlmsTxtController
      * Get the fully rendered page content from TYPO3's frontend rendering
      * This captures ALL content elements from all column positions
      */
-    protected function getRenderedPageContent(): string
+    protected function getRenderedPageContent(ServerRequestInterface $request): string
     {
         $cObject = GeneralUtility::makeInstance(ContentObjectRenderer::class);
         $cObject->start([], 'pages');
 
         $pageId = $this->configurationService->getCurrentPageId();
+        $siteLanguage = $request->getAttribute('language');
 
-        $page = $this->pageRepository->findById($pageId);
+        $page = $this->pageRepository->findById($pageId, $siteLanguage);
 
         $html = '';
 
-        if (!empty($page['title'])) {
-            $html .= '<h1>' . htmlspecialchars($page['title']) . '</h1>';
+        $displayTitle = !empty($page['seo_title']) ? $page['seo_title'] : ($page['title'] ?? '');
+        if (!empty($displayTitle)) {
+            $html .= '<h1>' . htmlspecialchars($displayTitle) . '</h1>';
         }
 
         if (!empty($page['description'])) {

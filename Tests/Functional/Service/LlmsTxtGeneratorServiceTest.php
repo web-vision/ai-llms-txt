@@ -21,6 +21,10 @@ final class LlmsTxtGeneratorServiceTest extends FunctionalTestCase
         'web-vision/ai-llms-txt',
     ];
 
+    protected array $coreExtensionsToLoad = [
+        'seo',
+    ];
+
     private LlmsTxtGeneratorService $subject;
 
     protected function setUp(): void
@@ -33,12 +37,12 @@ final class LlmsTxtGeneratorServiceTest extends FunctionalTestCase
     #[Test]
     public function llmsTxtGeneratorServiceCanBeInstantiated(): void
     {
-        self::assertInstanceOf(LlmsTxtGeneratorService::class, $this->subject);
+        static::assertInstanceOf(LlmsTxtGeneratorService::class, $this->subject);
     }
 
     #[Test]
     public function classHasGenerateLlmsTxtMethod(): void
     {
-        self::assertTrue(method_exists($this->subject, 'generateLlmsTxt'));
+        static::assertTrue(method_exists($this->subject, 'generateLlmsTxt'));
     }
 }
