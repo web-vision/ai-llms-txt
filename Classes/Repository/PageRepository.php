@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace WebVision\AiLlmsTxt\Repository;
 
 use TYPO3\CMS\Core\Context\Context;
-use TYPO3\CMS\Core\Context\LanguageAspect;
 use TYPO3\CMS\Core\Context\LanguageAspectFactory;
 use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Database\ConnectionPool;
@@ -65,23 +64,37 @@ class PageRepository
     /**
      * Find a page by its UID
      *
-     * @return array{uid: int, title: string, subtitle: string, description: string, abstract: string}|array{}
+     * @return array{uid: int, title: string, subtitle: string, seo_title: string, description: string, abstract: string}|array{}
      */
-    public function findById(int $pageId): array
+    public function findById(int $pageId, ?SiteLanguage $siteLanguage = null): array
     {
         $queryBuilder = $this->connectionPool->getQueryBuilderForTable('pages');
         $queryBuilder->getRestrictions()->removeAll()
             ->add(GeneralUtility::makeInstance(FrontendRestrictionContainer::class));
 
         $result = $queryBuilder
-            ->select('uid', 'title', 'subtitle', 'description', 'abstract')
+            ->select('uid', 'pid', 'title', 'subtitle', 'seo_title', 'description', 'abstract', 'sys_language_uid', 'l10n_parent')
             ->from('pages')
             ->where(
                 $queryBuilder->expr()->eq('uid', $queryBuilder->createNamedParameter($pageId, Connection::PARAM_INT))
             )
             ->executeQuery();
 
-        return $result->fetchAssociative() ?: [];
+        $page = $result->fetchAssociative();
+        if (!$page) {
+            return [];
+        }
+
+        if ($siteLanguage && $siteLanguage->getLanguageId() > 0) {
+            $corePageRepository = $this->createCorePageRepository($siteLanguage);
+            // getPagesOverlay processes an array of row data
+            $overlaidPages = $corePageRepository->getPagesOverlay([$page]);
+            if (!empty($overlaidPages[0])) {
+                $page = $overlaidPages[0];
+            }
+        }
+
+        return $page;
     }
 
     /**

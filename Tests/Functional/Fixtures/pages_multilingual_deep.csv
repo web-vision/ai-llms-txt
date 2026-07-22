@@ -1,0 +1,9 @@
+"pages"
+,"uid","pid","title","slug","description","abstract","doktype","nav_hide","sorting","sys_language_uid","l10n_parent","hidden","deleted","no_index"
+,1,0,"Root","/",,,1,0,128,0,0,0,0,0
+,2,1,"Page One","/page-one","Page One description",,1,0,256,0,0,0,0,0
+,10,2,"Sub Page One","/sub-one","Sub Page One description",,1,0,256,0,0,0,0,0
+,3,1,"Seite Eins","/seite-eins","Seite Eins Beschreibung",,1,0,256,1,2,0,0,0
+,11,2,"Unterseite Eins","/unterseite-eins","Unterseite Eins Beschreibung",,1,0,256,1,10,0,0,0
+,4,1,"Page Francaise","/page-francaise","Description Page Francaise",,1,0,256,2,2,0,0,0
+,12,2,"Souspage Francaise","/souspage-francaise","Souspage Francaise description",,1,0,256,2,10,0,0,0

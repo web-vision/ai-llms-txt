@@ -143,11 +143,7 @@ class NavigationBuilder
             }
         }
 
-        // Clean up parentUid from final result
-        return array_map(function ($child) {
-            unset($child['parentUid']);
-            return $child;
-        }, array_values($children));
+        return array_values($children);
     }
 
     protected function getLanguageTitle(array $page): string
