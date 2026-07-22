@@ -52,8 +52,10 @@
             "extension-key": "ai_llms_txt",
 			"ignore-as-root": false,
 			"web-dir": ".Build/Web",
-            "package": {
-                "providesPackages": {}
+            "Package": {
+                "providesPackages": {
+                    "ai_llms_txt": "web-vision/ai-llms-txt"
+                }
             }
 		}
     },
