@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(php -l /Volumes/ExtremePro/projects/ai-llms-txt/Tests/Functional/Builder/NavigationBuilderMultilingualTest.php)",
+      "mcp__plugin_mempalace_mempalace__mempalace_diary_write",
+      "mcp__plugin_mempalace_mempalace__mempalace_add_drawer",
+      "Bash(./Build/Scripts/runTests.sh *)"
+    ]
+  }
+}
