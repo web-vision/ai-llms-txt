@@ -117,3 +117,29 @@ This extension is licensed under GPL v2+ - see the [LICENSE](LICENSE) file for d
 
 - [llmstxt.org](https://llmstxt.org/) - Official specification
 - [TYPO3 Documentation](https://docs.typo3.org/) - TYPO3 CMS documentation
+
+## Supported Versions
+
+| Version | Supported          | End of Support |
+|---------|--------------------|----------------|
+| 0.x     | :white_check_mark: | 2029-06-30     |
+
+## Security
+
+Found a vulnerability? Please report it privately via our
+[security report form](https://security.web-vision.de) — **do not** open a public issue.
+See [SECURITY.md](SECURITY.md) for the full vulnerability disclosure policy,
+including what to expect and our safe harbor statement.
+
+## Simplified EU Declaration of Conformity (Annex VI)
+
+> Hereby, web-vision GmbH declares that the product with digital elements
+> type LLMS TXT Generator is in compliance with Regulation (EU) 2024/2847.
+>
+> The full text of the EU declaration of conformity is available at the
+> following internet address:
+> https://security.web-vision.de/conformity/web-vision/ai-llms-txt/0.3.0/en/
+
+The full declarations are also included in this repository:
+[English](EU-Declaration-of-Conformity.md) ·
+[Deutsch](EU-Konformitaetserklaerung.md).
