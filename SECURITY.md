@@ -12,9 +12,9 @@ Security updates are provided for the following versions. Versions marked
 unsupported no longer receive security fixes; please upgrade before
 reporting an issue against them.
 
-| Version        | Supported           |
-| -------------- | ------------------- |
-| 0.x            | :white_check_mark:  |
+| Version | Supported          |
+| ------- | ------------------ |
+| 0.x     | :white_check_mark: |
 
 Planned end of support for this product: **30 June 2029 (end of regular TYPO3 14 LTS support)**.
 
@@ -29,10 +29,10 @@ open a public GitHub/GitLab issue.
 
 ### What to expect
 
-| Step                         | Timeframe                         |
-| ----------------------------- | ---------------------------------- |
-| Acknowledgement of your report | within 1 business day (typically much faster) |
-| Status updates                | at least every 7 days until resolved |
+| Step                                | Timeframe                                                              |
+| ----------------------------------- | ---------------------------------------------------------------------- |
+| Acknowledgement of your report      | within 1 business day (typically much faster)                          |
+| Status updates                      | at least every 7 days until resolved                                   |
 | Fix / mitigation, based on severity | Critical/High: as fast as possible; Medium/Low: next scheduled release |
 
 We coordinate the disclosure timeline with the reporter and aim for a
