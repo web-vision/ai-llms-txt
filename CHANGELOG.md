@@ -17,6 +17,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Errors while generating llms.txt or Markdown are logged through the TYPO3 logging framework
 - `X-Content-Type-Options: nosniff` header for both outputs
 - Documentation of all site settings, the CLI export command and known limitations
+- Support for PHP 8.5 (#17)
+- README sections on installing security updates, uninstallation and data removal, automatic
+  updates, notes for integrators and where to get the SBOM (#16)
 
 ### Changed
 - The Markdown (`.md`) version of a page now answers with "page not found" when the
@@ -27,6 +30,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   and the export timestamp is in UTC
 - `typo3/cms-frontend` and `typo3/cms-seo` are now declared as dependencies in
   `ext_emconf.php` as well (no change for Composer installations)
+- The Markdown (`.md`) version of a page is served as `Content-Type: text/markdown` instead
+  of `text/plain`
 - The Markdown (`.md`) version of a page is served as `Content-Type: text/markdown` instead
   of `text/plain`
 
@@ -53,6 +58,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The Markdown version of a page had two main headings when its content starts with an
   `<h1>`, e.g. from a header content element. The page title is now left out in that case,
   and the page description follows the heading of the content
+- The Markdown version of a page had two main headings when its content starts with an
+  `<h1>`, e.g. from a header content element. The page title is now left out in that case,
+  and the page description follows the heading of the content
+- Top-level pages in llms.txt were listed with `+` instead of `-` as list marker, the marker
+  used by the llmstxt.org specification and expected by its reference parser
+- The Markdown version of a page lost all content following an `<aside>` or `<footer>`
+  that contains a `<div>`: layout wrapper divs are now unwrapped as a whole instead of
+  stripping every closing `</div>`
 
 ### Security
 - The Markdown version of a page was served even when the extension was disabled for the
