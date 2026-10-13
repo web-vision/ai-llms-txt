@@ -21,6 +21,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   of `text/plain`
 ### Added
 - Support for PHP 8.5 (#17)
+- README sections on installing security updates, uninstallation and data removal, automatic
+  updates, notes for integrators and where to get the SBOM (#16)
 
 ## [0.3.0] - 2026-10-13
 
