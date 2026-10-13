@@ -31,6 +31,7 @@ Build/testing-docker/.env
 *.zip
 
 # Local development
+.claude/settings.local.json
 .env
 .env.local
 node_modules/

@@ -10,10 +10,13 @@
 
 return [
     'directories' => [
+        '.agent',
         '.build',
         '.Build',
         '.cache',
+        '.claude',
         '.ddev',
+        '.gemini',
         '.git',
         '.github',
         '.gitlab',
@@ -28,11 +31,13 @@ return [
         'tailor-version-upload',
         'tests',
         'tools',
+        'openspec',
         'packages',
         // we need to package the vendor folder
         //'vendor',
     ],
     'files' => [
+        'CLAUDE.md',
         'CODE_OF_CONDUCT.md',
         'DS_Store',
         'Dockerfile',

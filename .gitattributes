@@ -1,13 +1,18 @@
 # Folders
+/.agent export-ignore
+/.claude export-ignore
 /.ddev export-ignore
+/.gemini export-ignore
 /.github export-ignore
 /.vscode export-ignore
 /.Build export-ignore
 /Build/ export-ignore
 /Tests/ export-ignore
+/openspec/ export-ignore
 /packages/ export-ignore
 
 # Files
+/CLAUDE.md export-ignore
 .editorconfig export-ignore
 .gitattributes export-ignore
 .gitignore export-ignore
