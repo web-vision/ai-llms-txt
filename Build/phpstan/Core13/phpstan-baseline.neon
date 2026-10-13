@@ -126,16 +126,6 @@ parameters:
 			path: ../../../Classes/Service/ConfigurationService.php
 
 		-
-			message: "#^Parameter \\#1 \\$string of function trim expects string, string\\|null given\\.$#"
-			count: 1
-			path: ../../../Classes/Service/HtmlCleanerService.php
-
-		-
-			message: "#^Parameter \\#3 \\$subject of function preg_replace expects array\\|string, string\\|null given\\.$#"
-			count: 10
-			path: ../../../Classes/Service/HtmlCleanerService.php
-
-		-
 			message: "#^Method WebVision\\\\AiLlmsTxt\\\\Service\\\\LlmsTxtGeneratorService\\:\\:buildMetadataSection\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: ../../../Classes/Service/LlmsTxtGeneratorService.php

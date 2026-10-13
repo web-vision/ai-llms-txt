@@ -270,6 +270,20 @@ final class HtmlCleanerServiceTest extends FunctionalTestCase
     }
 
     #[Test]
+    public function cleanTypo3HtmlSurvivesMalformedUtf8(): void
+    {
+        // A single invalid byte used to make the /u whitespace patterns return null,
+        // which cascaded through the remaining replacements and blanked the whole page.
+        $html = "<p>Caf\xE9 content</p><h2>Headline</h2>";
+
+        $result = $this->subject->cleanTypo3Html($html);
+
+        static::assertNotSame('', $result);
+        static::assertStringContainsString('content', $result);
+        static::assertStringContainsString('Headline', $result);
+    }
+
+    #[Test]
     public function cleanTypo3HtmlPreservesLists(): void
     {
         $html = '<ul><li>Item 1</li><li>Item 2</li></ul><ol><li>First</li></ol>';
