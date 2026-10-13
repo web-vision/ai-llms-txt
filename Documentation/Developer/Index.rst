@@ -94,7 +94,7 @@ Podman). Install the dependencies for the TYPO3 version to test first:
     Build/Scripts/runTests.sh -s cgl -n
 
 Run ``Build/Scripts/runTests.sh -h`` for all options. The same suites run on
-GitHub Actions for TYPO3 13 and 14 with PHP 8.2 to 8.4.
+GitHub Actions for TYPO3 13 and 14 with PHP 8.2 to 8.5.
 
 ..  _contributing:
 

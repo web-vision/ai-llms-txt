@@ -100,5 +100,5 @@ Dependency injection is configured in `Configuration/Services.yaml` using Symfon
 
 | TYPO3 | PHP |
 |-------|-----|
-| 13.4  | 8.2, 8.3, 8.4 |
-| 14.3  | 8.2, 8.3, 8.4 |
+| 13.4  | 8.2, 8.3, 8.4, 8.5 |
+| 14.3  | 8.2, 8.3, 8.4, 8.5 |

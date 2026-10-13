@@ -2,7 +2,7 @@
 
 [![TYPO3 13](https://img.shields.io/badge/TYPO3-13.4-orange.svg)](https://get.typo3.org/version/13)
 [![TYPO3 14](https://img.shields.io/badge/TYPO3-14.3-orange.svg)](https://get.typo3.org/version/14)
-[![PHP 8.2-8.4](https://img.shields.io/badge/PHP-8.2--8.4-blue.svg)](https://www.php.net/)
+[![PHP 8.2-8.5](https://img.shields.io/badge/PHP-8.2--8.5-blue.svg)](https://www.php.net/)
 [![License: GPL v2+](https://img.shields.io/badge/License-GPL%20v2+-blue.svg)](https://www.gnu.org/licenses/gpl-2.0)
 
 Generates an `llms.txt` file according to the [llmstxt.org specification](https://llmstxt.org/)
@@ -35,7 +35,7 @@ crawl or train on your content. Use `robots.txt` and your server configuration f
 ## Requirements
 
 - **TYPO3**: 13.4 LTS or 14.3 LTS
-- **PHP**: 8.2, 8.3 or 8.4
+- **PHP**: 8.2, 8.3, 8.4 or 8.5
 
 ## Installation
 

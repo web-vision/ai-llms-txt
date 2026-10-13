@@ -17,7 +17,7 @@
         "docs": "https://github.com/web-vision/ai-llms-txt#readme"
     },
     "require": {
-        "php": "^8.2 || ^8.3 || ^8.4",
+        "php": "^8.2 || ^8.3 || ^8.4 || ^8.5",
         "league/html-to-markdown": "^5.1",
         "typo3/cms-backend": "^13.4 || ^14.3",
         "typo3/cms-core": "^13.4 || ^14.3",
