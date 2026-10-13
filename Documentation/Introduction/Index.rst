@@ -1,4 +1,6 @@
-.. include:: /Includes.rst.txt
+..  include:: /Includes.rst.txt
+
+..  _introduction:
 
 ============
 Introduction
@@ -7,56 +9,47 @@ Introduction
 What does this extension do?
 ============================
 
-The LLMS TXT Generator extension provides TYPO3 with the capability to generate machine-readable files according to the `llmstxt.org specification <https://llmstxt.org/>`__.
+The LLMS TXT Generator gives Large Language Models (LLMs) and AI tools a
+compact, machine-readable view of a TYPO3 site, following the
+`llmstxt.org specification <https://llmstxt.org/>`__.
 
-The extension creates two types of content:
+It provides two outputs:
 
-1. **llms.txt files** - Machine-readable policy files that inform Large Language Models (LLMs) and AI crawlers about your site's crawling preferences and content structure
-2. **Markdown content** - Human and machine-readable representations of your TYPO3 pages in Markdown format
+1.  **llms.txt** - a Markdown index of the site: its title, a short summary,
+    optional metadata and a structured list of links to the site's pages.
+2.  **Markdown pages** - every listed page can be fetched as plain Markdown by
+    appending ``.md`` to its URL, without navigation, header or footer.
 
-Key Features
+Key features
 ============
 
-* **Automatic llms.txt generation** - Creates policy links at /.well-known/llms.txt according to the official specification
-* **Site navigation structure** - Automatically includes your site's navigation hierarchy in the llms.txt file
-* **Configurable metadata** - Add topics, contact information, and custom descriptions
-* **Markdown export** - Convert any TYPO3 page to Markdown format via .md suffix
-* **TYPO3 v12, v13 & v14 compatibility** - Supports all current LTS versions using modern PHP practices
-* **Flexible configuration** - Control depth, content, and behavior through Site Configuration
-* **Frontend rendering integration** - Leverages TYPO3's native content rendering pipeline
+*   **llms.txt generation** at ``/llms.txt`` and ``/.well-known/llms.txt``
+*   **Page tree listing** with configurable depth and page type exclusion
+*   **Markdown version of every page** through TYPO3's regular rendering, so
+    all content elements and column positions are included
+*   **Per-site configuration** of title, summary, topics, contact address and
+    additional content
+*   **Respects page visibility**: hidden, access-restricted, "hide in menu" and
+    "no index" pages are not listed
+*   **Optional caching** of the generated ``llms.txt``
+*   **CLI export** of pages as Markdown files
 
 What is llms.txt?
 =================
 
-llms.txt is an emerging standard for websites to communicate with Large Language Models and AI systems. Similar to robots.txt for web crawlers, llms.txt files provide:
+``llms.txt`` is a proposed convention for a Markdown file at the root of a
+website that tells language models what the site is about and where its most
+useful content is. Language models have limited context windows and struggle
+with full HTML pages; a curated index with links to clean Markdown versions
+lets them find and read the relevant content directly.
 
-* **Crawling policies** - Guidelines for AI systems on how to interact with your content
-* **Site structure** - Navigation and content organization information
-* **Metadata** - Topics, contact information, and site descriptions
-* **Content access** - Direct links to machine-readable content formats
-
-The specification follows a simple, human-readable format that both humans and AI systems can easily parse.
-
-Use Cases
-=========
-
-**Educational Institutions**
-  Provide structured access to course catalogs, faculty information, and academic content for AI-powered educational tools.
-
-**Content Publishers**
-  Offer clear guidelines for AI systems accessing articles, documentation, and media content.
-
-**Business Websites**
-  Structure company information, services, and contact details for AI-powered business discovery tools.
-
-**Documentation Sites**
-  Enable AI systems to better understand and reference technical documentation and knowledge bases.
+``llms.txt`` is **not** an access control mechanism. It does not grant or deny
+permission to crawl or train on your content; use ``robots.txt`` and your
+server configuration for that.
 
 Requirements
 ============
 
-* TYPO3 CMS 13.0 or higher
-* PHP 8.2 or higher
-* league/html-to-markdown package (automatically installed)
-
-The extension integrates seamlessly with existing TYPO3 installations and requires minimal configuration to get started.
+*   TYPO3 13.4 LTS or 14.3 LTS
+*   PHP 8.2, 8.3 or 8.4
+*   The TYPO3 system extension ``seo`` (installed automatically with Composer)

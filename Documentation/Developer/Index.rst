@@ -1,235 +1,114 @@
-.. include:: /Includes.rst.txt
+..  include:: /Includes.rst.txt
+
+..  _developer:
 
 =========
 Developer
 =========
 
-Architecture Overview
-======================
+..  _architecture:
 
-The LLMS TXT Generator extension follows modern TYPO3 development practices and supports TYPO3 v12, v13, and v14 LTS.
+Architecture
+============
 
-Core Components
-===============
+Both outputs are TypoScript page objects that call a ``USER`` function on
+:php:`\WebVision\AiLlmsTxt\Controller\LlmsTxtController`:
 
-Services
---------
+``llms.txt`` (typeNum 1699)
+    :php:`generateAction()` delegates to :php:`LlmsTxtGeneratorService`, which
+    reads the site settings through :php:`ConfigurationService`, builds the
+    page tree with :php:`NavigationBuilder` and caches the result if a cache
+    lifetime is configured.
 
-**ConfigurationService**
-  Handles all site configuration reading and provides typed access to configuration values.
-  Uses the TYPO3 core request injection pattern - request is set once via ``setRequest()``
-  and all methods access it internally.
+Markdown (typeNum 1701)
+    :php:`renderPageAsMarkdown()` checks that Markdown output is allowed for
+    the site and page, renders the page's content through TYPO3's
+    :php:`ContentObjectRenderer`, strips layout markup with
+    :php:`HtmlCleanerService` and converts the result with
+    :php:`MarkdownConverterService` (based on ``league/html-to-markdown``).
 
-**LlmsTxtGeneratorService**
-  Main application service that orchestrates the generation of llms.txt content by coordinating other services.
+..  list-table::
+    :header-rows: 1
+    :widths: 40 60
 
-**MarkdownConverterService**
-  Converts HTML content to Markdown format using the league/html-to-markdown library.
+    *   - Class (``WebVision\AiLlmsTxt\…``)
+        - Responsibility
+    *   - ``Controller\LlmsTxtController``
+        - Entry points for both page types
+    *   - ``Service\LlmsTxtGeneratorService``
+        - Assembles ``llms.txt`` and manages its cache
+    *   - ``Service\ConfigurationService``
+        - Typed access to the site settings
+    *   - ``Builder\NavigationBuilder``
+        - Builds and formats the page tree, with language fallback
+    *   - ``Repository\PageRepository``
+        - Page queries with frontend restrictions, batched per tree level
+    *   - ``Service\UrlGeneratorService``
+        - Absolute frontend URLs for page records
+    *   - ``Service\HtmlCleanerService``
+        - Removes empty and layout-only markup before conversion
+    *   - ``Service\MarkdownConverterService``
+        - HTML to Markdown conversion
+    *   - ``Command\DownloadMarkdownCommand``
+        - CLI command ``ai-llms:download-markdown``
 
-**NavigationBuilder**
-  Builds the site navigation structure for inclusion in llms.txt files.
+..  _api:
 
-Repository
-----------
+Public API and backward compatibility
+=====================================
 
-**PageRepository**
-  Provides database access for page records with proper respect for TYPO3's language and workspace handling.
+The extension follows `Semantic Versioning <https://semver.org/>`__. The
+following are covered by it and change incompatibly only in a new major
+version:
 
-Controller
-----------
+*   the site configuration settings (:ref:`configuration-site`),
+*   the page types 1699 and 1701 and the bundled route enhancer,
+*   the structure of the ``llms.txt`` and Markdown output,
+*   the CLI command ``ai-llms:download-markdown`` and its options.
 
-**LlmsTxtController**
-  Thin controller layer that handles HTTP requests and delegates business logic to services. Provides entry points for TypoScript USER objects.
+The PHP classes are internal. They are not marked ``final`` so that projects
+can replace a service through dependency injection, but their methods may
+change in minor versions. If you need a stable hook, please open an issue
+describing your use case.
 
-API Reference
-=============
-
-Controller Methods
-------------------
-
-WebVision\\LlmsTxt\\Controller\\LlmsTxtController
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. php:method:: generateAction(string $content = '', array $conf = []): string
-
-   Generates llms.txt content for TypoScript USER object.
-
-   :param string $content: Content passed from TypoScript (usually empty)
-   :param array $conf: Configuration array from TypoScript
-   :returns: Generated llms.txt content as string
-   :throws: Exception on generation failures
-
-.. php:method:: renderPageAsMarkdown(string $content = '', array $conf = []): string
-
-   Renders current page as Markdown by leveraging TYPO3's frontend rendering.
-
-   :param string $content: Content passed from TypoScript (usually empty)
-   :param array $conf: Configuration array from TypoScript
-   :returns: Page content converted to Markdown format
-   :throws: Exception on rendering or conversion failures
-
-Service Classes
----------------
-
-WebVision\\LlmsTxt\\Service\\LlmsTxtGeneratorService
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. php:method:: generateLlmsTxt(int $currentPageId): string
-
-   Generates complete llms.txt content for a given page context.
-
-   :param int $currentPageId: Current page ID for context
-   :returns: Complete llms.txt formatted content
-
-WebVision\\LlmsTxt\\Service\\ConfigurationService
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. php:method:: setRequest(ServerRequestInterface $request): void
-
-   Sets the request for the service. Must be called before using other methods.
-   Follows the TYPO3 core pattern used by ContentObjectRenderer.
-
-   :param ServerRequestInterface $request: The current PSR-7 request
-
-.. php:method:: isEnabled(): bool
-
-   Checks if llms.txt generation is enabled.
-
-   :returns: True if enabled, false otherwise
-
-.. php:method:: getCurrentPageId(): int
-
-   Gets the current page ID from the request. Handles TYPO3 v12/v13 via TSFE
-   and v14+ via frontend.page.information request attribute.
-
-   :returns: Current page ID
-   :throws: RuntimeException if page ID cannot be determined
-
-.. php:method:: getMaxDepth(): int
-
-   Gets maximum navigation depth setting.
-
-   :returns: Maximum depth as integer
-
-.. php:method:: getTitleOverride(): string
-
-   Gets custom title override if configured.
-
-   :returns: Custom title or empty string
-
-.. php:method:: getDescriptionOverride(): string
-
-   Gets custom description override if configured.
-
-   :returns: Custom description or empty string
-
-.. php:method:: getKeywords(): array
-
-   Gets configured keywords/topics.
-
-   :returns: Array of keyword strings
-
-.. php:method:: getContactEmail(): string
-
-   Gets configured contact email.
-
-   :returns: Contact email or empty string
-
-.. php:method:: getAdditionalInfo(): string
-
-   Gets additional information text.
-
-   :returns: Additional info or empty string
-
-.. php:method:: getSiteUrl(): string
-
-   Gets the current site's base URL.
-
-   :returns: Site URL as string
-
-Extending the Extension
-=======================
-
-tbd.
-
-Hooks and Events
-================
-
-The extension doesn't currently provide PSR-14 events, but you can extend functionality through:
-
-1. **Service replacement** - Override services through dependency injection
-2. **TypoScript configuration** - Extend configuration options
-3. **Custom page types** - Create additional page types using the same controller methods
+..  _testing:
 
 Testing
 =======
 
-Unit Testing
-------------
+Tests run in containers through :file:`Build/Scripts/runTests.sh` (Docker or
+Podman). Install the dependencies for the TYPO3 version to test first:
 
-The extension includes comprehensive unit tests, particularly for the ConfigurationService.
-Tests can be run against all supported TYPO3 versions:
+..  code-block:: bash
 
-.. code-block:: bash
+    # Install dependencies for TYPO3 13 (or 14)
+    Build/Scripts/runTests.sh -t 13 -s composerUpdate
 
-   # Run unit tests with TYPO3 v12
-   Build/Scripts/runTests.sh -s unit -t 12
+    # Unit and functional tests
+    Build/Scripts/runTests.sh -t 13 -p 8.2 -s unit
+    Build/Scripts/runTests.sh -t 13 -p 8.2 -s functional -d sqlite
 
-   # Run unit tests with TYPO3 v13
-   Build/Scripts/runTests.sh -s unit -t 13
+    # Static analysis and coding guidelines
+    Build/Scripts/runTests.sh -t 13 -s phpstan
+    Build/Scripts/runTests.sh -s cgl -n
 
-   # Run unit tests with TYPO3 v14
-   Build/Scripts/runTests.sh -s unit -t 14
+Run ``Build/Scripts/runTests.sh -h`` for all options. The same suites run on
+GitHub Actions for TYPO3 13 and 14 with PHP 8.2 to 8.4.
 
-   # Run with specific PHP version
-   Build/Scripts/runTests.sh -s unit -t 14 -p 8.3
-
-The ConfigurationService tests cover:
-
-* Request injection and retrieval
-* Fallback to ``$GLOBALS['TYPO3_REQUEST']``
-* All configuration getters (isEnabled, getMaxDepth, getTitleOverride, etc.)
-* Default values and type casting
-
-Functional Testing
-------------------
-
-Functional tests can be run using:
-
-.. code-block:: bash
-
-   Build/Scripts/runTests.sh -s functional
-
-Performance Considerations
-==========================
-
-**Navigation Building**
-  Navigation structure generation scales with site size. For large sites (1000+ pages), consider:
-
-  * Reducing maxDepth setting
-  * Implementing custom navigation filtering
-  * Adding caching layers
-
-**Content Rendering**
-  Markdown conversion processes all content elements. For content-heavy pages:
-
-  * Consider selective content rendering
-  * Implement content type filtering
-  * Use caching for expensive conversions
-
-**Memory Usage**
-  The HTML-to-Markdown conversion can be memory-intensive for large pages. Monitor memory usage and consider:
-
-  * Chunked processing for very large pages
-  * Custom memory-efficient conversion strategies
+..  _contributing:
 
 Contributing
 ============
 
-When contributing to the extension:
+Contributions are welcome at https://github.com/web-vision/ai-llms-txt.
 
-1. **Follow TYPO3 coding standards** - Use php-cs-fixer with TYPO3 ruleset
-2. **Write tests** - Include unit and functional tests for new features
-3. **Document changes** - Update documentation for new configuration options
-4. **Use dependency injection** - Prefer constructor injection over service location
-5. **Type everything** - Use strict types and comprehensive type hints
+*   Follow the TYPO3 coding guidelines: ``Build/Scripts/runTests.sh -s cgl``
+    fixes most issues automatically.
+*   Add tests for new behaviour and bug fixes. Test methods use the
+    ``#[Test]`` attribute instead of a ``test`` prefix.
+*   Document new settings in :ref:`configuration-site`.
+*   Use ``declare(strict_types=1)``, full type declarations and constructor
+    injection.
+
+Please report security issues privately as described in :file:`SECURITY.md`,
+not in the public issue tracker.

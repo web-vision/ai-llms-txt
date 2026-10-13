@@ -1,108 +1,205 @@
-.. include:: /Includes.rst.txt
+..  include:: /Includes.rst.txt
+
+..  _configuration:
 
 =============
 Configuration
 =============
 
+All settings are made per site, in the site configuration. Edit them in the
+backend module :guilabel:`Site Management > Sites`, tab
+:guilabel:`LLMS.TXT Configuration`, or directly in
+:file:`config/sites/<site-identifier>/config.yaml`.
 
-Page Type Configuration
-=======================
+The extension needs no TypoScript configuration of its own: the two page types
+it uses are registered automatically.
 
-The extension defines two page types for serving content:
+..  _configuration-site:
 
-llms.txt Page Type
-------------------
+Site settings
+=============
 
-.. code-block:: typoscript
+..  code-block:: yaml
+    :caption: config/sites/main/config.yaml
 
-   llmstxt = PAGE
-   llmstxt {
-       typeNum = 1699
+    llmsTxtEnabled: true
+    llmsTxtTitle: 'ACME Corporation'
+    llmsTxtDescription: 'Industrial products and engineering services since 1952.'
+    llmsTxtKeywords: 'manufacturing, engineering, consulting'
+    llmsTxtContactEmail: 'contact@example.com'
+    llmsTxtAdditionalInfo: |
+      ## Licensing
 
-       config {
-           disableAllHeaderCode = 1
-           additionalHeaders.10.header = Content-Type: text/plain; charset=utf-8
-           additionalHeaders.10.replace = 1
-           xhtml_cleaning = 0
-           admPanel = 0
-           debug = 0
-           no_cache = 1
-       }
+      Product data sheets may be quoted with attribution.
+    llmsTxtMaxDepth: 2
+    llmsTxtExcludeDoktypes: '3, 199'
+    llmsTxtCacheLifetime: 900
 
-       10 = USER
-       10 {
-           userFunc = WebVision\AiLlmsTxt\Controller\LlmsTxtController->generateAction
-       }
-   }
+..  confval:: llmsTxtEnabled
+    :name: site-llmsTxtEnabled
+    :type: boolean
+    :default: true
 
-Markdown Page Type
-------------------
+    Enables the extension for this site. This switch covers **both** outputs:
 
-.. code-block:: typoscript
+    *   ``llms.txt`` returns only a short "generation is disabled" notice.
+    *   Markdown (``.md``) requests are answered with the site's regular
+        "page not found" response.
 
-   markdown_page = PAGE
-   markdown_page {
-       typeNum = 1701
+..  confval:: llmsTxtTitle
+    :name: site-llmsTxtTitle
+    :type: string
+    :default: title of the site root page
 
-       config {
-           disableAllHeaderCode = 1
-           additionalHeaders.10.header = Content-Type: text/plain; charset=utf-8
-           additionalHeaders.10.replace = 1
-           xhtml_cleaning = 0
-           admPanel = 0
-           debug = 0
-           no_cache = 1
-           forceAbsoluteUrls = 1
-       }
+    Title used as the ``# H1`` heading of ``llms.txt``.
 
-       10 = USER
-       10 {
-           userFunc = WebVision\AiLlmsTxt\Controller\LlmsTxtController->renderPageAsMarkdown
-       }
-   }
+..  confval:: llmsTxtDescription
+    :name: site-llmsTxtDescription
+    :type: string
+    :default: description of the site root page
 
-Route Configuration
+    Short summary rendered as the ``>`` blockquote below the title. Line breaks
+    are collapsed into a single line, as the specification expects one
+    blockquote line.
+
+..  confval:: llmsTxtKeywords
+    :name: site-llmsTxtKeywords
+    :type: string (comma-separated)
+    :default: empty
+
+    Topics rendered as a ``**Topics:**`` line.
+
+..  confval:: llmsTxtContactEmail
+    :name: site-llmsTxtContactEmail
+    :type: string
+    :default: empty
+
+    Contact address rendered as a ``**Contact:**`` line.
+
+..  confval:: llmsTxtAdditionalInfo
+    :name: site-llmsTxtAdditionalInfo
+    :type: string (Markdown)
+    :default: empty
+
+    Free Markdown appended to the end of ``llms.txt``, after a horizontal rule.
+    Use it for sections such as licensing terms or "optional" link lists.
+    Unlike all other values, it is written as-is: whoever can edit the site
+    configuration controls this part of the file.
+
+..  confval:: llmsTxtMaxDepth
+    :name: site-llmsTxtMaxDepth
+    :type: integer
+    :default: 2
+
+    How many levels of the page tree below the site root are listed. Values are
+    clamped to the range 1 to 10.
+
+..  confval:: llmsTxtExcludeDoktypes
+    :name: site-llmsTxtExcludeDoktypes
+    :type: string (comma-separated page types)
+    :default: empty
+
+    Additional page types (``doktype`` values) to leave out of ``llms.txt``,
+    for example ``3`` for external links or a custom page type.
+
+    Folders (254), menu separators (199) and shortcuts (4) are always excluded.
+    This setting can only add to that list, not remove from it.
+
+    The *subpages* of an excluded page are not dropped: they move up and are
+    listed in place of the excluded page.
+
+..  confval:: llmsTxtCacheLifetime
+    :name: site-llmsTxtCacheLifetime
+    :type: integer (seconds)
+    :default: 0
+
+    How long ``llms.txt`` is cached, at most. ``0`` disables caching: the file
+    is generated on every request and also kept out of TYPO3's page cache.
+
+    With a lifetime set, ``llms.txt`` is stored in TYPO3's page cache, and the
+    generated content additionally in the ``hash`` cache. Entries are kept
+    separate per combination of frontend user groups, because
+    access-restricted pages appear only for visitors who may see them.
+
+    Cache entries are tagged ``pages``, so saving any page record in the
+    backend clears them. Changes that do not go through the backend, such as
+    a page's start or stop time passing or a direct database import, are
+    picked up once the entry expires or when the caches are flushed.
+
+    This setting applies to ``llms.txt`` only. The Markdown version of a page
+    is cached by TYPO3's page cache like the page itself.
+
+..  _configuration-pages:
+
+What is listed in llms.txt
+==========================
+
+A page appears in ``llms.txt`` only if all of the following apply:
+
+*   it is visible: not hidden, not deleted, within its start and stop time;
+*   it is accessible to the visitor, if it has access restrictions;
+*   :guilabel:`Page > Behaviour > Miscellaneous > Hide in Menus` (``nav_hide``)
+    is not set;
+*   :guilabel:`SEO > Robot Instructions > Index this page` is enabled
+    (``no_index`` is not set);
+*   its page type is not excluded (see :confval:`site-llmsTxtExcludeDoktypes`);
+*   it is within :confval:`site-llmsTxtMaxDepth`.
+
+The Markdown version of a page (``.md``) follows the same visibility and access
+rules. Pages with ``no_index`` set are answered with "page not found" there as
+well, so that a page kept out of search engines is not offered to language
+models instead.
+
+..  _configuration-routes:
+
+Route configuration
 ===================
 
-The extension includes route enhancers to create user-friendly URLs:
+Without route configuration the outputs are available through page type
+parameters only: ``/?type=1699`` for ``llms.txt`` and ``/any-page?type=1701``
+for Markdown. Import the bundled route enhancer to get the usual URLs:
 
-.. code-block:: yaml
+..  code-block:: yaml
+    :caption: config/sites/main/config.yaml
 
-   # EXT:ai_llms_txt/Configuration/Routes/RouterEnhancer.yaml
-   routeEnhancers:
-     PageTypeSuffix:
-       type: PageType
-       map:
-         .md: 1701
-         llms.txt: 1699
+    imports:
+      -
+        resource: 'EXT:ai_llms_txt/Configuration/Routes/RouterEnhancer.yaml'
 
-To use these routes, include them in your site configuration:
+It maps the following suffixes:
 
-.. code-block:: yaml
+..  code-block:: yaml
+    :caption: EXT:ai_llms_txt/Configuration/Routes/RouterEnhancer.yaml
 
-   # config/sites/main/config.yaml
-   imports:
-     -
-       resource: 'EXT:ai_llms_txt/Configuration/Routes/RouterEnhancer.yaml'
+    routeEnhancers:
+      PageTypeSuffix:
+        type: PageType
+        map:
+          llms.txt: 1699
+          .well-known/llms.txt: 1699
+          .md: 1701
 
-Advanced Configuration
-======================
+..  note::
+    If your site already defines a ``PageType`` enhancer, for example for an
+    XML sitemap, add the three ``map`` entries above to that enhancer instead
+    of importing the file, so that a single enhancer handles all suffixes.
 
-Custom Navigation Filtering
-----------------------------
+..  _configuration-typoscript:
 
-If you need to exclude certain pages from the llms.txt navigation structure, you can extend the NavigationBuilder service or use standard TYPO3 page properties:
+Page types
+==========
 
-* Set "Hide in navigation" to exclude pages from llms.txt
-* Use "Access" settings to control visibility
-* Set pages to hidden to exclude them entirely
-* Set no index meta tag on pages to prevent inclusion in llms.txt
+The extension registers these page types through TypoScript that is loaded
+automatically. They are listed here for reference: do not copy them into your
+own TypoScript.
 
-Custom Content Processing
---------------------------
+=================  =======  ========================================
+Page object        typeNum  Output
+=================  =======  ========================================
+``llmstxt``        1699     ``llms.txt``
+``markdown_page``  1701     Markdown version of the current page
+=================  =======  ========================================
 
-The extension uses TYPO3's standard content rendering. To customize how content appears in Markdown:
-
-* Use standard TYPO3 content element configuration
-* Customize TypoScript rendering for specific content types
-* The extension respects all standard TYPO3 content visibility settings
+Both are served as ``Content-Type: text/plain; charset=utf-8`` together with
+``X-Content-Type-Options: nosniff``, so that browsers never interpret the
+editor-controlled content as HTML.

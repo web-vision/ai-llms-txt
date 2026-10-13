@@ -1,8 +1,8 @@
 .. include:: /Includes.rst.txt
 
-================
+============================
 LLMS TXT Generator for TYPO3
-================
+============================
 
 :Extension key:
     ai_llms_txt
@@ -17,7 +17,7 @@ LLMS TXT Generator for TYPO3
     en
 
 :Copyright:
-    2025
+    2025-2026
 
 :Author:
     web-vision GmbH
@@ -37,13 +37,11 @@ LLMS TXT Generator for TYPO3
 ..  toctree::
     :maxdepth: 5
     :titlesonly:
-    :glob:
 
-   Introduction/Index
-   Administrator/Index
-   Editor/Index
-   Configuration/Index
-   Developer/Index
-   KnownProblems/Index
-   ChangeLog/Index
-   Sitemap
+    Introduction/Index
+    Administrator/Index
+    Configuration/Index
+    Editor/Index
+    Developer/Index
+    KnownProblems/Index
+    ChangeLog/Index

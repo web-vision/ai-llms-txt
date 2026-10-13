@@ -1,162 +1,106 @@
-.. include:: /Includes.rst.txt
+..  include:: /Includes.rst.txt
+
+..  _changelog:
 
 =========
 ChangeLog
 =========
 
-Version 0.2.2
-=============
+The complete history is kept in
+`CHANGELOG.md <https://github.com/web-vision/ai-llms-txt/blob/main/CHANGELOG.md>`__.
 
-Release Date: 2026-10-30
+..  _changelog-unreleased:
 
-Changes
--------
+Unreleased
+==========
 
-**Fixed**
+..  important::
 
-* The Markdown version of a page had the content elements of a ``b13/container``
-  grid twice: inside the container, and once more on their own. They are now
-  only rendered by their container
-
-Version 0.2.0-0.2.1
-=============
-
-Release Date: 2026-01-22
-
-Changes
--------
+    *   The Markdown version of a page now answers with "page not found" when
+        the extension is disabled for the site, or when the page has
+        :guilabel:`Index this page` switched off.
 
 **Added**
 
-* Unit tests for ConfigurationService with full coverage (24 tests)
-* TYPO3 v14 LTS support in test runner scripts
-* Comprehensive test suite runnable across TYPO3 12, 13, and 14
+*   Site setting :confval:`site-llmsTxtExcludeDoktypes` to leave additional
+    page types out of ``llms.txt`` (#1)
+*   Optional caching with :confval:`site-llmsTxtCacheLifetime`, disabled by
+    default (#2)
+*   Logging of generation errors, ``X-Content-Type-Options: nosniff`` header
+*   Documentation of all settings, the CLI export and known limitations
 
-**Changed**
-
-* Refactored ConfigurationService to use TYPO3 core request injection pattern
-* Request is now injected once via ``setRequest()`` instead of passing to each method
-* Added fallback to ``$GLOBALS['TYPO3_REQUEST']`` for backward compatibility
-* Improved code architecture following TYPO3 ContentObjectRenderer pattern
-
-**Removed**
-
-* Removed DownloadMarkdownCommand from Services.yaml (command not yet implemented)
-
-Version 0.1.8 - 0.1.9
-=====================
-
-Release Date: 2025-12-30
-
-Latest Changes
---------------
 **Fixed**
-* Corrected the exclusion of specific doktypes in PageRepository to ensure proper fetching of child pages.
 
+*   Pages of other languages appeared in the language sections of
+    ``llms.txt`` (#10)
+*   Translated SEO title and description, and text after text & media
+    elements, in the Markdown version (#7)
+*   Wrong ``.md`` links for page URLs ending with a slash (#8)
+*   Excluded page types, translated subpages and language fallback handling
+    in ``llms.txt``
+*   Performance on large page trees: queries are batched per tree level
+*   ``llms.txt`` stayed in TYPO3's page cache for up to a day; it now follows
+    :confval:`site-llmsTxtCacheLifetime`, and error responses are not cached
 
-=========
-ChangeLog
-=========
-Version 0.1.7
-==============
+**Security**
 
-Release Date: 2025-12-18
+*   The Markdown version ignored the site's enable switch and the page's
+    "no index" flag
+*   Error messages in the Markdown output could expose internal details
+*   Escaped markup in page content became live HTML in the Markdown output
+*   Line breaks and Markdown syntax in titles, descriptions and settings
+    could inject lines into ``llms.txt`` and keys into the CLI export's
+    YAML frontmatter
 
-Latest Changes
---------------
+..  _changelog-0-2-2:
 
-**Changed**
+0.2.2 - 2026-10-30
+==================
 
-* Update PageRepository to exclude specific doktypes and fetch their children
+*   The Markdown version of a page had the content elements of a
+    ``b13/container`` grid twice: inside the container, and once more on their
+    own. They are now only rendered by their container
 
+..  _changelog-0-2-1:
 
-Release Date: 2025-10-29
+0.2.1 - 2026-01-22
+==================
 
-Initial Release
----------------
+*   Updated the PHP versions used in the CI workflows and aligned code
+    formatting
 
-This is the initial release of the LLMS TXT Generator extension for TYPO3 v13.
+..  _changelog-0-2-0:
 
-New Features
-~~~~~~~~~~~~
+0.2.0 - 2026-01-22
+==================
 
-**Core Functionality**
+*   Refactored :php:`ConfigurationService` to receive the request once via
+    :php:`setRequest()`
+*   Unit tests for :php:`ConfigurationService`
+*   TYPO3 14 support in the test runner
 
-* Complete llms.txt generation according to the llmstxt.org specification
-* Automatic site navigation structure inclusion with configurable depth
-* Page-to-Markdown conversion for any TYPO3 page via .md suffix
+..  _changelog-0-1-9:
 
-**Configuration Options**
+0.1.9 - 2025-12-30
+==================
 
-* TypoScript-based configuration for all settings
-* Configurable navigation depth (maxDepth setting)
-* Custom title and description overrides
-* Keywords/topics configuration for site metadata
-* Contact email specification for AI systems
-* Additional information text support
+*   Fixed the exclusion of folders, separators and shortcuts so that their
+    subpages are still listed
 
-**Technical Implementation**
+..  _changelog-0-1-7:
 
-* Built specifically for TYPO3 v13 using modern PHP 8.2+ practices
-* Service-oriented architecture with dependency injection
-* Proper separation of concerns with dedicated services for each responsibility
-* HTML-to-Markdown conversion using league/html-to-markdown library
-* Route enhancers for user-friendly URLs (.md suffix and llms.txt endpoints)
+0.1.7 - 2025-12-18
+==================
 
-**Documentation**
+*   Folders, separators and shortcuts are excluded from ``llms.txt``, their
+    subpages are listed instead
 
-* Complete documentation following TYPO3 standards
-* Administrator installation and configuration guide
-* Editor usage guidelines
-* Developer API reference and extension guide
-* Configuration examples and best practices
+..  _changelog-initial:
 
-System Requirements
-~~~~~~~~~~~~~~~~~~~
+Initial release - 2025-10-29
+============================
 
-* TYPO3 CMS 13.0 or higher
-* PHP 8.2 or higher
-* league/html-to-markdown ^5.1 (automatically installed via Composer)
-
-Breaking Changes
-~~~~~~~~~~~~~~~~
-
-This is the initial release, so no breaking changes apply.
-
-Known Issues
-~~~~~~~~~~~~
-
-* Large sites (1000+ pages) may experience performance impacts during navigation generation
-* Complex HTML structures may not convert perfectly to Markdown format
-* Some web servers may require configuration for .well-known directory access
-
-Migration Notes
-~~~~~~~~~~~~~~~
-
-This is a new extension, so no migration is required.
-
-Deprecations
-~~~~~~~~~~~~
-
-No deprecations in this initial release.
-
-Credits
-~~~~~~~
-
-* Development: web-vision GmbH
-* Based on the llmstxt.org specification for AI-readable content guidelines
-* Uses league/html-to-markdown for HTML-to-Markdown conversion
-
-Installation
-~~~~~~~~~~~~
-
-Install via Composer:
-
-.. code-block:: bash
-
-   composer require web-vision/ai-llms-txt
-
-After installation, the extension is ready to use with default settings. Visit ?type=1699 or ?type=1701
-or ``/.well-known/llms.txt`` if you have configured RouterEnhancers, to access the generated links.
-
-For detailed configuration options, see the Configuration section of this documentation.
+*   ``llms.txt`` generation according to the llmstxt.org specification, with
+    the site's page tree up to a configurable depth
+*   Markdown version of every page via the ``.md`` suffix
+*   Route enhancers for ``/llms.txt``, ``/.well-known/llms.txt`` and ``.md``

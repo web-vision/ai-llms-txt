@@ -1,102 +1,161 @@
-.. include:: /Includes.rst.txt
+..  include:: /Includes.rst.txt
+
+..  _administrator:
 
 =============
 Administrator
 =============
 
+..  _installation:
+
 Installation
 ============
 
-The extension can be installed using Composer (recommended). Legacy mode is not tested.
+Install the extension with Composer:
 
-Composer Installation
----------------------
+..  code-block:: bash
 
-.. code-block:: bash
+    composer require web-vision/ai-llms-txt
 
-   composer require web-vision/ai-llms-txt
+Then set up the extension, so that the TYPO3 caches are flushed:
 
+..  code-block:: bash
 
-Configuration
-=============
+    vendor/bin/typo3 extension:setup
 
-After installation, the extension works out of the box with sensible defaults. However, you can customize its behavior through TypoScript configuration.
+The extension is also available in the TYPO3 Extension Repository (TER) under
+the key ``ai_llms_txt``. Classic mode installations are not covered by the
+automated tests.
 
-Basic TypoScript Setup
-----------------------
+..  _setup:
 
-The extension automatically includes its TypoScript configuration. No manual setup is required for basic functionality.
+Setup
+=====
 
-Site Configuration
-------------------
+The extension works without further configuration: it registers its page
+types automatically and is enabled for every site.
 
-The extension automatically uses your site's configuration from ``config/sites/[site]/config.yaml``. If you want to customize the routing, you can add custom route enhancers:
+1.  Import the route enhancer into each site configuration to get the
+    ``/llms.txt`` and ``.md`` URLs, see :ref:`configuration-routes`.
+2.  Optionally adjust the title, summary and other values in the site
+    configuration, see :ref:`configuration-site`.
+3.  To keep a site out of it entirely, disable
+    :confval:`site-llmsTxtEnabled` for that site.
 
-.. code-block:: yaml
+..  _urls:
 
-   imports:
-     -
-       resource: 'EXT:ai_llms_txt/Configuration/Routes/RouterEnhancer.yaml'
+Available URLs
+==============
 
-This import adds the following route enhancers:
+..  list-table::
+    :header-rows: 1
+    :widths: 55 45
 
-* ``llms.txt`` for the llms.txt specification (typeNum 1699)
-* ``.md`` suffix for Markdown content (typeNum 1701)
+    *   - URL
+        - Output
+    *   - ``https://example.com/llms.txt``
+        - ``llms.txt`` (with route enhancer)
+    *   - ``https://example.com/.well-known/llms.txt``
+        - ``llms.txt`` (with route enhancer)
+    *   - ``https://example.com/about.md``
+        - Markdown version of ``/about`` (with route enhancer)
+    *   - ``https://example.com/?type=1699``
+        - ``llms.txt`` (always available)
+    *   - ``https://example.com/about?type=1701``
+        - Markdown version of ``/about`` (always available)
 
-Accessing Generated Content
-===========================
+..  _testing-installation:
 
-After installation, the following URLs become available:
-
-llms.txt Files
---------------
-
-* **https://yoursite.com/?type=1699** - Default access via typeNum
-* **https://yoursite.com/llms.txt** - Alternative direct access (if route enhancer is configured)
-
-
-Markdown Content
-----------------
-
-* **https://yoursite.com/any-page.md** - Markdown version of any TYPO3 page
-
-Testing the Installation
+Testing the installation
 ========================
 
-1. **Test llms.txt generation:**
-   Visit ``https://yoursite.com/llms.txt`` to verify the llms.txt is accessible.
+1.  Open ``https://example.com/llms.txt``. It starts with the site title as
+    a ``#`` heading, followed by the summary and the list of pages.
+2.  Append ``.md`` to the URL of any regular page, for example
+    ``https://example.com/about.md``. The page content is shown as plain
+    Markdown.
 
-   or
+..  _cli-export:
 
-   Visit ``https://yoursite.com/.well-known/llms.txt``
+Exporting pages as Markdown files
+=================================
 
-2. **Test Markdown conversion:**
+The command ``ai-llms:download-markdown`` saves the Markdown version of pages
+as ``.md`` files, for example to feed them into an AI knowledge base:
 
-   Visit any page on your site with ``.md`` appended (e.g., ``https://yoursite.com/about.md``) to see the Markdown version.
+..  code-block:: bash
 
-3. **Check content structure:**
+    # Export all sites to var/markdown-export/
+    vendor/bin/typo3 ai-llms:download-markdown
 
-   The llms.txt file should include your site's title, description, and navigation structure.
+    # Export one site, with YAML frontmatter, and preview first
+    vendor/bin/typo3 ai-llms:download-markdown main --include-metadata --dry-run
+
+..  list-table::
+    :header-rows: 1
+    :widths: 30 70
+
+    *   - Argument / option
+        - Description
+    *   - ``siteIdentifier``
+        - Site to export. Without it, all sites are exported.
+    *   - ``-o``, ``--output-dir``
+        - Target directory, relative to the project root.
+          Default: ``var/markdown-export``.
+    *   - ``-l``, ``--limit``
+        - Maximum number of pages to export. Default: ``0`` (no limit).
+    *   - ``-f``, ``--format``
+        - File naming: ``slug`` (default), ``uid`` or ``title``.
+    *   - ``-m``, ``--include-metadata``
+        - Prepend YAML frontmatter with uid, title, description, URL, site
+          and export time.
+    *   - ``--flat``
+        - Write all files into one directory instead of one per site.
+    *   - ``--overwrite``
+        - Overwrite existing files.
+    *   - ``--dry-run``
+        - List what would be exported without writing files.
+
+The command fetches each page's ``.md`` URL over HTTP, so the site must be
+reachable from the server under its configured base URL, and the route
+enhancer must be imported.
+
+..  _troubleshooting:
 
 Troubleshooting
 ===============
 
-**llms.txt file not accessible**
-  Ensure your web server is configured to serve files from the ``.well-known`` directory. Some servers block access to hidden directories by default.
+``/llms.txt`` returns "page not found"
+    The route enhancer is not imported into the site configuration, see
+    :ref:`configuration-routes`. ``/?type=1699`` works without any routing
+    and helps to tell a routing problem apart from other causes.
 
-**Markdown conversion fails**
-  Check that the ``league/html-to-markdown`` package is properly installed via Composer.
+``/.well-known/llms.txt`` is not reachable
+    Some web server configurations block paths starting with a dot. Allow
+    ``/.well-known/`` to be passed to TYPO3, or use ``/llms.txt``.
 
-**Navigation structure missing**
-  Verify that your pages are not hidden and have proper navigation settings in the page properties.
+A page's ``.md`` URL returns "page not found"
+    This is intended when the extension is disabled for the site, or when
+    the page has :guilabel:`Index this page` switched off (``no_index``).
 
-**Content not rendering**
-  Ensure content elements are not hidden and are in standard column positions (colPos).
+A page is missing from ``llms.txt``
+    Check the conditions in :ref:`configuration-pages`. If caching is
+    enabled and the page was changed outside the backend, for example by its
+    start time passing, it appears once the cache entry expires.
 
-Performance Considerations
-=========================
+``llms.txt`` contains an "error: Failed to generate content" line
+    Generation failed. The cause is logged through the TYPO3 logging
+    framework (by default in :file:`var/log/`), not shown in the response.
 
-* The extension uses TYPO3's caching mechanisms where possible
-* llms.txt generation processes the entire site navigation, so performance depends on site size
-* Markdown conversion processes all content elements on a page
-* For large sites, consider implementing additional caching strategies if needed
+..  _performance:
+
+Performance
+===========
+
+``llms.txt`` is generated with batched database queries per tree level rather
+than one query per page. On large sites, keep
+:confval:`site-llmsTxtMaxDepth` low and set :confval:`site-llmsTxtCacheLifetime`
+so the file is not rebuilt on every request.
+
+The Markdown version of a page renders the full page through TYPO3 and
+converts it, so it takes about as long as rendering the HTML page.

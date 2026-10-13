@@ -1,56 +1,55 @@
 # LLMS TXT Generator for TYPO3
 
-[![TYPO3 13](https://img.shields.io/badge/TYPO3-13-orange.svg)](https://get.typo3.org/version/13)
-[![PHP 8.2+](https://img.shields.io/badge/PHP-8.2+-blue.svg)](https://www.php.net/)
+[![TYPO3 13](https://img.shields.io/badge/TYPO3-13.4-orange.svg)](https://get.typo3.org/version/13)
+[![TYPO3 14](https://img.shields.io/badge/TYPO3-14.3-orange.svg)](https://get.typo3.org/version/14)
+[![PHP 8.2-8.4](https://img.shields.io/badge/PHP-8.2--8.4-blue.svg)](https://www.php.net/)
 [![License: GPL v2+](https://img.shields.io/badge/License-GPL%20v2+-blue.svg)](https://www.gnu.org/licenses/gpl-2.0)
 
-TYPO3 extension for generating `llms.txt` links according to the [llmstxt.org specification](https://llmstxt.org/) to control Large Language Model crawling policies.
+Generates an `llms.txt` file according to the [llmstxt.org specification](https://llmstxt.org/)
+and serves pages as Markdown, giving Large Language Models a structured, machine-readable
+view of your TYPO3 site.
 
 ## Features
 
-- **Automatic llms.txt generation** - Creates policy files according to the official specification
-- **Site navigation structure** - Includes your site's navigation hierarchy in the llms.txt file
-- **Configurable metadata** - Add topics, contact information, and custom descriptions
-- **Markdown export** - Convert any TYPO3 page to Markdown format via `.md` suffix
-- **TYPO3 v13 compatibility** - Built specifically for TYPO3 v13 using modern PHP practices
+- **llms.txt generation** at `/llms.txt` and `/.well-known/llms.txt`, listing the site's page
+  tree with links and descriptions
+- **Markdown version of every page** by appending `.md` to its URL, rendered through TYPO3's
+  regular content rendering
+- **Per-site configuration** of title, summary, topics, contact address, depth and excluded
+  page types
+- **Respects page visibility**: hidden, access-restricted, "hide in menu" and "no index" pages
+  are not listed
+- **Optional caching** of the generated llms.txt
+- **CLI export** of pages as Markdown files (`ai-llms:download-markdown`)
 
 ## What is llms.txt?
 
-llms.txt is an emerging standard for websites to communicate with Large Language Models and AI systems. Similar to robots.txt for web crawlers, llms.txt files provide:
+`llms.txt` is a proposed convention for a Markdown file at the root of a website that tells
+language models what the site is about and where its most useful content is. Language models
+struggle with full HTML pages and have limited context windows; a curated index with links to
+clean Markdown versions lets them find and read the relevant content directly.
 
-- **Crawling policies** - Guidelines for AI systems on how to interact with your content
-- **Site structure** - Navigation and content organization information
-- **Metadata** - Topics, contact information, and site descriptions
-- **Content access** - Direct links to machine-readable content formats
+`llms.txt` is **not** an access control mechanism: it does not grant or deny permission to
+crawl or train on your content. Use `robots.txt` and your server configuration for that.
+
+## Requirements
+
+- **TYPO3**: 13.4 LTS or 14.3 LTS
+- **PHP**: 8.2, 8.3 or 8.4
 
 ## Installation
 
-### Composer (Recommended)
-
 ```bash
 composer require web-vision/ai-llms-txt
+vendor/bin/typo3 extension:setup
 ```
 
-## Quick Start
+The extension works immediately and is enabled for all sites:
 
-After installation, the extension works immediately with default settings:
+- `https://example.com/?type=1699` returns `llms.txt`
+- `https://example.com/about?type=1701` returns the Markdown version of `/about`
 
-- **llms.txt generation**: Visit `https://yoursite.com/?type=1699`
-- **Markdown pages**: Visit `https://yoursite.com/?type=1701`
-
-with Route Enhancer:
-
-- **llms.txt file**: Visit `https://yoursite.com/.well-known/llms.txt`
-- **Markdown pages**: Add `.md` to any page URL (e.g., `https://yoursite.com/about.md`)
-
-## Configuration
-
-All settings can be configured in your site configuration.
-
-
-## Route Configuration
-
-To enable user-friendly URLs, include the route enhancers in your site configuration:
+For the usual URLs, import the route enhancer into your site configuration:
 
 ```yaml
 # config/sites/main/config.yaml
@@ -59,61 +58,50 @@ imports:
     resource: 'EXT:ai_llms_txt/Configuration/Routes/RouterEnhancer.yaml'
 ```
 
-This enables:
-- `.md` suffix for Markdown content
-- `llms.txt` for direct access to the specification file
+This enables `/llms.txt`, `/.well-known/llms.txt` and the `.md` suffix, for example
+`https://example.com/about.md`.
 
-## Usage Examples
+## Configuration
 
-### Accessing Generated Content
+All settings are made per site, in the backend module **Site Management > Sites**
+(tab *LLMS.TXT Configuration*) or directly in the site's `config.yaml`:
 
-**llms.txt files:**
-- `https://yoursite.com/?type=1699`
-- `https://yoursite.com/.well-known/llms.txt` - with route enhancer
-- `https://yoursite.com/llms.txt` - Alternative access (with route enhancer)
+```yaml
+llmsTxtEnabled: true            # Enables llms.txt and the .md pages for this site
+llmsTxtTitle: 'ACME Corporation'   # Default: title of the root page
+llmsTxtDescription: 'Industrial products and engineering services.'   # Default: root page description
+llmsTxtKeywords: 'manufacturing, engineering'
+llmsTxtContactEmail: 'contact@example.com'
+llmsTxtAdditionalInfo: 'Free Markdown appended to the end of llms.txt'
+llmsTxtMaxDepth: 2              # Page tree levels to list, 1-10
+llmsTxtExcludeDoktypes: '3, 199'   # Additional page types to leave out
+llmsTxtCacheLifetime: 900       # Seconds; 0 (default) disables caching
+```
 
-**Markdown content:**
-- `https://yoursite.com/?type=1701`
-- `https://yoursite.com/about.md` - Markdown version of your About page
-- `https://yoursite.com/services/consulting.md` - Markdown version of any page
-
-
-## Requirements
-
-- **TYPO3**: 13.0 or higher
-- **PHP**: 8.2 or higher
-- **Dependencies**: league/html-to-markdown (automatically installed)
+See the [configuration reference](Documentation/Configuration/Index.rst) for details, including
+which pages are listed.
 
 ## Documentation
 
-Comprehensive documentation is available covering:
-
-- [Installation and Configuration](Documentation/Administrator/Index.rst)
-- [Editor Guidelines](Documentation/Editor/Index.rst)
-- [Developer API Reference](Documentation/Developer/Index.rst)
-- [TypoScript Configuration](Documentation/Configuration/Index.rst)
+- [Introduction](Documentation/Introduction/Index.rst)
+- [Installation, URLs, CLI export and troubleshooting](Documentation/Administrator/Index.rst)
+- [Configuration reference](Documentation/Configuration/Index.rst)
+- [Editor guidelines](Documentation/Editor/Index.rst)
+- [Architecture, public API and testing](Documentation/Developer/Index.rst)
+- [Known problems](Documentation/KnownProblems/Index.rst)
+- [Changelog](CHANGELOG.md)
 
 ## Contributing
 
-Contributions are welcome! Please:
-
-1. Follow TYPO3 coding standards
-2. Include tests for new features
-3. Update documentation for configuration changes
-4. Use dependency injection patterns
-5. Maintain strict typing
+Contributions are welcome. Please follow the TYPO3 coding guidelines, include tests for new
+behaviour and document new settings. See the
+[developer documentation](Documentation/Developer/Index.rst#testing) for how to run the tests.
 
 ## License
 
 This extension is licensed under GPL v2+ - see the [LICENSE](LICENSE) file for details.
 
-## Support
-
-- **Documentation**: Full documentation in the `Documentation/` folder
-- **Issues**: Report issues via the project issue tracker
-- **Community**: Join TYPO3 community discussions for general TYPO3 support
-
 ## Related
 
-- [llmstxt.org](https://llmstxt.org/) - Official specification
+- [llmstxt.org](https://llmstxt.org/) - Specification
 - [TYPO3 Documentation](https://docs.typo3.org/) - TYPO3 CMS documentation
