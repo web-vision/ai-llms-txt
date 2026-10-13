@@ -144,6 +144,36 @@ final class NavigationBuilderTest extends FunctionalTestCase
     }
 
     #[Test]
+    public function formatAsMarkdownKeepsEveryEntryOnASingleLine(): void
+    {
+        // Page descriptions are multi-line text fields. A line break must not end the
+        // list item: a blank line would close the list and leave the remaining text
+        // as free-standing content in llms.txt.
+        $structure = [
+            [
+                'title' => "About\nus",
+                'description' => '',
+                'url' => 'https://example.com/about.md',
+                'children' => [
+                    [
+                        'uid' => 5,
+                        'title' => 'Team',
+                        'url' => 'https://example.com/team.md',
+                        'description' => "Meet our team.\r\n\r\nInjected paragraph",
+                        'children' => [],
+                    ],
+                ],
+                'language' => 'EN',
+            ],
+        ];
+
+        $result = $this->subject->formatAsMarkdown($structure);
+
+        static::assertContains('+ [About us](https://example.com/about.md)', $result);
+        static::assertContains('  - [Team](https://example.com/team.md): Meet our team\\. Injected paragraph', $result);
+    }
+
+    #[Test]
     public function formatAsMarkdownGroupsByLanguage(): void
     {
         $structure = [

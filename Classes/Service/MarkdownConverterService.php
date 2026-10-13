@@ -41,10 +41,35 @@ class MarkdownConverterService
 
         try {
             $markdown = $converter->convert($html);
-            $markdown = html_entity_decode($markdown, ENT_QUOTES | ENT_HTML5, 'UTF-8');
-            return trim($markdown);
+            return trim($this->decodeEntitiesExceptMarkup($markdown));
         } catch (\Exception $e) {
             return '';
         }
+    }
+
+    /**
+     * Decode HTML entities so text reads naturally in the Markdown output
+     * (e.g. "Tom &amp; Jerry" -> "Tom & Jerry"), but deliberately leave the
+     * tag-introducing characters "<" and ">" encoded.
+     *
+     * A blanket html_entity_decode() would undo the htmlspecialchars() escaping that
+     * LlmsTxtController applies to page metadata, and turn markup that was escaped in
+     * the source HTML back into live markup. Since the whole point of this output is to
+     * be consumed elsewhere - and most Markdown renderers pass raw HTML straight
+     * through - that turns editor-controlled page content into stored XSS in the
+     * consumer. Leaving "&lt;"/"&gt;" encoded keeps them inert while still rendering as
+     * literal "<"/">" wherever the Markdown is displayed.
+     */
+    private function decodeEntitiesExceptMarkup(string $markdown): string
+    {
+        return preg_replace_callback(
+            '/&(?:#[0-9]{1,7}|#[xX][0-9a-fA-F]{1,6}|[a-zA-Z][a-zA-Z0-9]{1,31});/',
+            static function (array $matches): string {
+                $decoded = html_entity_decode($matches[0], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
+                return ($decoded === '<' || $decoded === '>') ? $matches[0] : $decoded;
+            },
+            $markdown
+        ) ?? $markdown;
     }
 }

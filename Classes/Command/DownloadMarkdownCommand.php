@@ -12,6 +12,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
+use Symfony\Component\Yaml\Yaml;
 use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Resource\Exception\InvalidPathException;
 use TYPO3\CMS\Core\Site\Entity\Site;
@@ -370,23 +371,32 @@ final class DownloadMarkdownCommand extends Command
         return $filename;
     }
 
+    /**
+     * Build YAML frontmatter for an exported page.
+     *
+     * Values are serialized with the YAML component rather than hand-quoted: page titles
+     * and descriptions are editor-controlled, and `description` is a multi-line capable
+     * text field. addslashes() neither escapes newlines - letting an editor inject
+     * arbitrary frontmatter keys into every exported file - nor produces valid YAML for
+     * an apostrophe, which it turns into the invalid escape sequence \' inside a
+     * double-quoted scalar.
+     */
     private function addFrontmatter(string $content, Site $site, array $page): string
     {
-        $uri = $site->getRouter()->generateUri((int)$page['uid']);
-
-        $frontmatter = "---\n";
-        $frontmatter .= 'uid: ' . $page['uid'] . "\n";
-        $frontmatter .= 'title: "' . addslashes($page['title']) . "\"\n";
+        $data = [
+            'uid' => (int)$page['uid'],
+            'title' => (string)$page['title'],
+        ];
 
         if (!empty($page['description'])) {
-            $frontmatter .= 'description: "' . addslashes($page['description']) . "\"\n";
+            $data['description'] = (string)$page['description'];
         }
 
-        $frontmatter .= 'url: "' . $uri . "\"\n";
-        $frontmatter .= 'site: "' . $site->getIdentifier() . "\"\n";
-        $frontmatter .= 'exported: "' . date('Y-m-d\TH:i:s\Z') . "\"\n";
-        $frontmatter .= "---\n\n";
+        $data['url'] = (string)$site->getRouter()->generateUri((int)$page['uid']);
+        $data['site'] = $site->getIdentifier();
+        // gmdate(), not date(): the trailing "Z" claims UTC.
+        $data['exported'] = gmdate('Y-m-d\TH:i:s\Z');
 
-        return $frontmatter . $content;
+        return "---\n" . Yaml::dump($data, 2, 2) . "---\n\n" . $content;
     }
 }

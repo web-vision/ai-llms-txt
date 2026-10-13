@@ -218,15 +218,34 @@ final class MarkdownConverterServiceTest extends FunctionalTestCase
     }
 
     #[Test]
-    public function convertHtmlToMarkdownDecodesHtmlEntities(): void
+    public function convertHtmlToMarkdownDecodesTextEntities(): void
     {
-        $html = '<p>Special chars: &amp; &lt; &gt; &quot; &apos;</p>';
+        $html = '<p>Special chars: &amp; &quot; &apos; &ndash; caf&eacute;</p>';
 
         $result = $this->subject->convertHtmlToMarkdown($html);
 
         static::assertStringContainsString('&', $result);
-        static::assertStringContainsString('<', $result);
-        static::assertStringContainsString('>', $result);
+        static::assertStringContainsString('"', $result);
+        static::assertStringContainsString("'", $result);
+        static::assertStringContainsString('–', $result);
+        static::assertStringContainsString('café', $result);
+        static::assertStringNotContainsString('&amp;', $result);
+    }
+
+    #[Test]
+    public function convertHtmlToMarkdownKeepsTagIntroducingEntitiesEncoded(): void
+    {
+        // Escaped markup must not be decoded back into live markup: this output is
+        // consumed by Markdown renderers, most of which pass raw HTML straight through.
+        $html = '<h1>&lt;script&gt;alert(1)&lt;/script&gt;</h1><p>1 &lt; 2 &amp;&amp; 3 &gt; 2</p>';
+
+        $result = $this->subject->convertHtmlToMarkdown($html);
+
+        static::assertStringNotContainsString('<script', $result);
+        static::assertStringNotContainsString('</script', $result);
+        static::assertStringContainsString('&lt;script&gt;', $result);
+        // Surrounding text entities are still decoded normally
+        static::assertStringContainsString('&& 3', $result);
     }
 
     #[Test]

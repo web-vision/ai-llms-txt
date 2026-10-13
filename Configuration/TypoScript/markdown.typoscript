@@ -4,9 +4,17 @@ markdown_page {
 
     config {
         disableAllHeaderCode = 1
-        additionalHeaders.10 {
-            header = Content-Type: text/plain; charset=utf-8
-            replace = 1
+        additionalHeaders {
+            10 {
+                header = Content-Type: text/plain; charset=utf-8
+                replace = 1
+            }
+            # Content is editor-controlled and served verbatim; without this a browser
+            # may sniff the body as HTML and execute it instead of honouring text/plain.
+            20 {
+                header = X-Content-Type-Options: nosniff
+                replace = 1
+            }
         }
         xhtml_cleaning = 0
         admPanel = 0

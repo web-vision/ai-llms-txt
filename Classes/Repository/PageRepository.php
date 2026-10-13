@@ -64,7 +64,7 @@ class PageRepository
     /**
      * Find a page by its UID
      *
-     * @return array{uid: int, title: string, subtitle: string, seo_title: string, description: string, abstract: string}|array{}
+     * @return array{uid: int, title: string, subtitle: string, seo_title: string, description: string, abstract: string, no_index: int}|array{}
      */
     public function findById(int $pageId, ?SiteLanguage $siteLanguage = null): array
     {
@@ -73,7 +73,7 @@ class PageRepository
             ->add(GeneralUtility::makeInstance(FrontendRestrictionContainer::class));
 
         $result = $queryBuilder
-            ->select('uid', 'pid', 'title', 'subtitle', 'seo_title', 'description', 'abstract', 'sys_language_uid', 'l10n_parent')
+            ->select('uid', 'pid', 'title', 'subtitle', 'seo_title', 'description', 'abstract', 'no_index', 'sys_language_uid', 'l10n_parent')
             ->from('pages')
             ->where(
                 $queryBuilder->expr()->eq('uid', $queryBuilder->createNamedParameter($pageId, Connection::PARAM_INT))

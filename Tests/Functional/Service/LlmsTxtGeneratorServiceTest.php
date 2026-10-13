@@ -7,6 +7,8 @@ namespace WebVision\AiLlmsTxt\Tests\Functional\Service;
 use PHPUnit\Framework\Attributes\Test;
 use TYPO3\CMS\Core\Cache\CacheManager;
 use TYPO3\CMS\Core\Configuration\SiteConfiguration;
+use TYPO3\CMS\Core\Context\Context;
+use TYPO3\CMS\Core\Context\UserAspect;
 use TYPO3\CMS\Core\Http\ServerRequest;
 use TYPO3\CMS\Core\Site\Entity\Site;
 use TYPO3\CMS\Core\Site\SiteFinder;
@@ -77,7 +79,7 @@ final class LlmsTxtGeneratorServiceTest extends FunctionalTestCase
         $this->setRequestForSite($site);
 
         $cache = GeneralUtility::makeInstance(CacheManager::class)->getCache('hash');
-        $cacheIdentifier = 'llmstxt_' . $site->getIdentifier() . '_' . $site->getRootPageId();
+        $cacheIdentifier = $this->subject->calculateCacheIdentifier($site);
         $cache->set($cacheIdentifier, 'SENTINEL CACHED CONTENT', ['pages'], 3600);
 
         $result = $this->subject->generateLlmsTxt(1);
@@ -97,7 +99,7 @@ final class LlmsTxtGeneratorServiceTest extends FunctionalTestCase
         $this->setRequestForSite($site);
 
         $cache = GeneralUtility::makeInstance(CacheManager::class)->getCache('hash');
-        $cacheIdentifier = 'llmstxt_' . $site->getIdentifier() . '_' . $site->getRootPageId();
+        $cacheIdentifier = $this->subject->calculateCacheIdentifier($site);
 
         $this->subject->generateLlmsTxt(1);
 
@@ -111,7 +113,7 @@ final class LlmsTxtGeneratorServiceTest extends FunctionalTestCase
         $this->setRequestForSite($site);
 
         $cache = GeneralUtility::makeInstance(CacheManager::class)->getCache('hash');
-        $cacheIdentifier = 'llmstxt_' . $site->getIdentifier() . '_' . $site->getRootPageId();
+        $cacheIdentifier = $this->subject->calculateCacheIdentifier($site);
         static::assertFalse($cache->has($cacheIdentifier));
 
         $this->subject->generateLlmsTxt(1);
@@ -124,6 +126,51 @@ final class LlmsTxtGeneratorServiceTest extends FunctionalTestCase
         $result = $this->subject->generateLlmsTxt(1);
 
         static::assertSame('SENTINEL FROM CACHE', $result);
+    }
+
+    #[Test]
+    public function cacheIdentifierIsScopedToFrontendUserGroups(): void
+    {
+        $site = $this->writeSiteConfiguration(['llmsTxtCacheLifetime' => 900]);
+        $context = $this->get(Context::class);
+
+        $context->setAspect('frontend.user', new UserAspect(null, [0, -1]));
+        $anonymousIdentifier = $this->subject->calculateCacheIdentifier($site);
+
+        $context->setAspect('frontend.user', new UserAspect(null, [0, -1, 2]));
+        $memberIdentifier = $this->subject->calculateCacheIdentifier($site);
+
+        static::assertNotSame(
+            $anonymousIdentifier,
+            $memberIdentifier,
+            'Navigation is filtered by fe_group, so a member\'s cache entry must not be reusable for anonymous visitors'
+        );
+    }
+
+    #[Test]
+    public function cacheIdentifierIsStableForTheSameGroupsRegardlessOfOrder(): void
+    {
+        $site = $this->writeSiteConfiguration(['llmsTxtCacheLifetime' => 900]);
+        $context = $this->get(Context::class);
+
+        $context->setAspect('frontend.user', new UserAspect(null, [0, -1, 5, 2]));
+        $first = $this->subject->calculateCacheIdentifier($site);
+
+        $context->setAspect('frontend.user', new UserAspect(null, [2, 5, -1, 0]));
+        $second = $this->subject->calculateCacheIdentifier($site);
+
+        static::assertSame($first, $second, 'Group order must not fragment the cache');
+    }
+
+    #[Test]
+    public function cacheIdentifierIsAValidCacheEntryIdentifier(): void
+    {
+        // Site identifiers may contain characters (dots, for instance) that
+        // FrontendInterface::PATTERN_ENTRYIDENTIFIER rejects.
+        $site = $this->writeSiteConfiguration(['llmsTxtCacheLifetime' => 900]);
+        $cache = GeneralUtility::makeInstance(CacheManager::class)->getCache('hash');
+
+        static::assertTrue($cache->isValidEntryIdentifier($this->subject->calculateCacheIdentifier($site)));
     }
 
     private function writeSiteConfiguration(array $additionalConfig): Site

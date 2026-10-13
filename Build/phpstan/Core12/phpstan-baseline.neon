@@ -146,7 +146,7 @@ parameters:
 			path: ../../../Tests/Functional/Builder/NavigationBuilderBugTest.php
 
 		-
-			message: "#^Offset 'uid' does not exist on array\\{\\}\\|array\\{uid\\: int, title\\: string, subtitle\\: string, seo_title\\: string, description\\: string, abstract\\: string\\}\\.$#"
+			message: "#^Offset 'uid' does not exist on array\\{\\}\\|array\\{uid\\: int, title\\: string, subtitle\\: string, seo_title\\: string, description\\: string, abstract\\: string, no_index\\: int\\}\\.$#"
 			count: 3
 			path: ../../../Tests/Functional/Repository/PageRepositoryTest.php
 

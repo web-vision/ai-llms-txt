@@ -256,6 +256,11 @@ class NavigationBuilder
      */
     protected function escapeMarkdown(string $text): string
     {
+        // Every label is rendered into a single list item line, but titles and
+        // descriptions are multi-line capable fields: collapse line breaks first, so a
+        // blank line cannot end the list and leave free-standing text in llms.txt.
+        $text = trim(preg_replace('/\s+/u', ' ', $text) ?? $text);
+
         // Escape markdown special characters: [ ] ( ) \ ` * _ { } # + - . !
         // The replacement pattern needs 4 backslashes to produce a literal backslash + captured char
         return preg_replace('/([\[\]()\\\`*_{}#+\-.!])/', '\\\\$1', $text) ?? $text;
