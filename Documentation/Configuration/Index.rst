@@ -200,6 +200,7 @@ Page object        typeNum  Output
 ``markdown_page``  1701     Markdown version of the current page
 =================  =======  ========================================
 
-Both are served as ``Content-Type: text/plain; charset=utf-8`` together with
-``X-Content-Type-Options: nosniff``, so that browsers never interpret the
+``llms.txt`` is served as ``Content-Type: text/plain; charset=utf-8``, the
+Markdown version as ``Content-Type: text/markdown; charset=utf-8``. Both come
+with ``X-Content-Type-Options: nosniff``, so that browsers never interpret the
 editor-controlled content as HTML.

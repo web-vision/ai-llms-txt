@@ -6,11 +6,11 @@ markdown_page {
         disableAllHeaderCode = 1
         additionalHeaders {
             10 {
-                header = Content-Type: text/plain; charset=utf-8
+                header = Content-Type: text/markdown; charset=utf-8
                 replace = 1
             }
             # Content is editor-controlled and served verbatim; without this a browser
-            # may sniff the body as HTML and execute it instead of honouring text/plain.
+            # may sniff the body as HTML and execute it instead of honouring text/markdown.
             20 {
                 header = X-Content-Type-Options: nosniff
                 replace = 1

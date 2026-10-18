@@ -106,7 +106,7 @@ final class FrontendOutputTest extends FunctionalTestCase
         $response = $this->requestMarkdown('/about-us');
 
         static::assertSame(200, $response->getStatusCode());
-        static::assertStringStartsWith('text/plain', $response->getHeaderLine('Content-Type'));
+        static::assertStringStartsWith('text/markdown', $response->getHeaderLine('Content-Type'));
         static::assertSame('nosniff', $response->getHeaderLine('X-Content-Type-Options'));
         static::assertStringStartsWith('# SEO About Us', (string)$response->getBody());
     }

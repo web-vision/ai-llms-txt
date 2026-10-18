@@ -130,7 +130,8 @@ receives security updates.
   (hidden, deleted, start and stop time, frontend user groups). Pages hidden in menus or
   marked "no index" are not listed. The Markdown version of a "no index" page, and of any
   page of a site where the extension is disabled, answers with "page not found".
-- **Safe output.** Both outputs are sent as `text/plain` with `X-Content-Type-Options: nosniff`.
+- **Safe output.** llms.txt is sent as `text/plain`, the Markdown version as `text/markdown`,
+  both with `X-Content-Type-Options: nosniff`.
   Values in llms.txt are escaped and kept on a single line, and `<` and `>` remain encoded in
   the Markdown output, so escaped markup never turns into live HTML.
 - **No internal details in responses.** Errors are logged through the TYPO3 logging framework;

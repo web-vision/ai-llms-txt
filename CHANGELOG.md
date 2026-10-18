@@ -27,6 +27,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   and the export timestamp is in UTC
 - `typo3/cms-frontend` and `typo3/cms-seo` are now declared as dependencies in
   `ext_emconf.php` as well (no change for Composer installations)
+- The Markdown (`.md`) version of a page is served as `Content-Type: text/markdown` instead
+  of `text/plain`
 
 ### Fixed
 - Pages of other languages appeared in the language sections of llms.txt on deep page
