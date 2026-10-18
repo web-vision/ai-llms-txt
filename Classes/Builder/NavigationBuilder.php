@@ -211,7 +211,7 @@ class NavigationBuilder
                 if (!empty($section['url'])) {
                     $title = $this->escapeMarkdown($section['title'] ?? '');
                     $url = $this->escapeUrl($section['url'] ?? '');
-                    $lines[] = "+ [{$title}]({$url})";
+                    $lines[] = "- [{$title}]({$url})";
                 }
 
                 $this->formatChildrenAsMarkdown($section['children'] ?? [], $lines, 1);

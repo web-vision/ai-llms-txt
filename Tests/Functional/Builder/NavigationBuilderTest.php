@@ -169,7 +169,7 @@ final class NavigationBuilderTest extends FunctionalTestCase
 
         $result = $this->subject->formatAsMarkdown($structure);
 
-        static::assertContains('+ [About us](https://example.com/about.md)', $result);
+        static::assertContains('- [About us](https://example.com/about.md)', $result);
         static::assertContains('  - [Team](https://example.com/team.md): Meet our team\\. Injected paragraph', $result);
     }
 
