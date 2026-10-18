@@ -364,4 +364,20 @@ final class MarkdownConverterServiceTest extends FunctionalTestCase
         static::assertStringContainsString('This text must survive after the preceding image element.', $result);
         static::assertStringContainsString('Text accompanying the image.', $result);
     }
+
+    #[Test]
+    public function convertHtmlToMarkdownPreservesContentAfterRemovedNodeContainingDivs(): void
+    {
+        $html = '
+            <div class="container">
+                <aside class="sidebar"><div class="box"><p>Sidebar text</p></div></aside>
+            </div>
+            <div class="row"><p>Main text after the sidebar.</p></div>
+        ';
+
+        $result = $this->subject->convertHtmlToMarkdown($html);
+
+        static::assertStringContainsString('Main text after the sidebar.', $result);
+        static::assertStringNotContainsString('Sidebar text', $result);
+    }
 }

@@ -284,6 +284,28 @@ final class HtmlCleanerServiceTest extends FunctionalTestCase
     }
 
     #[Test]
+    public function cleanTypo3HtmlKeepsOtherDivsBalanced(): void
+    {
+        // Stripping every </div> used to leave the inner div open, so the following
+        // paragraph was parsed as part of the <aside> and removed with it.
+        $html = '<div class="container"><aside><div class="box"><p>Side</p></div></aside></div><p>Main</p>';
+
+        $result = $this->subject->cleanTypo3Html($html);
+
+        static::assertSame('<aside><div class="box"><p>Side</p></div></aside><p>Main</p>', $result);
+    }
+
+    #[Test]
+    public function cleanTypo3HtmlKeepsEncodingAndEscapingWhenUnwrappingDivs(): void
+    {
+        $html = '<div class="row"><p>Café &amp; &lt;script&gt;</p></div>';
+
+        $result = $this->subject->cleanTypo3Html($html);
+
+        static::assertSame('<p>Café &amp; &lt;script&gt;</p>', $result);
+    }
+
+    #[Test]
     public function cleanTypo3HtmlPreservesLists(): void
     {
         $html = '<ul><li>Item 1</li><li>Item 2</li></ul><ol><li>First</li></ol>';

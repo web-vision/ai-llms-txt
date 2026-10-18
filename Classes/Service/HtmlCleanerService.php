@@ -41,10 +41,60 @@ class HtmlCleanerService
         $html = $this->replace('/\s*(<\/?(?:h[1-6]|p|ul|ol|li|blockquote|pre|table|tr|td|th)(?:\s[^>]*)?>)\s*/i', '$1', $html);
 
         // Step 3: Remove common layout/column wrapper divs that create empty lines
-        $html = $this->replace('/<div[^>]*class="[^"]*(?:container|row|col|column|grid|layout|wrapper)[^"]*"[^>]*>/i', '', $html);
-        $html = $this->replace('/<\/div>/i', '', $html);
+        $html = $this->unwrapLayoutDivs($html);
 
         return trim($html);
+    }
+
+    /**
+     * Replace layout/column wrapper divs by their children.
+     *
+     * Opening and closing tags are always removed together. Removing every closing </div>
+     * while keeping all other opening <div> tags leaves unclosed elements, which makes the
+     * HTML parser of the Markdown converter nest the rest of the page into e.g. an <aside>
+     * that is then dropped completely via "remove_nodes" - truncating the Markdown output.
+     */
+    private function unwrapLayoutDivs(string $html): string
+    {
+        if (trim($html) === '') {
+            return $html;
+        }
+
+        $previousUseInternalErrors = libxml_use_internal_errors(true);
+        $document = new \DOMDocument();
+        $loaded = $document->loadHTML(
+            '<?xml encoding="UTF-8"><div id="ai-llms-txt-root">' . $html . '</div>',
+            LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD
+        );
+        libxml_clear_errors();
+        libxml_use_internal_errors($previousUseInternalErrors);
+
+        $root = $loaded ? $document->getElementById('ai-llms-txt-root') : null;
+        $divs = $root !== null ? (new \DOMXPath($document))->query('.//div[@class]', $root) : false;
+        if ($root === null || $divs === false) {
+            return $html;
+        }
+
+        foreach ($divs as $div) {
+            $parent = $div->parentNode;
+            if (!$div instanceof \DOMElement
+                || $parent === null
+                || preg_match('/container|row|col|column|grid|layout|wrapper/i', $div->getAttribute('class')) !== 1
+            ) {
+                continue;
+            }
+            while ($div->firstChild !== null) {
+                $parent->insertBefore($div->firstChild, $div);
+            }
+            $parent->removeChild($div);
+        }
+
+        $result = '';
+        foreach ($root->childNodes as $childNode) {
+            $result .= $document->saveHTML($childNode);
+        }
+
+        return $result;
     }
 
     /**

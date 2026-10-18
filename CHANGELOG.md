@@ -45,6 +45,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   first level did not show up; it now follows `llmsTxtCacheLifetime`
 - Error responses of llms.txt and the Markdown version were stored in the page cache
 - A single invalid UTF-8 byte in the page content made the whole Markdown version empty
+- The Markdown version of a page lost all content following an `<aside>` or `<footer>`
+  that contains a `<div>`: layout wrapper divs are now unwrapped as a whole instead of
+  stripping every closing `</div>`
 
 ### Security
 - The Markdown version of a page was served even when the extension was disabled for the
