@@ -113,6 +113,33 @@ final class FrontendOutputTest extends FunctionalTestCase
     }
 
     #[Test]
+    public function markdownVersionUsesTheMainHeadingOfTheContentInsteadOfThePageTitle(): void
+    {
+        $this->writeSiteConfiguration([]);
+        $this->importCSVDataSet(__DIR__ . '/../Fixtures/Frontend/tt_content.csv');
+
+        $body = (string)$this->requestMarkdown('/about-us')->getBody();
+
+        // The description follows the heading taken from the content
+        static::assertMatchesRegularExpression('/^# Welcome to our company\n\n\S+ About our company\n/', $body);
+        static::assertStringNotContainsString('SEO About Us', $body);
+        static::assertSame(1, preg_match_all('/^# /m', $body));
+        static::assertStringContainsString('We build things.', $body);
+    }
+
+    #[Test]
+    public function markdownVersionStartsWithThePageTitleWhenTheContentHasNoMainHeading(): void
+    {
+        $this->writeSiteConfiguration([]);
+        $this->importCSVDataSet(__DIR__ . '/../Fixtures/Frontend/tt_content.csv');
+
+        $body = (string)$this->requestMarkdown('/products')->getBody();
+
+        static::assertMatchesRegularExpression('/^# Products\n\n\S+ Our product range\n/', $body);
+        static::assertStringContainsString('## Our range', $body);
+    }
+
+    #[Test]
     public function markdownVersionOfAPageExcludedFromIndexingIsNotFound(): void
     {
         $this->writeSiteConfiguration([]);

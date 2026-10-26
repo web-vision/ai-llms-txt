@@ -187,17 +187,6 @@ class LlmsTxtController
         $cObject->setRequest($request);
         $cObject->start([], 'pages');
 
-        $html = '';
-
-        $displayTitle = !empty($page['seo_title']) ? $page['seo_title'] : ($page['title'] ?? '');
-        if (!empty($displayTitle)) {
-            $html .= '<h1>' . htmlspecialchars($displayTitle) . '</h1>';
-        }
-
-        if (!empty($page['description'])) {
-            $html .= '<p class="page-description"> > ' . htmlspecialchars($page['description']) . '</p>';
-        }
-
         // Render ALL content elements from ALL column positions
         // This ensures we capture everything on the page even third-party extensions
         $contentConfiguration = [
@@ -210,10 +199,40 @@ class LlmsTxtController
         ];
         $renderedContent = $cObject->cObjGetSingle('CONTENT', $contentConfiguration);
 
-        if (!empty($renderedContent)) {
-            $html .= $renderedContent;
+        $displayTitle = !empty($page['seo_title']) ? $page['seo_title'] : ($page['title'] ?? '');
+
+        return $this->composePageHtml((string)$displayTitle, (string)($page['description'] ?? ''), $renderedContent);
+    }
+
+    /**
+     * Put the page title and description in front of the rendered content.
+     *
+     * If the first heading of the content is already a main heading (e.g. a header content
+     * element with layout 1), the page title is left out to avoid a second <h1>, and the
+     * description is placed below that heading instead.
+     */
+    protected function composePageHtml(string $title, string $description, string $renderedContent): string
+    {
+        $descriptionHtml = '';
+        if ($description !== '') {
+            $descriptionHtml = '<p class="page-description"> > ' . htmlspecialchars($description) . '</p>';
         }
 
-        return $html;
+        $endOfMainHeading = false;
+        if (preg_match('/<h([1-6])[\s>]/i', $renderedContent, $matches, PREG_OFFSET_CAPTURE) === 1
+            && $matches[1][0] === '1'
+        ) {
+            $endOfMainHeading = stripos($renderedContent, '</h1>', $matches[0][1]);
+        }
+        if ($endOfMainHeading !== false) {
+            return substr_replace($renderedContent, $descriptionHtml, $endOfMainHeading + strlen('</h1>'), 0);
+        }
+
+        $html = '';
+        if ($title !== '') {
+            $html .= '<h1>' . htmlspecialchars($title) . '</h1>';
+        }
+
+        return $html . $descriptionHtml . $renderedContent;
     }
 }

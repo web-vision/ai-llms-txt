@@ -3,3 +3,8 @@
 page = PAGE
 page.10 = TEXT
 page.10.value = Regular page
+
+# Content elements, as collected by the Markdown version: the HTML stored in bodytext
+# stands in for what fluid_styled_content would render.
+tt_content = TEXT
+tt_content.field = bodytext
