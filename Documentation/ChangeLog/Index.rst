@@ -9,6 +9,33 @@ ChangeLog
 The complete history is kept in
 `CHANGELOG.md <https://github.com/web-vision/ai-llms-txt/blob/main/CHANGELOG.md>`__.
 
+..  _changelog-0-4-0:
+
+0.4.0 - 2026-10-26
+==================
+
+..  important::
+
+    *   The Markdown version of a page is served as
+        ``Content-Type: text/markdown`` instead of ``text/plain``. Check
+        proxies, CDN rules or clients that match on the content type.
+    *   If the content of a page starts with an ``<h1>``, the Markdown version
+        no longer adds the page title as a second main heading.
+
+**Added**
+
+*   Support for PHP 8.5 (#17)
+*   README sections on security updates, uninstallation, automatic updates,
+    notes for integrators and the SBOM (#16)
+
+**Fixed**
+
+*   Second main heading in the Markdown version when the content starts with
+    an ``<h1>``
+*   Top-level pages in ``llms.txt`` were listed with ``+`` instead of ``-``
+*   Content following an ``<aside>`` or ``<footer>`` containing a ``<div>``
+    was lost in the Markdown version
+
 ..  _changelog-0-3-0:
 
 0.3.0 - 2026-10-13

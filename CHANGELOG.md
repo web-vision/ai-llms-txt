@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-10-26
+
+### Added
+- Support for PHP 8.5 (#17)
+- README sections on installing security updates, uninstallation and data removal, automatic
+  updates, notes for integrators and where to get the SBOM (#16)
+
+### Changed
+- The Markdown (`.md`) version of a page is served as `Content-Type: text/markdown` instead
+  of `text/plain`
+
 ### Fixed
 - The Markdown version of a page had two main headings when its content starts with an
   `<h1>`, e.g. from a header content element. The page title is now left out in that case,
@@ -16,13 +27,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The Markdown version of a page lost all content following an `<aside>` or `<footer>`
   that contains a `<div>`: layout wrapper divs are now unwrapped as a whole instead of
   stripping every closing `</div>`
-### Changed
-- The Markdown (`.md`) version of a page is served as `Content-Type: text/markdown` instead
-  of `text/plain`
-### Added
-- Support for PHP 8.5 (#17)
-- README sections on installing security updates, uninstallation and data removal, automatic
-  updates, notes for integrators and where to get the SBOM (#16)
 
 ## [0.3.0] - 2026-10-13
 
@@ -113,7 +117,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Comprehensive documentation following TYPO3 standards
 - Support for TYPO3 v12, v13, and v14 LTS
 
-[Unreleased]: https://github.com/web-vision/ai-llms-txt/compare/0.3.0...HEAD
+[Unreleased]: https://github.com/web-vision/ai-llms-txt/compare/0.4.0...HEAD
+[0.4.0]: https://github.com/web-vision/ai-llms-txt/compare/0.3.0...0.4.0
 [0.3.0]: https://github.com/web-vision/ai-llms-txt/compare/0.2.1...0.3.0
 [0.2.1]: https://github.com/web-vision/ai-llms-txt/compare/0.2.0...0.2.1
 [0.2.0]: https://github.com/web-vision/ai-llms-txt/compare/0.1.9...0.2.0

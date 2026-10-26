@@ -196,11 +196,11 @@ Security fixes are released as new versions on
 [Packagist](https://packagist.org/packages/web-vision/ai-llms-txt) and in the
 [TYPO3 Extension Repository](https://extensions.typo3.org/extension/ai_llms_txt). The
 [changelog](CHANGELOG.md) lists them under *Security*. Versions with the same minor version
-(for example 0.3.x) contain no breaking changes, so they can be installed without adapting the
+(for example 0.4.x) contain no breaking changes, so they can be installed without adapting the
 project.
 
 - **Composer:** run `composer update web-vision/ai-llms-txt` and deploy as usual. With the
-  constraint `^0.3`, Composer installs every 0.3.x release. `composer outdated` shows newer
+  constraint `^0.4`, Composer installs every 0.4.x release. `composer outdated` shows newer
   versions; `composer audit` reports installed versions with a published security advisory.
 - **Without Composer:** update the extension in *Admin Tools > Extensions* after updating the
   extension list.
