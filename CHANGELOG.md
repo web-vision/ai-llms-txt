@@ -7,10 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.2] - 2026-10-30
+
 ### Fixed
 - The Markdown version of a page had the content elements of a `b13/container` grid twice:
   inside the container, and once more on their own. They are now only rendered by their
   container
+
+## [0.2.1] - 2026-01-22
+
+### Changed
+- Updated the PHP versions used in the CI workflows and aligned code formatting
 
 ## [0.2.0] - 2026-01-22
 
@@ -41,6 +48,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Comprehensive documentation following TYPO3 standards
 - Support for TYPO3 v12, v13, and v14 LTS
 
-[Unreleased]: https://github.com/web-vision/ai-llms-txt/compare/v0.2.0...HEAD
-[0.2.0]: https://github.com/web-vision/ai-llms-txt/compare/v0.1.9...v0.2.0
-[0.1.9]: https://github.com/web-vision/ai-llms-txt/releases/tag/v0.1.9
+[Unreleased]: https://github.com/web-vision/ai-llms-txt/compare/0.2.2...HEAD
+[0.2.2]: https://github.com/web-vision/ai-llms-txt/compare/0.2.1...0.2.2
+[0.2.1]: https://github.com/web-vision/ai-llms-txt/compare/0.2.0...0.2.1
+[0.2.0]: https://github.com/web-vision/ai-llms-txt/compare/0.1.9...0.2.0
+[0.1.9]: https://github.com/web-vision/ai-llms-txt/releases/tag/0.1.9

@@ -4,6 +4,20 @@
 ChangeLog
 =========
 
+Version 0.2.2
+=============
+
+Release Date: 2026-10-30
+
+Changes
+-------
+
+**Fixed**
+
+* The Markdown version of a page had the content elements of a ``b13/container``
+  grid twice: inside the container, and once more on their own. They are now
+  only rendered by their container
+
 Version 0.2.0-0.2.1
 =============
 
