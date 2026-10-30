@@ -10,6 +10,7 @@ use TYPO3\CMS\Core\Cache\CacheDataCollectorInterface;
 use TYPO3\CMS\Core\Cache\CacheTag;
 use TYPO3\CMS\Core\Error\Http\StatusException;
 use TYPO3\CMS\Core\Http\PropagateResponseException;
+use TYPO3\CMS\Core\Schema\TcaSchemaFactory;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Frontend\Cache\CacheInstruction;
 use TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer;
@@ -189,11 +190,17 @@ class LlmsTxtController
 
         // Render ALL content elements from ALL column positions
         // This ensures we capture everything on the page even third-party extensions
+        $where = '{#deleted}=0 AND {#hidden}=0';
+        // b13/container renders the children of a container inside the container. Rendered on
+        // their own as well, as elements of their column position, they would appear twice.
+        if (GeneralUtility::makeInstance(TcaSchemaFactory::class)->get('tt_content')->hasField('tx_container_parent')) {
+            $where .= ' AND {#tx_container_parent}=0';
+        }
         $contentConfiguration = [
             'table' => 'tt_content',
             'select.' => [
                 'orderBy' => 'colPos, sorting',
-                'where' => '{#deleted}=0 AND {#hidden}=0',
+                'where' => $where,
                 'pidInList' => (string)$pageId,
             ],
         ];

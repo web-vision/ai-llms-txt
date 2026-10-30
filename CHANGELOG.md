@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- The Markdown version of a page had the content elements of a `b13/container` grid twice:
+  inside the container, and once more on their own. They are now only rendered by their
+  container
+
 ## [0.4.0] - 2026-10-26
 
 ### Added

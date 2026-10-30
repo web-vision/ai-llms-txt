@@ -1,0 +1,18 @@
+{
+    "name": "web-vision/ai-llms-txt-test-container-parent",
+    "type": "typo3-cms-extension",
+    "description": "Test fixture: the column b13/container keeps the parent container of a content element in",
+    "version": "1.0.0",
+    "license": "GPL-2.0-or-later",
+    "require": {
+        "typo3/cms-core": "^13.4 || ^14.3"
+    },
+    "extra": {
+        "typo3/cms": {
+            "extension-key": "container_parent",
+            "Package": {
+                "providesPackages": {}
+            }
+        }
+    }
+}

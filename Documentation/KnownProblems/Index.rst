@@ -47,8 +47,9 @@ content, so its quality depends on the markup your templates produce:
     meaningful Markdown representation.
 *   Only content elements of the page are included, from all column
     positions, ordered by column and then by their position in the column.
-    Content that the page template renders by itself, such as menus or
-    footer content, is not included.
+    The children of a ``b13/container`` grid are rendered by their container
+    only, as on the page itself. Content that the page template renders by
+    itself, such as menus or footer content, is not included.
 
 The result is meant to be a readable, semantic version of the content, not a
 faithful copy of the page's layout.

@@ -21,6 +21,8 @@ final class FrontendOutputTest extends FunctionalTestCase
 {
     protected array $testExtensionsToLoad = [
         'web-vision/ai-llms-txt',
+        // The column of b13/container, without the extension itself
+        __DIR__ . '/../Fixtures/Extensions/container_parent',
     ];
 
     protected array $coreExtensionsToLoad = [
@@ -137,6 +139,19 @@ final class FrontendOutputTest extends FunctionalTestCase
 
         static::assertMatchesRegularExpression('/^# Products\n\n\S+ Our product range\n/', $body);
         static::assertStringContainsString('## Our range', $body);
+    }
+
+    #[Test]
+    public function markdownVersionHasTheChildrenOfAContainerOnlyOnceInsideTheContainer(): void
+    {
+        $this->writeSiteConfiguration([]);
+        // Element 11 is a container: its bodytext stands for what it renders, its child 12 included
+        $this->importCSVDataSet(__DIR__ . '/../Fixtures/Frontend/tt_content_container.csv');
+
+        $body = (string)$this->requestMarkdown('/about-us')->getBody();
+
+        static::assertSame(1, substr_count($body, 'Inside the grid.'));
+        static::assertMatchesRegularExpression('/## Before the grid\s+Inside the grid\.\s+After the grid\./', $body);
     }
 
     #[Test]
