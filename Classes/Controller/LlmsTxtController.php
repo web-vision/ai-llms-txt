@@ -100,11 +100,18 @@ class LlmsTxtController
 
         // Render ALL content elements from ALL column positions
         // This ensures we capture everything on the page even third-party extensions
+        $where = '{#deleted}=0 AND {#hidden}=0';
+        // b13/container renders the children of a container inside the container. Rendered on
+        // their own as well, as elements of their column position, they would appear twice.
+        // TcaSchemaFactory is not available in TYPO3 12, so the TCA is checked directly.
+        if (isset($GLOBALS['TCA']['tt_content']['columns']['tx_container_parent'])) {
+            $where .= ' AND {#tx_container_parent}=0';
+        }
         $contentConfiguration = [
             'table' => 'tt_content',
             'select.' => [
                 'orderBy' => 'colPos, sorting',
-                'where' => '{#deleted}=0 AND {#hidden}=0',
+                'where' => $where,
                 'pidInList' => (string)$pageId,
             ],
         ];
