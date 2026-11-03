@@ -14,6 +14,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Yaml\Yaml;
 use TYPO3\CMS\Core\Core\Environment;
+use TYPO3\CMS\Core\Exception\SiteNotFoundException;
 use TYPO3\CMS\Core\Resource\Exception\InvalidPathException;
 use TYPO3\CMS\Core\Site\Entity\Site;
 use TYPO3\CMS\Core\Site\SiteFinder;
@@ -28,6 +29,11 @@ use WebVision\AiLlmsTxt\Service\UrlGeneratorService;
 final class DownloadMarkdownCommand extends Command
 {
     private const DEFAULT_OUTPUT_DIR = 'var/markdown-export';
+
+    /**
+     * Number of parent pages whose subpages are fetched with one query
+     */
+    private const PARENTS_PER_QUERY = 500;
     private readonly Client $httpClient;
 
     public function __construct(
@@ -124,23 +130,29 @@ final class DownloadMarkdownCommand extends Command
             return Command::FAILURE;
         }
 
-        // Prepare output directory
-        $baseDir = $this->prepareOutputDirectory($outputDir);
-        if ($baseDir === null) {
-            $io->error(sprintf('Failed to create output directory: %s', $outputDir));
+        try {
+            $sites = $siteIdentifier
+                ? [$this->siteFinder->getSiteByIdentifier($siteIdentifier)]
+                : $this->siteFinder->getAllSites();
+        } catch (SiteNotFoundException) {
+            $io->error(sprintf('Site "%s" does not exist.', $siteIdentifier));
+            return Command::FAILURE;
+        }
+
+        // A dry run must not leave anything behind, not even an empty directory
+        $baseDir = $this->resolveOutputDirectory($outputDir);
+        if (!$dryRun && !$this->createDirectory($baseDir)) {
+            $io->error(sprintf('Failed to create output directory: %s', $baseDir));
             return Command::FAILURE;
         }
 
         $io->writeln(sprintf('Output directory: <info>%s</info>', $baseDir));
 
-        // Get sites to process
-        $sites = $siteIdentifier
-            ? [$this->siteFinder->getSiteByIdentifier($siteIdentifier)]
-            : $this->siteFinder->getAllSites();
-
         $totalProcessed = 0;
         $totalSkipped = 0;
         $totalErrors = 0;
+        // With --flat, all sites share one directory, and their file names must not collide
+        $usedFilenamesByDirectory = [];
 
         foreach ($sites as $site) {
             $io->section(sprintf('Processing site: %s', $site->getIdentifier()));
@@ -157,8 +169,6 @@ final class DownloadMarkdownCommand extends Command
                 $io->writeln(sprintf('Found %d visible pages', $totalPages));
 
                 $pagesToProcess = $limit > 0 ? array_slice($pages, 0, $limit) : $pages;
-                $progressBar = $io->createProgressBar(count($pagesToProcess));
-                $progressBar->start();
 
                 // Create site subdirectory if not in flat mode
                 $siteDir = $flat ? $baseDir : $baseDir . '/' . $site->getIdentifier();
@@ -166,7 +176,27 @@ final class DownloadMarkdownCommand extends Command
                     $this->ensureDirectoryExists($siteDir);
                 }
 
-                $usedFilenames = [];
+                $usedFilenames = $usedFilenamesByDirectory[$siteDir] ?? [];
+
+                if ($dryRun) {
+                    $plannedFiles = [];
+                    foreach ($pagesToProcess as $page) {
+                        $filePath = $siteDir . '/' . $this->generateFilename($page, $format, $usedFilenames) . '.md';
+                        if (!$overwrite && file_exists($filePath)) {
+                            $plannedFiles[] = $filePath . ' (exists, skipped)';
+                            $totalSkipped++;
+                            continue;
+                        }
+                        $plannedFiles[] = $filePath;
+                        $totalProcessed++;
+                    }
+                    $usedFilenamesByDirectory[$siteDir] = $usedFilenames;
+                    $io->listing($plannedFiles);
+                    continue;
+                }
+
+                $progressBar = $io->createProgressBar(count($pagesToProcess));
+                $progressBar->start();
 
                 foreach ($pagesToProcess as $page) {
                     try {
@@ -177,12 +207,6 @@ final class DownloadMarkdownCommand extends Command
                         // Check if file exists and skip if not overwriting
                         if (!$overwrite && file_exists($filePath)) {
                             $totalSkipped++;
-                            $progressBar->advance();
-                            continue;
-                        }
-
-                        if ($dryRun) {
-                            $totalProcessed++;
                             $progressBar->advance();
                             continue;
                         }
@@ -227,6 +251,7 @@ final class DownloadMarkdownCommand extends Command
                     $progressBar->advance();
                 }
 
+                $usedFilenamesByDirectory[$siteDir] = $usedFilenames;
                 $progressBar->finish();
                 $io->newLine(2);
             } catch (\Exception $e) {
@@ -235,46 +260,87 @@ final class DownloadMarkdownCommand extends Command
                     'site' => $site->getIdentifier(),
                     'exception' => $e,
                 ]);
+                $totalErrors++;
             }
         }
 
-        $io->success(sprintf(
+        if ($dryRun) {
+            $io->success(sprintf('%d pages would be exported, %d skipped', $totalProcessed, $totalSkipped));
+            return $totalErrors > 0 ? Command::FAILURE : Command::SUCCESS;
+        }
+
+        $summary = sprintf(
             'Processed %d pages successfully, %d skipped, %d errors',
             $totalProcessed,
             $totalSkipped,
             $totalErrors
-        ));
+        );
+        // Scripts and schedulers rely on the exit code to notice an incomplete export
+        if ($totalErrors > 0) {
+            $io->error($summary);
+            return Command::FAILURE;
+        }
+        $io->success($summary);
 
         return Command::SUCCESS;
     }
 
-    private function prepareOutputDirectory(string $dir): ?string
+    private function resolveOutputDirectory(string $dir): string
     {
-        // Convert relative path to absolute
         if (!PathUtility::isAbsolutePath($dir)) {
             $dir = Environment::getProjectPath() . '/' . $dir;
-        }
-
-        if (!is_dir($dir) && !mkdir($dir, 0755, true) && !is_dir($dir)) {
-            return null;
         }
 
         return $dir;
     }
 
+    private function createDirectory(string $dir): bool
+    {
+        return is_dir($dir) || mkdir($dir, 0755, true) || is_dir($dir);
+    }
+
     private function ensureDirectoryExists(string $path): void
     {
-        if (!is_dir($path) && !mkdir($path, 0755, true) && !is_dir($path)) {
+        if (!$this->createDirectory($path)) {
             throw new InvalidPathException(sprintf('Failed to create directory: %s', $path), 1769076608);
         }
     }
 
+    /**
+     * The root page of the site and every page below it that llms.txt can list
+     *
+     * Pages hidden in menus or excluded from indexing are left out, as in llms.txt; the
+     * subpages of folders, spacers and shortcuts move up into their place.
+     *
+     * @return array<int, array<string, mixed>>
+     */
     private function getVisiblePages(Site $site): array
     {
-        return $this->pageRepository->findNavigationByParentWithFallback(
-            $site->getRootPageId(),
-            $site->getDefaultLanguage()
-        );
+        $rootPage = $this->pageRepository->findById($site->getRootPageId());
+        $pages = $rootPage !== [] ? [$rootPage] : [];
+
+        $visitedUids = [$site->getRootPageId() => true];
+        $parentUids = [$site->getRootPageId()];
+        while ($parentUids !== []) {
+            $nextParentUids = [];
+            foreach (array_chunk($parentUids, self::PARENTS_PER_QUERY) as $parentUidsOfQuery) {
+                $childrenByParent = $this->pageRepository->findNavigationByParentsBatch($parentUidsOfQuery, 0);
+                foreach ($parentUidsOfQuery as $parentUid) {
+                    foreach ($childrenByParent[$parentUid] ?? [] as $child) {
+                        $uid = (int)$child['uid'];
+                        if (isset($visitedUids[$uid])) {
+                            continue;
+                        }
+                        $visitedUids[$uid] = true;
+                        $pages[] = $child;
+                        $nextParentUids[] = $uid;
+                    }
+                }
+            }
+            $parentUids = $nextParentUids;
+        }
+
+        return $pages;
     }
 
     private function fetchPageContent(Site $site, array $page): ?string
@@ -329,8 +395,9 @@ final class DownloadMarkdownCommand extends Command
     {
         $baseFilename = match ($format) {
             'uid' => 'page-' . $page['uid'],
-            'title' => $this->sanitizeFilename($page['title']),
-            default => $this->sanitizeFilename($page['title']), // slug is default, but we use title as fallback
+            'title' => $this->sanitizeFilename((string)$page['title']),
+            // "/about-us/team" becomes "about-us-team", the root page "/" becomes "index"
+            default => $this->sanitizeFilename(trim((string)($page['slug'] ?? ''), '/') ?: 'index'),
         };
 
         // Handle duplicates
