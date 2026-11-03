@@ -39,3 +39,4 @@ test-results/
 playwright-report/
 config/
 *.sql.gz
+.cache

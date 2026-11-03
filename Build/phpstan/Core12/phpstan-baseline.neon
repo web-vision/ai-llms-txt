@@ -136,21 +136,6 @@ parameters:
 			path: ../../../Classes/Service/UrlGeneratorService.php
 
 		-
-			message: "#^Offset 'children' does not exist on array\\{\\}\\|array\\{title\\: 'About Us', description\\: string, url\\: string, children\\: array, language\\: 'Default language'\\}\\.$#"
-			count: 2
-			path: ../../../Tests/Functional/Builder/NavigationBuilderBugTest.php
-
-		-
-			message: "#^Offset 'children' does not exist on array\\{\\}\\|array\\{title\\: 'Über uns', description\\: string, url\\: string, children\\: array, language\\: 'Language 2'\\}\\.$#"
-			count: 2
-			path: ../../../Tests/Functional/Builder/NavigationBuilderBugTest.php
-
-		-
-			message: "#^Offset 'uid' does not exist on array\\{\\}\\|array\\{uid\\: int, title\\: string, subtitle\\: string, seo_title\\: string, description\\: string, abstract\\: string, no_index\\: int\\}\\.$#"
-			count: 3
-			path: ../../../Tests/Functional/Repository/PageRepositoryTest.php
-
-		-
 			message: "#^Method WebVision\\\\AiLlmsTxt\\\\Tests\\\\Functional\\\\Service\\\\LlmsTxtGeneratorServiceTest\\:\\:writeSiteConfiguration\\(\\) has parameter \\$additionalConfig with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: ../../../Tests/Functional/Service/LlmsTxtGeneratorServiceTest.php

@@ -50,6 +50,9 @@ server configuration for that.
 Requirements
 ============
 
-*   TYPO3 13.4 LTS or 14.3 LTS
+*   TYPO3 12.4 LTS
 *   PHP 8.2, 8.3 or 8.4
 *   The TYPO3 system extension ``seo`` (installed automatically with Composer)
+
+Version 0.2 is the release line for TYPO3 12. For TYPO3 13.4 LTS and 14.3
+LTS, use version 0.4 or later.

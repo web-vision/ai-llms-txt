@@ -16,6 +16,8 @@ Unreleased
 
 ..  important::
 
+    *   The 0.2 release line supports TYPO3 12.4 LTS only. Sites on TYPO3 13.4
+        or 14.3 use version 0.4 or later.
     *   The Markdown version of a page now answers with "page not found" when
         the extension is disabled for the site, or when the page has
         :guilabel:`Index this page` switched off.

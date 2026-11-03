@@ -35,6 +35,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The Markdown (`.md`) version of a page is served as `Content-Type: text/markdown` instead
   of `text/plain`
 
+### Removed
+- Support for TYPO3 13 and 14. The 0.2 releases are for TYPO3 12 only; sites on TYPO3 13.4
+  or 14.3 use version 0.4 or later
+
 ### Fixed
 - Pages of other languages appeared in the language sections of llms.txt on deep page
   trees (#10)

@@ -13,6 +13,6 @@ final class VersionTest extends UnitTestCase
     #[Test]
     public function isSupportedCoreVersion(): void
     {
-        static::assertContains((new Typo3Version())->getMajorVersion(), [12, 13, 14]);
+        static::assertContains((new Typo3Version())->getMajorVersion(), [12]);
     }
 }

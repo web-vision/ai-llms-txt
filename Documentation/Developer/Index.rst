@@ -81,19 +81,19 @@ Podman). Install the dependencies for the TYPO3 version to test first:
 
 ..  code-block:: bash
 
-    # Install dependencies for TYPO3 13 (or 14)
-    Build/Scripts/runTests.sh -t 13 -s composerUpdate
+    # Install dependencies for TYPO3 12
+    Build/Scripts/runTests.sh -t 12 -s composerUpdate
 
     # Unit and functional tests
-    Build/Scripts/runTests.sh -t 13 -p 8.2 -s unit
-    Build/Scripts/runTests.sh -t 13 -p 8.2 -s functional -d sqlite
+    Build/Scripts/runTests.sh -t 12 -p 8.2 -s unit
+    Build/Scripts/runTests.sh -t 12 -p 8.2 -s functional -d sqlite
 
     # Static analysis and coding guidelines
-    Build/Scripts/runTests.sh -t 13 -s phpstan
+    Build/Scripts/runTests.sh -t 12 -s phpstan
     Build/Scripts/runTests.sh -s cgl -n
 
 Run ``Build/Scripts/runTests.sh -h`` for all options. The same suites run on
-GitHub Actions for TYPO3 13 and 14 with PHP 8.2 to 8.4.
+GitHub Actions for TYPO3 12 with PHP 8.2 to 8.4.
 
 ..  _contributing:
 
