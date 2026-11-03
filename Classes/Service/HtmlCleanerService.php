@@ -11,6 +11,14 @@ namespace WebVision\AiLlmsTxt\Service;
 class HtmlCleanerService
 {
     /**
+     * Elements that start a block of their own. Whitespace next to them is only layout of
+     * the HTML source; next to any other element it separates words.
+     */
+    private const BLOCK_ELEMENTS = 'address|article|aside|blockquote|br|caption|dd|details|div|dl|dt|fieldset'
+        . '|figcaption|figure|footer|form|h[1-6]|header|hr|legend|li|main|nav|ol|p|pre|section|summary'
+        . '|table|tbody|td|tfoot|th|thead|tr|ul';
+
+    /**
      * Clean up TYPO3-specific HTML before conversion to Markdown
      *
      * Removes common TYPO3 wrapper elements and presentational markup
@@ -26,22 +34,47 @@ class HtmlCleanerService
             $html = mb_convert_encoding($html, 'UTF-8', 'UTF-8');
         }
 
+        // In preformatted text, such as code, line breaks and indentation are content.
+        // It is set aside until the whitespace of the rest has been normalized.
+        $preformatted = [];
+        $placeholderPrefix = 'ai-llms-txt-pre-' . bin2hex(random_bytes(8)) . '-';
+        $html = preg_replace_callback(
+            '/<pre\b[^>]*>.*?<\/pre>/is',
+            static function (array $matches) use (&$preformatted, $placeholderPrefix): string {
+                $preformatted[] = $matches[0];
+                return '<!--' . $placeholderPrefix . (count($preformatted) - 1) . '-->';
+            },
+            $html
+        ) ?? $html;
+        $placeholderPattern = '<!--' . preg_quote($placeholderPrefix, '/') . '(\d+)-->';
+
         // Step 1: Remove empty elements (run multiple times for nested elements)
         for ($i = 0; $i < 3; $i++) {
             $html = $this->replace('/<a[^>]*>\s*<\/a>/i', '', $html);
             $html = $this->replace('/<div[^>]*>\s*<\/div>/i', '', $html);
             $html = $this->replace('/<span[^>]*>\s*<\/span>/i', '', $html);
-            $html = $this->replace('/<p[^>]*>[\s\r\n&nbsp;]*<\/p>/i', '', $html);
+            $html = $this->replace('/<p(?:\s[^>]*)?>(?:\s|&nbsp;|&#160;)*<\/p>/i', '', $html);
             $html = $this->replace('/<(section|article|aside)[^>]*>\s*<\/\1>/i', '', $html);
         }
 
         // Step 2: Normalize whitespace
         $html = $this->replace('/\s+/u', ' ', $html);
-        $html = $this->replace('/>\s+</u', '><', $html);
-        $html = $this->replace('/\s*(<\/?(?:h[1-6]|p|ul|ol|li|blockquote|pre|table|tr|td|th)(?:\s[^>]*)?>)\s*/i', '$1', $html);
+        $html = $this->replace(
+            '/\s*(<\/?(?:' . self::BLOCK_ELEMENTS . ')(?:\s[^>]*)?>|' . $placeholderPattern . ')\s*/i',
+            '$1',
+            $html
+        );
 
         // Step 3: Remove common layout/column wrapper divs that create empty lines
         $html = $this->unwrapLayoutDivs($html);
+
+        if ($preformatted !== []) {
+            $html = preg_replace_callback(
+                '/' . $placeholderPattern . '/',
+                static fn (array $matches): string => $preformatted[(int)$matches[1]] ?? '',
+                $html
+            ) ?? $html;
+        }
 
         return trim($html);
     }
