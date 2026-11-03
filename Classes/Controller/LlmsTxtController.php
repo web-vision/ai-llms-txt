@@ -11,6 +11,7 @@ use TYPO3\CMS\Core\Cache\CacheTag;
 use TYPO3\CMS\Core\Error\Http\StatusException;
 use TYPO3\CMS\Core\Http\PropagateResponseException;
 use TYPO3\CMS\Core\Schema\TcaSchemaFactory;
+use TYPO3\CMS\Core\Site\Entity\Site;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Frontend\Cache\CacheInstruction;
 use TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer;
@@ -28,6 +29,11 @@ use WebVision\AiLlmsTxt\Service\MarkdownConverterService;
  */
 class LlmsTxtController
 {
+    /**
+     * Page type of llms.txt, see Configuration/TypoScript/setup.typoscript
+     */
+    public const LLMS_TXT_PAGE_TYPE = 1699;
+
     public function __construct(
         private readonly LlmsTxtGeneratorService $llmsTxtGenerator,
         private readonly ConfigurationService $configurationService,
@@ -56,6 +62,39 @@ class LlmsTxtController
             // Return generic error message in llms.txt format - never leak exception details
             return "llmstxt: 1.0\nsite: " . $this->configurationService->getSiteUrl() . "\nerror: Failed to generate content\n";
         }
+    }
+
+    /**
+     * Render the link from the HTML pages of a site to its llms.txt, for page.headerData
+     *
+     * The URL comes from the router, so it respects the site's base path and route
+     * enhancers. llms.txt lists the default language, so all languages link to that one.
+     *
+     * @param array<string, mixed> $conf
+     */
+    #[\TYPO3\CMS\Core\Attribute\AsAllowedCallable]
+    public function renderAlternateLink(string $content, array $conf, ServerRequestInterface $request): string
+    {
+        $site = $request->getAttribute('site');
+        if (!$site instanceof Site) {
+            return '';
+        }
+        $this->configurationService->setRequest($request);
+
+        try {
+            if (!$this->configurationService->isEnabled()) {
+                return '';
+            }
+            $url = (string)$site->getRouter()->generateUri(
+                $site->getRootPageId(),
+                ['_language' => $site->getDefaultLanguage(), 'type' => self::LLMS_TXT_PAGE_TYPE]
+            );
+        } catch (\Exception $e) {
+            $this->logger->warning('Failed to generate the link to llms.txt', ['exception' => $e]);
+            return '';
+        }
+
+        return '<link rel="alternate" type="text/plain" href="' . htmlspecialchars($url) . '" />';
     }
 
     /**

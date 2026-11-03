@@ -42,6 +42,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   files after the page title instead of the URL segment, `--dry-run` created the output
   directory and listed nothing, an unknown site identifier ended with a PHP exception, and the
   command reported success even when pages failed
+- The `<link rel="alternate">` to llms.txt in the head of every page always pointed to
+  `/llms.txt`: wrong for sites under a path or without the route enhancer, and present even
+  where the extension is disabled. It is now built by the router and left out for disabled sites
 
 ### Security
 - league/html-to-markdown is now required in version 5.2.3 or later. Earlier versions let

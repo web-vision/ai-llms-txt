@@ -204,3 +204,9 @@ Page object        typeNum  Output
 Markdown version as ``Content-Type: text/markdown; charset=utf-8``. Both come
 with ``X-Content-Type-Options: nosniff``, so that browsers never interpret the
 editor-controlled content as HTML.
+
+The regular pages of a site point to its ``llms.txt`` with
+``<link rel="alternate" type="text/plain" href="…">`` in their ``<head>``. The
+link is added as ``page.headerData.1761744920``, so it requires the page object
+of your site to be named ``page``, and it is left out where the extension is
+disabled for the site.

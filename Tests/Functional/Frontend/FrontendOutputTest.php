@@ -102,6 +102,28 @@ final class FrontendOutputTest extends FunctionalTestCase
     }
 
     #[Test]
+    public function regularPagesLinkToTheLlmsTxtOfTheSite(): void
+    {
+        $this->writeSiteConfiguration([]);
+
+        $body = (string)$this->executeFrontendSubRequest(new InternalRequest('https://website.local/about-us'))->getBody();
+
+        // The site imports no route enhancer, so the router addresses the page type as a parameter
+        static::assertStringContainsString('<link rel="alternate" type="text/plain" href="https://website.local/?type=1699" />', $body);
+    }
+
+    #[Test]
+    public function regularPagesDoNotLinkToLlmsTxtWhenDisabledForTheSite(): void
+    {
+        $this->writeSiteConfiguration(['llmsTxtEnabled' => false]);
+
+        $body = (string)$this->executeFrontendSubRequest(new InternalRequest('https://website.local/about-us'))->getBody();
+
+        static::assertStringContainsString('Regular page', $body);
+        static::assertStringNotContainsString('rel="alternate"', $body);
+    }
+
+    #[Test]
     public function markdownVersionOfAPageIsServed(): void
     {
         $this->writeSiteConfiguration([]);
