@@ -198,11 +198,11 @@ Security fixes are released as new versions on
 [Packagist](https://packagist.org/packages/web-vision/ai-llms-txt) and in the
 [TYPO3 Extension Repository](https://extensions.typo3.org/extension/ai_llms_txt). The
 [changelog](CHANGELOG.md) lists them under *Security*. Versions with the same minor version
-(for example 0.3.x) contain no breaking changes, so they can be installed without adapting the
+(for example 0.2.x) contain no breaking changes, so they can be installed without adapting the
 project.
 
 - **Composer:** run `composer update web-vision/ai-llms-txt` and deploy as usual. With the
-  constraint `^0.3`, Composer installs every 0.3.x release. `composer outdated` shows newer
+  constraint `^0.2`, Composer installs every 0.2.x release. `composer outdated` shows newer
   versions; `composer audit` reports installed versions with a published security advisory.
 - **Without Composer:** update the extension in *Admin Tools > Extensions* after updating the
   extension list.
@@ -260,9 +260,8 @@ For agencies and developers who deliver this extension as part of a TYPO3 projec
   that process them, such as an application rendering the Markdown as HTML or a language model
   reading llms.txt, must treat them as untrusted input: render Markdown with raw HTML disabled
   and only safe link schemes, and do not let instructions in the content control the model.
-- **Your own conformity assessment.** The EU declaration of conformity below covers this
-  extension only. Projects that integrate it can refer to it and to the SBOM in their own
-  documentation.
+- **Your own conformity assessment.** Projects that integrate the extension can refer to the
+  SBOM in their own documentation.
 - **Vulnerabilities.** Report vulnerabilities you find in the extension via
   https://security.web-vision.de, also when you found them in a customer project.
 
@@ -271,7 +270,7 @@ For agencies and developers who deliver this extension as part of a TYPO3 projec
 An SBOM in CycloneDX 1.6 JSON format is generated automatically for every release and every
 change to the main branch. Because the extension ships without a lock file and its
 dependencies resolve differently per TYPO3 version, there is one SBOM for each supported TYPO3
-version (13 and 14).
+version (12 for the 0.2 releases).
 
 - **Download:** open the run of the
   [SBOM workflow](https://github.com/web-vision/ai-llms-txt/actions/workflows/sbom.yml) for the
@@ -294,16 +293,3 @@ Found a vulnerability? Please report it privately via our
 [security report form](https://security.web-vision.de) — **do not** open a public issue.
 See [SECURITY.md](SECURITY.md) for the full vulnerability disclosure policy,
 including what to expect and our safe harbor statement.
-
-## Simplified EU Declaration of Conformity (Annex VI)
-
-> Hereby, web-vision GmbH declares that the product with digital elements
-> type LLMS TXT Generator is in compliance with Regulation (EU) 2024/2847.
->
-> The full text of the EU declaration of conformity is available at the
-> following internet address:
-> https://security.web-vision.de/conformity/web-vision/ai-llms-txt/0.3.0/en/
-
-The full declarations are also included in this repository:
-[English](EU-Declaration-of-Conformity.md) ·
-[Deutsch](EU-Konformitaetserklaerung.md).

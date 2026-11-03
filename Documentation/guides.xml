@@ -10,7 +10,7 @@
                project-contact="hello@web-vision.de"
                project-repository="https://github.com/web-vision/ai-llms-txt"
                project-issues="https://github.com/web-vision/ai-llms-txt/issues"
-               edit-on-github-branch="main"
+               edit-on-github-branch="0.2"
                edit-on-github="web-vision/ai-llms-txt"
                typo3-core-preferred="stable"
     />

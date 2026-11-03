@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+Brings the fixes and features of 0.3.0 and 0.4.0 to TYPO3 12. This includes their changes in
+behaviour, listed under *Changed*: check them before updating.
+
 ### Added
 - Site setting `llmsTxtExcludeDoktypes` to leave additional page types out of llms.txt;
   subpages of an excluded page move up instead of being dropped (#1)

@@ -18,9 +18,17 @@ Unreleased
 
     *   The 0.2 release line supports TYPO3 12.4 LTS only. Sites on TYPO3 13.4
         or 14.3 use version 0.4 or later.
+    *   This release brings the fixes and features of 0.3.0 and 0.4.0 to
+        TYPO3 12, including their changes in behaviour. Check them before
+        updating.
     *   The Markdown version of a page now answers with "page not found" when
         the extension is disabled for the site, or when the page has
         :guilabel:`Index this page` switched off.
+    *   The Markdown version of a page is served as
+        ``Content-Type: text/markdown`` instead of ``text/plain``. Check
+        proxies, CDN rules or clients that match on the content type.
+    *   If the content of a page starts with an ``<h1>``, the Markdown version
+        no longer adds the page title as a second main heading.
 
 **Added**
 
@@ -30,6 +38,8 @@ Unreleased
     default (#2)
 *   Logging of generation errors, ``X-Content-Type-Options: nosniff`` header
 *   Documentation of all settings, the CLI export and known limitations
+*   README sections on security updates, uninstallation, automatic updates,
+    notes for integrators and the SBOM (#16)
 
 **Fixed**
 
@@ -43,6 +53,9 @@ Unreleased
 *   Performance on large page trees: queries are batched per tree level
 *   ``llms.txt`` stayed in TYPO3's page cache for up to a day; it now follows
     :confval:`site-llmsTxtCacheLifetime`, and error responses are not cached
+*   Top-level pages in ``llms.txt`` were listed with ``+`` instead of ``-``
+*   Content following an ``<aside>`` or ``<footer>`` containing a ``<div>``
+    was lost in the Markdown version
 
 **Security**
 
