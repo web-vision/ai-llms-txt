@@ -15,6 +15,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   cacheable, such as a list of records with filters - was missing from the Markdown version of
   its page. It is now rendered into it, and a page with such content is no longer kept in
   TYPO3's page cache, like that content on the HTML page
+- The `.md` links in llms.txt led to "page not found" on sites whose page URLs end in a suffix
+  such as `.html`, and on sites without the route enhancer of the extension. The links are now
+  built by the router for the page type of the Markdown version. The CLI export fetched its
+  pages through the same broken links
 
 ## [0.4.0] - 2026-10-26
 
