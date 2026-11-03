@@ -92,6 +92,10 @@ behaviour, listed under *Changed*: check them before updating.
   inject arbitrary lines, such as fake links, into llms.txt
 - Line breaks in page titles and descriptions could inject arbitrary keys into the YAML
   frontmatter of the CLI export
+- league/html-to-markdown is now required in version 5.2.3 or later. Earlier versions let
+  page content break out of code blocks, links and HTML attributes in the Markdown version, and
+  certain content made the conversion take quadratic time (GHSA-8m5h-gv5q-jmp5,
+  GHSA-vc6h-86x6-wcjg, GHSA-r2cp-59h5-vgjj, GHSA-h3wg-gqjr-jjmw, GHSA-4xjf-2r66-5r28)
 
 ## [0.2.2] - 2026-10-30
 
