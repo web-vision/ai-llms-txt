@@ -56,22 +56,12 @@ parameters:
 			path: ../../../Classes/Command/DownloadMarkdownCommand.php
 
 		-
-			message: "#^Method WebVision\\\\AiLlmsTxt\\\\Command\\\\DownloadMarkdownCommand\\:\\:getVisiblePages\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: ../../../Classes/Command/DownloadMarkdownCommand.php
-
-		-
 			message: "#^Parameter \\#1 \\$string of function trim expects string, string\\|null given\\.$#"
 			count: 1
 			path: ../../../Classes/Command/DownloadMarkdownCommand.php
 
 		-
 			message: "#^Property WebVision\\\\AiLlmsTxt\\\\Command\\\\DownloadMarkdownCommand\\:\\:\\$markdownConverter is never read, only written\\.$#"
-			count: 1
-			path: ../../../Classes/Command/DownloadMarkdownCommand.php
-
-		-
-			message: "#^Property WebVision\\\\AiLlmsTxt\\\\Command\\\\DownloadMarkdownCommand\\:\\:\\$urlGenerator is never read, only written\\.$#"
 			count: 1
 			path: ../../../Classes/Command/DownloadMarkdownCommand.php
 
@@ -136,11 +126,6 @@ parameters:
 			path: ../../../Classes/Service/LlmsTxtGeneratorService.php
 
 		-
-			message: "#^Method WebVision\\\\AiLlmsTxt\\\\Service\\\\UrlGeneratorService\\:\\:generatePageUrl\\(\\) has parameter \\$page with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: ../../../Classes/Service/UrlGeneratorService.php
-
-		-
 			message: "#^Offset 'children' does not exist on array\\{\\}\\|array\\{title\\: 'About Us', description\\: string, url\\: string, children\\: array, language\\: 'Default language'\\}\\.$#"
 			count: 2
 			path: ../../../Tests/Functional/Builder/NavigationBuilderBugTest.php
@@ -151,7 +136,7 @@ parameters:
 			path: ../../../Tests/Functional/Builder/NavigationBuilderBugTest.php
 
 		-
-			message: "#^Offset 'uid' does not exist on array\\{\\}\\|array\\{uid\\: int, title\\: string, subtitle\\: string, seo_title\\: string, description\\: string, abstract\\: string, no_index\\: int\\}\\.$#"
+			message: "#^Offset 'uid' does not exist on array\\{\\}\\|array\\{uid\\: int, title\\: string, slug\\: string, subtitle\\: string, seo_title\\: string, description\\: string, abstract\\: string, no_index\\: int\\}\\.$#"
 			count: 3
 			path: ../../../Tests/Functional/Repository/PageRepositoryTest.php
 
