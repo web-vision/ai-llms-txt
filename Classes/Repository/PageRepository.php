@@ -47,6 +47,7 @@ class PageRepository
         'uid',
         'pid',
         'title',
+        'slug',
         'description',
         'abstract',
         'nav_title',
@@ -64,7 +65,7 @@ class PageRepository
     /**
      * Find a page by its UID
      *
-     * @return array{uid: int, title: string, subtitle: string, seo_title: string, description: string, abstract: string, no_index: int}|array{}
+     * @return array{uid: int, title: string, slug: string, subtitle: string, seo_title: string, description: string, abstract: string, no_index: int}|array{}
      */
     public function findById(int $pageId, ?SiteLanguage $siteLanguage = null): array
     {
@@ -73,7 +74,7 @@ class PageRepository
             ->add(GeneralUtility::makeInstance(FrontendRestrictionContainer::class));
 
         $result = $queryBuilder
-            ->select('uid', 'pid', 'title', 'subtitle', 'seo_title', 'description', 'abstract', 'no_index', 'sys_language_uid', 'l10n_parent')
+            ->select('uid', 'pid', 'title', 'slug', 'subtitle', 'seo_title', 'description', 'abstract', 'no_index', 'sys_language_uid', 'l10n_parent')
             ->from('pages')
             ->where(
                 $queryBuilder->expr()->eq('uid', $queryBuilder->createNamedParameter($pageId, Connection::PARAM_INT))
@@ -106,7 +107,7 @@ class PageRepository
      * @param int $parentUid Parent page UID
      * @param array<int, int> $excludeDoktypes Additional doktypes to exclude, on top of the
      *   always-excluded structural doktypes (sysfolder/spacer/shortcut)
-     * @return array<int, array{uid: int, pid: int, title: string, description: string, abstract: string, doktype: int, sys_language_uid: int, l10n_parent: int}>
+     * @return array<int, array{uid: int, pid: int, title: string, slug: string, description: string, abstract: string, doktype: int, sys_language_uid: int, l10n_parent: int}>
      */
     public function findNavigationByParent(int $parentUid, array $excludeDoktypes = []): array
     {
@@ -118,7 +119,7 @@ class PageRepository
      *
      * @param int $parentUid Parent page UID
      * @param int $languageUid Language UID to filter by
-     * @return array<int, array{uid: int, pid: int, title: string, description: string, abstract: string, doktype: int, sys_language_uid: int, l10n_parent: int}>
+     * @return array<int, array{uid: int, pid: int, title: string, slug: string, description: string, abstract: string, doktype: int, sys_language_uid: int, l10n_parent: int}>
      *
      * @deprecated since 0.3.0, will be removed in 1.0.0. Use findNavigationByParentWithFallback() with SiteLanguage for proper language fallback handling.
      */
@@ -135,7 +136,7 @@ class PageRepository
      * @param array<int, int> $excludeDoktypes Additional doktypes to exclude
      * @param array<int, bool> $visitedUids UIDs already visited to prevent infinite recursion
      * @param int $currentDepth Current recursion depth
-     * @return array<int, array{uid: int, pid: int, title: string, description: string, abstract: string, doktype: int, sys_language_uid: int, l10n_parent: int}>
+     * @return array<int, array{uid: int, pid: int, title: string, slug: string, description: string, abstract: string, doktype: int, sys_language_uid: int, l10n_parent: int}>
      */
     protected function findNavigationPages(
         int $parentUid,
@@ -216,7 +217,7 @@ class PageRepository
     /**
      * Map a database row to a page array
      *
-     * @return array{uid: int, pid: int, title: string, description: string, abstract: string, doktype: int, sys_language_uid: int, l10n_parent: int}
+     * @return array{uid: int, pid: int, title: string, slug: string, description: string, abstract: string, doktype: int, sys_language_uid: int, l10n_parent: int}
      */
     protected function mapRowToPageArray(array $row): array
     {
@@ -226,6 +227,7 @@ class PageRepository
             // Rows that went through a language overlay without a translation are already
             // mapped, so they carry the resolved title but no nav_title
             'title' => ($row['nav_title'] ?? '') ?: $row['title'],
+            'slug' => (string)($row['slug'] ?? ''),
             'description' => $row['description'] ?? '',
             'abstract' => $row['abstract'] ?? '',
             'doktype' => (int)$row['doktype'],
@@ -354,7 +356,7 @@ class PageRepository
      * @param int $parentUid Parent page UID
      * @param SiteLanguage $siteLanguage The site language to fetch pages for
      * @param array<int, int> $excludeDoktypes Additional doktypes to exclude
-     * @return array<int, array{uid: int, pid: int, title: string, description: string, abstract: string, doktype: int, sys_language_uid: int, l10n_parent: int}>
+     * @return array<int, array{uid: int, pid: int, title: string, slug: string, description: string, abstract: string, doktype: int, sys_language_uid: int, l10n_parent: int}>
      */
     public function findNavigationByParentWithFallback(int $parentUid, SiteLanguage $siteLanguage, array $excludeDoktypes = []): array
     {

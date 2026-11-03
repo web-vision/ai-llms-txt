@@ -81,7 +81,10 @@ Exporting pages as Markdown files
 =================================
 
 The command ``ai-llms:download-markdown`` saves the Markdown version of pages
-as ``.md`` files, for example to feed them into an AI knowledge base:
+as ``.md`` files, for example to feed them into an AI knowledge base. It
+exports the root page of a site and every page below it that ``llms.txt`` can
+list: pages hidden in menus or excluded from indexing are left out, the
+subpages of folders are included.
 
 ..  code-block:: bash
 
@@ -105,7 +108,9 @@ as ``.md`` files, for example to feed them into an AI knowledge base:
     *   - ``-l``, ``--limit``
         - Maximum number of pages to export. Default: ``0`` (no limit).
     *   - ``-f``, ``--format``
-        - File naming: ``slug`` (default), ``uid`` or ``title``.
+        - File naming: ``slug`` (default; ``/about-us/team`` becomes
+          ``about-us-team.md``, the root page ``index.md``), ``uid``
+          (``page-5.md``) or ``title``.
     *   - ``-m``, ``--include-metadata``
         - Prepend YAML frontmatter with uid, title, description, URL, site
           and export time.
@@ -114,11 +119,12 @@ as ``.md`` files, for example to feed them into an AI knowledge base:
     *   - ``--overwrite``
         - Overwrite existing files.
     *   - ``--dry-run``
-        - List what would be exported without writing files.
+        - List the files that would be written, without creating any file or
+          directory.
 
-The command fetches each page's ``.md`` URL over HTTP, so the site must be
-reachable from the server under its configured base URL, and the route
-enhancer must be imported.
+The command fetches the Markdown version of each page over HTTP, so the site
+must be reachable from the server under its configured base URL. It ends with
+a non-zero exit code if a page or site could not be processed.
 
 ..  _troubleshooting:
 

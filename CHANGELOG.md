@@ -91,6 +91,11 @@ behaviour, listed under *Changed*: check them before updating.
   itself is not affected, it only lists the default language
 - Below the first level of llms.txt, the subpages of an excluded page type were listed after
   their new siblings instead of in the place of the excluded page
+- `ai-llms:download-markdown` only exported the pages on the first level below the root page;
+  it now exports the root page and the whole page tree. `--format=slug`, the default, named the
+  files after the page title instead of the URL segment, `--dry-run` created the output
+  directory and listed nothing, an unknown site identifier ended with a PHP exception, and the
+  command reported success even when pages failed
 
 ### Security
 - The Markdown version of a page was served even when the extension was disabled for the

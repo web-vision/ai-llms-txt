@@ -62,7 +62,7 @@ final class NavigationBuilderBugTest extends FunctionalTestCase
 
         $urlGenerator = $this->createMock(UrlGeneratorService::class);
         $urlGenerator->method('generatePageUrl')->willReturnCallback(function ($page) {
-            $slug = $page['slug'] ?? 'page-' . $page['uid'];
+            $slug = 'page-' . $page['uid'];
             $lang = (int)($page['sys_language_uid'] ?? 0);
             $prefix = '';
             if ($lang === 1) {
