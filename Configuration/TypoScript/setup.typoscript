@@ -1,7 +1,7 @@
 page {
     headerData {
-        1761744920 = TEXT
-        1761744920.value = <link rel="alternate" type="text/plain" href="/llms.txt" />
+        1761744920 = USER
+        1761744920.userFunc = WebVision\AiLlmsTxt\Controller\LlmsTxtController->renderAlternateLink
     }
 }
 
