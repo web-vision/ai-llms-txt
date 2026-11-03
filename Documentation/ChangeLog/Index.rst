@@ -9,6 +9,55 @@ ChangeLog
 The complete history is kept in
 `CHANGELOG.md <https://github.com/web-vision/ai-llms-txt/blob/main/CHANGELOG.md>`__.
 
+..  _changelog-0-5-0:
+
+0.5.0 - 2026-11-11
+==================
+
+..  important::
+
+    *   The ``.md`` links in ``llms.txt`` and the link to ``llms.txt`` in the
+        page head are built by the router. Without the route enhancer they now
+        use ``?type=1701`` and ``?type=1699``, which work, instead of URLs
+        that did not resolve.
+    *   ``ai-llms:download-markdown`` exports the whole page tree, names files
+        after the page's URL segment by default, and ends with a non-zero exit
+        code when a page fails. Check scripts that process its output.
+    *   Tables become Markdown tables in the Markdown version, and ``llms.txt``
+        no longer escapes periods, hyphens or parentheses.
+    *   league/html-to-markdown 5.2.3 or later is required.
+
+**Added**
+
+*   Tables are converted to Markdown tables (#11)
+
+**Fixed**
+
+*   ``.md`` links in ``llms.txt`` for sites whose page URLs end in ``.html``
+    or that do not import the route enhancer
+*   Missing spaces between inline elements, and code blocks collapsed onto
+    one line, in the Markdown version
+*   Paragraphs such as "SPSS" were dropped from the Markdown version
+*   The description of top-level pages was missing in ``llms.txt``
+*   Subpages of an excluded page type below the first level were listed out
+    of order
+*   The CLI export only exported the first level of pages; ``--format=slug``,
+    ``--dry-run``, unknown sites and the exit code did not work as documented
+*   The link to ``llms.txt`` in the page head ignored the site's base path
+    and was also added for disabled sites
+*   A warning for untranslated pages of a fallback language in the
+    language-aware page queries
+*   The content elements of a ``b13/container`` grid appeared twice in the
+    Markdown version
+*   Content that is not cacheable, such as ``USER_INT`` objects or plugins
+    with filters, was missing from the Markdown version. It is now rendered,
+    and a page with such content is no longer kept in TYPO3's page cache
+
+**Security**
+
+*   league/html-to-markdown 5.2.3 is required, which fixes code, links and
+    attributes breaking out of their Markdown, and quadratic conversion time
+
 ..  _changelog-0-4-0:
 
 0.4.0 - 2026-10-26

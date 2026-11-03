@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-11-11
+
 ### Added
 - Tables in the page content become Markdown tables in the Markdown version, instead of being
   reduced to their text with the cells of a row run together (#11)
@@ -162,7 +164,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Comprehensive documentation following TYPO3 standards
 - Support for TYPO3 v12, v13, and v14 LTS
 
-[Unreleased]: https://github.com/web-vision/ai-llms-txt/compare/0.4.0...HEAD
+[Unreleased]: https://github.com/web-vision/ai-llms-txt/compare/0.5.0...HEAD
+[0.5.0]: https://github.com/web-vision/ai-llms-txt/compare/0.4.0...0.5.0
 [0.4.0]: https://github.com/web-vision/ai-llms-txt/compare/0.3.0...0.4.0
 [0.3.0]: https://github.com/web-vision/ai-llms-txt/compare/0.2.1...0.3.0
 [0.2.1]: https://github.com/web-vision/ai-llms-txt/compare/0.2.0...0.2.1
