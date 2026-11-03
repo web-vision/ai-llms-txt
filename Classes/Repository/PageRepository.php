@@ -238,8 +238,8 @@ class PageRepository
      * Batch fetch all navigation pages for multiple parent UIDs in a single query
      * This significantly reduces database queries for large sites (solves N+1 problem)
      *
-     * Pages with an excluded doktype are omitted and their own children are promoted
-     * into their parent's position (same behavior as the single-parent findNavigationPages()).
+     * Pages with an excluded doktype are omitted and their own children take their place
+     * among the siblings (same behavior as the single-parent findNavigationPages()).
      *
      * @param array<int> $parentUids Array of parent page UIDs
      * @param int|null $languageUid Language UID to filter by (null = all languages)
@@ -304,37 +304,43 @@ class PageRepository
 
         $excludedSet = array_merge(self::EXCLUDED_DOKTYPES, $excludeDoktypes);
 
-        // Group results by parent UID, deferring excluded pages for child-promotion below
-        $grouped = [];
-        $excludedUidToParent = [];
+        // Group results by parent UID. An excluded page is kept as a placeholder (its UID)
+        // where it is sorted, so that its children can take exactly its place below.
+        $entriesByParent = [];
+        $excludedUids = [];
         while ($row = $result->fetchAssociative()) {
             $pid = (int)$row['pid'];
             if (in_array((int)$row['doktype'], $excludedSet, true)) {
-                $excludedUidToParent[(int)$row['uid']] = $pid;
+                $excludedUids[] = (int)$row['uid'];
+                $entriesByParent[$pid][] = (int)$row['uid'];
                 continue;
             }
-            if (!isset($grouped[$pid])) {
-                $grouped[$pid] = [];
-            }
-            $grouped[$pid][] = $this->mapRowToPageArray($row);
+            $entriesByParent[$pid][] = $this->mapRowToPageArray($row);
         }
 
-        if (!empty($excludedUidToParent)) {
+        $promotedChildren = [];
+        if ($excludedUids !== []) {
             $promotedChildren = $this->findNavigationByParentsBatchInternal(
-                array_keys($excludedUidToParent),
+                $excludedUids,
                 $languageUid,
                 $excludeDoktypes,
                 $visitedUids,
                 $currentDepth + 1
             );
-            foreach ($promotedChildren as $excludedUid => $children) {
-                $originalPid = $excludedUidToParent[$excludedUid];
-                if (!isset($grouped[$originalPid])) {
-                    $grouped[$originalPid] = [];
+        }
+
+        $grouped = [];
+        foreach ($entriesByParent as $pid => $entries) {
+            $pages = [];
+            foreach ($entries as $pageOrPlaceholder) {
+                if (is_int($pageOrPlaceholder)) {
+                    array_push($pages, ...($promotedChildren[$pageOrPlaceholder] ?? []));
+                    continue;
                 }
-                foreach ($children as $child) {
-                    $grouped[$originalPid][] = $child;
-                }
+                $pages[] = $pageOrPlaceholder;
+            }
+            if ($pages !== []) {
+                $grouped[$pid] = $pages;
             }
         }
 
