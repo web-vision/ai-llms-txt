@@ -280,9 +280,7 @@ final class DownloadMarkdownCommand extends Command
     private function fetchPageContent(Site $site, array $page): ?string
     {
         try {
-            // Use .md suffix to get markdown content (typeNum 1701)
-            $uri = (string)$site->getRouter()->generateUri((int)$page['uid']);
-            $markdownUrl = rtrim($uri, '/') . '.md';
+            $markdownUrl = $this->urlGenerator->generatePageUrl($page);
 
             // Fetch markdown content from the page
             $response = $this->httpClient->request('GET', $markdownUrl);

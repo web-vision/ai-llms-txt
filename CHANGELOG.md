@@ -73,6 +73,10 @@ behaviour, listed under *Changed*: check them before updating.
 - The Markdown version of a page lost all content following an `<aside>` or `<footer>`
   that contains a `<div>`: layout wrapper divs are now unwrapped as a whole instead of
   stripping every closing `</div>`
+- The `.md` links in llms.txt led to "page not found" on sites whose page URLs end in a suffix
+  such as `.html`, and on sites without the route enhancer of the extension. The links are now
+  built by the router for the page type of the Markdown version. The CLI export fetched its
+  pages through the same broken links
 
 ### Security
 - The Markdown version of a page was served even when the extension was disabled for the
