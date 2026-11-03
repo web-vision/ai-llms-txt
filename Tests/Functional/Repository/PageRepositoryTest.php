@@ -332,6 +332,24 @@ final class PageRepositoryTest extends FunctionalTestCase
     }
 
     #[Test]
+    public function findNavigationByParentsBatchPutsPromotedChildrenAtThePositionOfTheExcludedPage(): void
+    {
+        // The folder "Nested Folder" (sorting 256) comes before this page below "Contact"
+        $this->getConnectionPool()->getConnectionForTable('pages')->insert('pages', [
+            'uid' => 18,
+            'pid' => 4,
+            'title' => 'Contact Form',
+            'slug' => '/contact/form',
+            'doktype' => 1,
+            'sorting' => 512,
+        ]);
+
+        $result = $this->subject->findNavigationByParentsBatch([4], 0);
+
+        static::assertSame(['Deep Page In Nested Folder', 'Contact Form'], array_column($result[4], 'title'));
+    }
+
+    #[Test]
     public function findNavigationByParentWithFallbackReturnsUntranslatedPagesOfAFallbackLanguage(): void
     {
         $siteLanguage = new SiteLanguage(3, 'it_IT.UTF-8', new Uri('https://example.com/it/'), [

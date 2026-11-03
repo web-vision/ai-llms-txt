@@ -35,6 +35,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `PageRepository::findNavigationByParentWithFallback()` and the batch variant raised an
   "Undefined array key" warning for untranslated pages of a language with fallback. llms.txt
   itself is not affected, it only lists the default language
+- Below the first level of llms.txt, the subpages of an excluded page type were listed after
+  their new siblings instead of in the place of the excluded page
 
 ### Security
 - league/html-to-markdown is now required in version 5.2.3 or later. Earlier versions let
