@@ -37,8 +37,8 @@ Markdown conversion
 The Markdown version is converted from the rendered HTML of the page's
 content, so its quality depends on the markup your templates produce:
 
-*   Tables are not converted and lose their structure
-    (`#11 <https://github.com/web-vision/ai-llms-txt/issues/11>`__).
+*   Tables become Markdown tables. Markdown has no merged cells: content of
+    cells spanning several rows or columns is kept, the layout is not.
 *   Layout wrappers, ``<div>`` elements with classes such as ``container``,
     ``row``, ``col`` or ``grid``, are unwrapped; empty elements are removed.
     The rest of the markup is converted as it is.

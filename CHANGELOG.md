@@ -23,6 +23,8 @@ behaviour, listed under *Changed*: check them before updating.
 - Support for PHP 8.5 (#17)
 - README sections on installing security updates, uninstallation and data removal, automatic
   updates, notes for integrators and where to get the SBOM (#16)
+- Tables in the page content become Markdown tables in the Markdown version, instead of being
+  reduced to their text with the cells of a row run together (#11)
 
 ### Changed
 - The Markdown (`.md`) version of a page now answers with "page not found" when the
