@@ -6,7 +6,6 @@ namespace WebVision\AiLlmsTxt\Tests\Functional\Service;
 
 use PHPUnit\Framework\Attributes\Test;
 use TYPO3\CMS\Core\Cache\CacheManager;
-use TYPO3\CMS\Core\Configuration\SiteConfiguration;
 use TYPO3\CMS\Core\Context\Context;
 use TYPO3\CMS\Core\Context\UserAspect;
 use TYPO3\CMS\Core\Http\ServerRequest;
@@ -199,8 +198,9 @@ final class LlmsTxtGeneratorServiceTest extends FunctionalTestCase
                 YAML
         );
 
-        $this->get(SiteConfiguration::class)->siteConfigurationChanged();
-        $this->get(SiteFinder::class)->siteConfigurationChanged();
+        // TYPO3 12 has no siteConfigurationChanged(): reading the sites uncached makes
+        // SiteConfiguration and SiteFinder pick up the configuration written above.
+        $this->get(SiteFinder::class)->getAllSites(false);
 
         return $this->get(SiteFinder::class)->getSiteByIdentifier('test-site');
     }

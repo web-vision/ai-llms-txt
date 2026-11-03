@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace WebVision\AiLlmsTxt\Tests\Functional\Builder;
 
 use PHPUnit\Framework\Attributes\Test;
-use TYPO3\CMS\Core\Configuration\SiteConfiguration;
 use TYPO3\CMS\Core\Site\SiteFinder;
 use TYPO3\TestingFramework\Core\Functional\FunctionalTestCase;
 use WebVision\AiLlmsTxt\Builder\NavigationBuilder;
@@ -92,9 +91,9 @@ final class NavigationBuilderMultilingualTest extends FunctionalTestCase
                 YAML
         );
 
-        // Invalidate cached site configs so SiteFinder re-reads from the filesystem
-        $this->get(SiteConfiguration::class)->siteConfigurationChanged();
-        $this->get(SiteFinder::class)->siteConfigurationChanged();
+        // TYPO3 12 has no siteConfigurationChanged(): reading the sites uncached makes
+        // SiteConfiguration and SiteFinder pick up the configuration written above.
+        $this->get(SiteFinder::class)->getAllSites(false);
     }
 
     /**
