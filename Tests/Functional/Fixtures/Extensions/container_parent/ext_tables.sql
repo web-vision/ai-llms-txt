@@ -1,0 +1,3 @@
+CREATE TABLE tt_content (
+	tx_container_parent int(11) DEFAULT '0' NOT NULL
+);
