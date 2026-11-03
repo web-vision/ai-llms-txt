@@ -39,6 +39,9 @@ behaviour, listed under *Changed*: check them before updating.
   of `text/plain`
 - The Markdown (`.md`) version of a page is served as `Content-Type: text/markdown` instead
   of `text/plain`
+- Titles and descriptions in llms.txt only escape the characters that can change its Markdown
+  structure: brackets, angle brackets, backslashes, backticks, asterisks and underscores.
+  Periods, hyphens, parentheses and similar characters are no longer preceded by a backslash
 
 ### Removed
 - Support for TYPO3 13 and 14. The 0.2 releases are for TYPO3 12 only; sites on TYPO3 13.4
@@ -82,6 +85,7 @@ behaviour, listed under *Changed*: check them before updating.
 - The Markdown version of a page lost the space between neighbouring inline elements, gluing
   words, emphasis and links together (`**fast***reliable*`), and put code blocks on a single
   line. Paragraphs consisting only of the letters n, b, s and p, such as "SPSS", were dropped
+- llms.txt left out the description of top-level pages; only their subpages had one
 
 ### Security
 - The Markdown version of a page was served even when the extension was disabled for the

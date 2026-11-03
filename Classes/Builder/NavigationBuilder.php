@@ -207,11 +207,8 @@ class NavigationBuilder
             $lines[] = "## {$escapedLanguage}";
 
             foreach ($sections as $section) {
-                // Section header with proper escaping
                 if (!empty($section['url'])) {
-                    $title = $this->escapeMarkdown($section['title'] ?? '');
-                    $url = $this->escapeUrl($section['url'] ?? '');
-                    $lines[] = "- [{$title}]({$url})";
+                    $lines[] = $this->formatEntry($section, '');
                 }
 
                 $this->formatChildrenAsMarkdown($section['children'] ?? [], $lines, 1);
@@ -234,15 +231,7 @@ class NavigationBuilder
         $indent = str_repeat('  ', $depth);
 
         foreach ($children as $page) {
-            $title = $this->escapeMarkdown($page['title'] ?? '');
-            $url = $this->escapeUrl($page['url'] ?? '');
-            $description = $this->escapeMarkdown($page['description'] ?? '');
-
-            if (!empty($description)) {
-                $lines[] = "{$indent}- [{$title}]({$url}): {$description}";
-            } else {
-                $lines[] = "{$indent}- [{$title}]({$url})";
-            }
+            $lines[] = $this->formatEntry($page, $indent);
 
             // Recursively format nested children
             if (!empty($page['children'])) {
@@ -252,7 +241,32 @@ class NavigationBuilder
     }
 
     /**
-     * Escape special markdown characters in text
+     * Format a page as a list item in the llmstxt.org form "- [title](url): description"
+     *
+     * @param array<string, mixed> $page
+     */
+    protected function formatEntry(array $page, string $indent): string
+    {
+        $title = $this->escapeMarkdown((string)($page['title'] ?? ''));
+        $url = $this->escapeUrl((string)($page['url'] ?? ''));
+        $description = $this->escapeMarkdown((string)($page['description'] ?? ''));
+
+        if ($description !== '') {
+            return "{$indent}- [{$title}]({$url}): {$description}";
+        }
+
+        return "{$indent}- [{$title}]({$url})";
+    }
+
+    /**
+     * Escape the characters that can change the Markdown structure of a list item
+     *
+     * Titles and descriptions always end up within a single list item line, after its
+     * marker. There, only brackets can open or close a link (and with "!" an image), angle
+     * brackets an autolink or raw HTML, and backslashes, backticks, asterisks and
+     * underscores code or emphasis. Characters such as ".", "-", "#" or "(" only have a
+     * meaning at the start of a line or right after a closing bracket, so escaping them
+     * as well would only clutter the text that language models read.
      */
     protected function escapeMarkdown(string $text): string
     {
@@ -261,9 +275,8 @@ class NavigationBuilder
         // blank line cannot end the list and leave free-standing text in llms.txt.
         $text = trim(preg_replace('/\s+/u', ' ', $text) ?? $text);
 
-        // Escape markdown special characters: [ ] ( ) \ ` * _ { } # + - . !
-        // The replacement pattern needs 4 backslashes to produce a literal backslash + captured char
-        return preg_replace('/([\[\]()\\\`*_{}#+\-.!])/', '\\\\$1', $text) ?? $text;
+        // The replacement needs 4 backslashes to produce a literal backslash + captured char
+        return preg_replace('/([\\\\\[\]`*_<>])/', '\\\\$1', $text) ?? $text;
     }
 
     /**
