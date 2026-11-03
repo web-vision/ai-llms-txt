@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Tables in the page content become Markdown tables in the Markdown version, instead of being
+  reduced to their text with the cells of a row run together (#11)
+
 ### Fixed
 - The Markdown version of a page had the content elements of a `b13/container` grid twice:
   inside the container, and once more on their own. They are now only rendered by their

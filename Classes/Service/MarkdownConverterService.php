@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace WebVision\AiLlmsTxt\Service;
 
+use League\HTMLToMarkdown\Converter\TableConverter;
 use League\HTMLToMarkdown\HtmlConverter;
 
 /**
@@ -38,6 +39,9 @@ class MarkdownConverterService
             'use_autolinks' => false,
             'header_style' => 'atx', // Use ATX style headers (e.g., ## Header)
         ]);
+        // Without it, tables are reduced to their text, with the cells of a row run
+        // together into one word ("PlanPriceBasic10 EUR")
+        $converter->getEnvironment()->addConverter(new TableConverter());
 
         try {
             $markdown = $converter->convert($html);

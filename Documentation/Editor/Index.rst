@@ -106,6 +106,6 @@ Some content types may not convert perfectly to Markdown:
 * **Interactive elements** - Forms, JavaScript widgets, etc. may not convert meaningfully
 * **Custom styling** - Visual formatting is simplified in Markdown
 * **Images and media** - Not included in the Markdown output
-* **Tables** - Lose their table structure
+* **Tables** - Become Markdown tables; merged cells are not preserved
 
 This is normal and expected - the Markdown format is designed to be a simplified, semantic representation of your content that focuses on meaning rather than visual presentation.

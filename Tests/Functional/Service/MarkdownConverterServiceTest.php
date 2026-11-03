@@ -249,18 +249,20 @@ final class MarkdownConverterServiceTest extends FunctionalTestCase
     }
 
     #[Test]
-    public function convertHtmlToMarkdownConvertsTablesBasically(): void
+    public function convertHtmlToMarkdownConvertsTablesToMarkdownTables(): void
     {
-        $html = '<table>
-            <tr><th>Header 1</th><th>Header 2</th></tr>
-            <tr><td>Cell 1</td><td>Cell 2</td></tr>
-        </table>';
+        $html = '<p>Prices:</p><table>
+            <thead><tr><th>Plan</th><th>Price</th></tr></thead>
+            <tbody><tr><td>Basic</td><td>10 EUR</td></tr><tr><td>Pro | Team</td><td>20 EUR</td></tr></tbody>
+        </table><p>After the table.</p>';
 
         $result = $this->subject->convertHtmlToMarkdown($html);
 
-        // Tables may be converted to pipe format or simplified
-        static::assertStringContainsString('Header 1', $result);
-        static::assertStringContainsString('Cell 1', $result);
+        static::assertStringContainsString(
+            "| Plan | Price |\n|---|---|\n| Basic | 10 EUR |\n| Pro \\| Team | 20 EUR |",
+            $result
+        );
+        static::assertStringContainsString('After the table.', $result);
     }
 
     #[Test]
