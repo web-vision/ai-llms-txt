@@ -77,6 +77,9 @@ behaviour, listed under *Changed*: check them before updating.
   such as `.html`, and on sites without the route enhancer of the extension. The links are now
   built by the router for the page type of the Markdown version. The CLI export fetched its
   pages through the same broken links
+- The Markdown version of a page lost the space between neighbouring inline elements, gluing
+  words, emphasis and links together (`**fast***reliable*`), and put code blocks on a single
+  line. Paragraphs consisting only of the letters n, b, s and p, such as "SPSS", were dropped
 
 ### Security
 - The Markdown version of a page was served even when the extension was disabled for the

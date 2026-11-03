@@ -380,4 +380,40 @@ final class MarkdownConverterServiceTest extends FunctionalTestCase
         static::assertStringContainsString('Main text after the sidebar.', $result);
         static::assertStringNotContainsString('Sidebar text', $result);
     }
+
+    #[Test]
+    public function convertHtmlToMarkdownKeepsTheSpaceBetweenInlineElements(): void
+    {
+        $html = '<p>We offer <strong>fast</strong> <em>reliable</em> hosting, see '
+            . '<a href="https://a.example">docs</a> <a href="https://b.example">support</a>.</p>';
+
+        $result = $this->subject->convertHtmlToMarkdown($html);
+
+        static::assertSame(
+            'We offer **fast** *reliable* hosting, see [docs](https://a.example) [support](https://b.example).',
+            $result
+        );
+    }
+
+    #[Test]
+    public function convertHtmlToMarkdownKeepsLineBreaksAndIndentationOfPreformattedText(): void
+    {
+        $html = "<div class=\"container\"><p>Example:</p>\n<pre><code>if (\$a) {\n    return \$b;\n}</code></pre>\n<p>Done.</p></div>";
+
+        $result = $this->subject->convertHtmlToMarkdown($html);
+
+        static::assertStringContainsString("if (\$a) {\n    return \$b;\n}", $result);
+        static::assertStringContainsString('Example:', $result);
+        static::assertStringContainsString('Done.', $result);
+    }
+
+    #[Test]
+    public function convertHtmlToMarkdownKeepsParagraphsMadeOfTheLettersOfNbsp(): void
+    {
+        $html = '<p>SPSS</p><p>Snob</p><p>&nbsp;</p><p>After</p>';
+
+        $result = $this->subject->convertHtmlToMarkdown($html);
+
+        static::assertSame("SPSS\n\nSnob\n\nAfter", $result);
+    }
 }

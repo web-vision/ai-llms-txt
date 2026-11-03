@@ -39,9 +39,9 @@ content, so its quality depends on the markup your templates produce:
 
 *   Tables are not converted and lose their structure
     (`#11 <https://github.com/web-vision/ai-llms-txt/issues/11>`__).
-*   Layout markup is removed with pattern matching, not a full HTML parser.
-    All ``<div>`` elements are unwrapped; with unusually nested markup this
-    can occasionally move or merge text.
+*   Layout wrappers, ``<div>`` elements with classes such as ``container``,
+    ``row``, ``col`` or ``grid``, are unwrapped; empty elements are removed.
+    The rest of the markup is converted as it is.
 *   Images, video, audio and embedded frames are removed; links are kept.
 *   Forms, interactive widgets and content rendered by JavaScript have no
     meaningful Markdown representation.
