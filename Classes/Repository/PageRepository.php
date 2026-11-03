@@ -223,7 +223,9 @@ class PageRepository
         return [
             'uid' => (int)$row['uid'],
             'pid' => (int)$row['pid'],
-            'title' => $row['nav_title'] ?: $row['title'],
+            // Rows that went through a language overlay without a translation are already
+            // mapped, so they carry the resolved title but no nav_title
+            'title' => ($row['nav_title'] ?? '') ?: $row['title'],
             'description' => $row['description'] ?? '',
             'abstract' => $row['abstract'] ?? '',
             'doktype' => (int)$row['doktype'],

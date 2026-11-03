@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace WebVision\AiLlmsTxt\Tests\Functional\Repository;
 
 use PHPUnit\Framework\Attributes\Test;
+use TYPO3\CMS\Core\Http\Uri;
+use TYPO3\CMS\Core\Site\Entity\SiteLanguage;
 use TYPO3\TestingFramework\Core\Functional\FunctionalTestCase;
 use WebVision\AiLlmsTxt\Repository\PageRepository;
 
@@ -327,5 +329,19 @@ final class PageRepositoryTest extends FunctionalTestCase
 
         static::assertNotContains('Nested Folder', $contactChildren, 'Folder must be excluded even at depth 2+');
         static::assertContains('Deep Page In Nested Folder', $contactChildren, 'Folder\'s child must be promoted to the folder\'s position');
+    }
+
+    #[Test]
+    public function findNavigationByParentWithFallbackReturnsUntranslatedPagesOfAFallbackLanguage(): void
+    {
+        $siteLanguage = new SiteLanguage(3, 'it_IT.UTF-8', new Uri('https://example.com/it/'), [
+            'title' => 'Italian',
+            'fallbackType' => 'fallback',
+            'fallbacks' => '0',
+        ]);
+
+        $result = $this->subject->findNavigationByParentWithFallback(1, $siteLanguage);
+
+        static::assertSame(['About Us', 'Products', 'Contact', 'Page in Folder'], array_column($result, 'title'));
     }
 }
