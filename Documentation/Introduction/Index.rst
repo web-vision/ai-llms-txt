@@ -54,5 +54,6 @@ Requirements
 *   PHP 8.2, 8.3 or 8.4
 *   The TYPO3 system extension ``seo`` (installed automatically with Composer)
 
-Version 0.2 is the release line for TYPO3 12. For TYPO3 13.4 LTS and 14.3
-LTS, use version 0.4 or later.
+The ``0.2`` branch keeps projects on TYPO3 12 running. It is not released and
+not officially supported: the extension is supported for TYPO3 13.4 LTS and
+14.3 LTS with version 0.5 or later.

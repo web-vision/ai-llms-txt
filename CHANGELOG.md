@@ -7,8 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-Brings the fixes and features of 0.3.0 and 0.4.0 to TYPO3 12. This includes their changes in
-behaviour, listed under *Changed*: check them before updating.
+The `0.2` branch brings the fixes and features of 0.3.0, 0.4.0 and 0.5.0 to TYPO3 12. It is not
+released and not officially supported. This includes their changes in behaviour, listed under
+*Changed*: check them before updating.
 
 ### Added
 - Site setting `llmsTxtExcludeDoktypes` to leave additional page types out of llms.txt;
@@ -44,8 +45,8 @@ behaviour, listed under *Changed*: check them before updating.
   Periods, hyphens, parentheses and similar characters are no longer preceded by a backslash
 
 ### Removed
-- Support for TYPO3 13 and 14. The 0.2 releases are for TYPO3 12 only; sites on TYPO3 13.4
-  or 14.3 use version 0.4 or later
+- Support for TYPO3 13 and 14. The `0.2` branch is for TYPO3 12 only; sites on TYPO3 13.4
+  or 14.3 use version 0.5 or later
 
 ### Fixed
 - Pages of other languages appeared in the language sections of llms.txt on deep page

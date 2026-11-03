@@ -36,13 +36,13 @@ crawl or train on your content. Use `robots.txt` and your server configuration f
 - **TYPO3**: 12.4 LTS
 - **PHP**: 8.2, 8.3 or 8.4
 
-Version 0.2 is the release line for TYPO3 12. For TYPO3 13.4 LTS and 14.3 LTS, use version 0.4
-or later.
+The `0.2` branch keeps projects on TYPO3 12 running. It is not released and not officially
+supported: the extension is supported for TYPO3 13.4 LTS and 14.3 LTS with version 0.5 or later.
 
 ## Installation
 
 ```bash
-composer require web-vision/ai-llms-txt
+composer require web-vision/ai-llms-txt:0.2.x-dev
 vendor/bin/typo3 extension:setup
 ```
 
@@ -198,11 +198,12 @@ Security fixes are released as new versions on
 [Packagist](https://packagist.org/packages/web-vision/ai-llms-txt) and in the
 [TYPO3 Extension Repository](https://extensions.typo3.org/extension/ai_llms_txt). The
 [changelog](CHANGELOG.md) lists them under *Security*. Versions with the same minor version
-(for example 0.2.x) contain no breaking changes, so they can be installed without adapting the
+(for example 0.5.x) contain no breaking changes, so they can be installed without adapting the
 project.
 
 - **Composer:** run `composer update web-vision/ai-llms-txt` and deploy as usual. With the
-  constraint `^0.2`, Composer installs every 0.2.x release. `composer outdated` shows newer
+  constraint `0.2.x-dev`, Composer installs the latest state of the `0.2` branch for TYPO3 12,
+  which is not released. `composer outdated` shows newer
   versions; `composer audit` reports installed versions with a published security advisory.
 - **Without Composer:** update the extension in *Admin Tools > Extensions* after updating the
   extension list.
@@ -270,7 +271,7 @@ For agencies and developers who deliver this extension as part of a TYPO3 projec
 An SBOM in CycloneDX 1.6 JSON format is generated automatically for every release and every
 change to the main branch. Because the extension ships without a lock file and its
 dependencies resolve differently per TYPO3 version, there is one SBOM for each supported TYPO3
-version (12 for the 0.2 releases).
+version (13 and 14). The `0.2` branch for TYPO3 12 is not released and has none.
 
 - **Download:** open the run of the
   [SBOM workflow](https://github.com/web-vision/ai-llms-txt/actions/workflows/sbom.yml) for the

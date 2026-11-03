@@ -16,9 +16,10 @@ Unreleased
 
 ..  important::
 
-    *   The 0.2 release line supports TYPO3 12.4 LTS only. Sites on TYPO3 13.4
-        or 14.3 use version 0.4 or later.
-    *   This release brings the fixes and features of 0.3.0 and 0.4.0 to
+    *   The ``0.2`` branch supports TYPO3 12.4 LTS only. It is not released
+        and not officially supported. Sites on TYPO3 13.4 or 14.3 use version
+        0.5 or later.
+    *   The branch brings the fixes and features of 0.3.0, 0.4.0 and 0.5.0 to
         TYPO3 12, including their changes in behaviour. Check them before
         updating.
     *   The Markdown version of a page now answers with "page not found" when
