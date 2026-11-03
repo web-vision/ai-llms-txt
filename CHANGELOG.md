@@ -11,6 +11,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Tables in the page content become Markdown tables in the Markdown version, instead of being
   reduced to their text with the cells of a row run together (#11)
 
+### Changed
+- Titles and descriptions in llms.txt only escape the characters that can change its Markdown
+  structure: brackets, angle brackets, backslashes, backticks, asterisks and underscores.
+  Periods, hyphens, parentheses and similar characters are no longer preceded by a backslash
+
 ### Fixed
 - The Markdown version of a page had the content elements of a `b13/container` grid twice:
   inside the container, and once more on their own. They are now only rendered by their
@@ -26,6 +31,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The Markdown version of a page lost the space between neighbouring inline elements, gluing
   words, emphasis and links together (`**fast***reliable*`), and put code blocks on a single
   line. Paragraphs consisting only of the letters n, b, s and p, such as "SPSS", were dropped
+- llms.txt left out the description of top-level pages; only their subpages had one
+
 ### Security
 - league/html-to-markdown is now required in version 5.2.3 or later. Earlier versions let
   page content break out of code blocks, links and HTML attributes in the Markdown version, and

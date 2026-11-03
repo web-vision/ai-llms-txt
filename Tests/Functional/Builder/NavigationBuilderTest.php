@@ -170,7 +170,43 @@ final class NavigationBuilderTest extends FunctionalTestCase
         $result = $this->subject->formatAsMarkdown($structure);
 
         static::assertContains('- [About us](https://example.com/about.md)', $result);
-        static::assertContains('  - [Team](https://example.com/team.md): Meet our team\\. Injected paragraph', $result);
+        static::assertContains('  - [Team](https://example.com/team.md): Meet our team. Injected paragraph', $result);
+    }
+
+    #[Test]
+    public function formatAsMarkdownIncludesTheDescriptionOfTopLevelPages(): void
+    {
+        $structure = [
+            [
+                'title' => 'About Us',
+                'description' => 'Who we are',
+                'url' => 'https://example.com/about.md',
+                'children' => [],
+                'language' => 'EN',
+            ],
+        ];
+
+        static::assertContains('- [About Us](https://example.com/about.md): Who we are', $this->subject->formatAsMarkdown($structure));
+    }
+
+    #[Test]
+    public function formatAsMarkdownEscapesOnlyWhatChangesTheMarkdownStructure(): void
+    {
+        $structure = [
+            [
+                'title' => 'Version 2.0 (beta) - #1',
+                'description' => 'See [this](https://evil.example) and ![img](x.png), <b>bold</b>, *stars*, _under_, `code` and a\\b. Done!',
+                'url' => 'https://example.com/v2.md',
+                'children' => [],
+                'language' => 'EN',
+            ],
+        ];
+
+        static::assertContains(
+            '- [Version 2.0 (beta) - #1](https://example.com/v2.md): See \\[this\\](https://evil.example) and !\\[img\\](x.png), '
+            . '\\<b\\>bold\\</b\\>, \\*stars\\*, \\_under\\_, \\`code\\` and a\\\\b. Done!',
+            $this->subject->formatAsMarkdown($structure)
+        );
     }
 
     #[Test]
