@@ -11,6 +11,7 @@ use TYPO3\CMS\Core\Http\PropagateResponseException;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer;
 use TYPO3\CMS\Frontend\Controller\ErrorController;
+use TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController;
 use WebVision\AiLlmsTxt\Repository\PageRepository;
 use WebVision\AiLlmsTxt\Service\ConfigurationService;
 use WebVision\AiLlmsTxt\Service\LlmsTxtGeneratorService;
@@ -43,13 +44,73 @@ class LlmsTxtController
 
         try {
             $currentPageId = $this->configurationService->getCurrentPageId();
+            $this->applyCacheLifetimeToPageCache($request);
             return $this->llmsTxtGenerator->generateLlmsTxt($currentPageId);
         } catch (\Exception $e) {
             $this->logger->error('Failed to generate llms.txt content', ['exception' => $e]);
+            $this->disablePageCache($request, 'llms.txt generation failed');
 
             // Return generic error message in llms.txt format - never leak exception details
             return "llmstxt: 1.0\nsite: " . $this->configurationService->getSiteUrl() . "\nerror: Failed to generate content\n";
         }
+    }
+
+    /**
+     * Apply llmsTxtCacheLifetime to TYPO3's page cache, which stores the llms.txt response.
+     *
+     * Both page types are cached USER objects, so TYPO3 keeps the rendered llms.txt in its
+     * page cache regardless of the extension's own cache. That entry belongs to the site
+     * root page, and TYPO3 only clears it when the root page itself changes: edits further
+     * down the tree would stay invisible for the whole page cache lifetime (a day by
+     * default). Tagging the entry "pages" lets DataHandler clear it whenever any page record
+     * is saved, and capping the page's cache timeout limits how long it is kept. A lifetime
+     * of 0 keeps llms.txt out of the page cache entirely, so it really is generated on every
+     * request.
+     */
+    protected function applyCacheLifetimeToPageCache(ServerRequestInterface $request): void
+    {
+        $cacheLifetime = $this->configurationService->getCacheLifetime();
+        if ($cacheLifetime <= 0) {
+            $this->disablePageCache($request, 'llms.txt caching is disabled (llmsTxtCacheLifetime)');
+            return;
+        }
+
+        $frontendController = $this->getFrontendController($request);
+        if ($frontendController === null) {
+            return;
+        }
+        $frontendController->addCacheTags(['pages']);
+
+        // TYPO3 12 has no lifetime per cache tag. The page cache entry gets the lifetime of
+        // the page record's cache_timeout instead, which TSFE only reads once rendering is
+        // done - so lowering it here still applies to this entry. A shorter timeout set by
+        // an editor is kept.
+        if (is_array($frontendController->page)) {
+            $pageCacheTimeout = (int)($frontendController->page['cache_timeout'] ?? 0);
+            if ($pageCacheTimeout <= 0 || $pageCacheTimeout > $cacheLifetime) {
+                $frontendController->page['cache_timeout'] = $cacheLifetime;
+            }
+        }
+    }
+
+    /**
+     * Keep the current response out of TYPO3's page cache.
+     *
+     * Used for error responses in particular: cached, a transient failure would keep being
+     * served as an error message for the full page cache lifetime.
+     */
+    protected function disablePageCache(ServerRequestInterface $request, string $reason): void
+    {
+        // An internal request, so that $TYPO3_CONF_VARS['FE']['disableNoCacheParameter']
+        // cannot veto it: that setting is meant for the no_cache URL parameter only.
+        $this->getFrontendController($request)?->set_no_cache('EXT:ai_llms_txt: ' . $reason, true);
+    }
+
+    protected function getFrontendController(ServerRequestInterface $request): ?TypoScriptFrontendController
+    {
+        $frontendController = $request->getAttribute('frontend.controller') ?? $GLOBALS['TSFE'] ?? null;
+
+        return $frontendController instanceof TypoScriptFrontendController ? $frontendController : null;
     }
 
     /**
@@ -79,6 +140,7 @@ class LlmsTxtController
             $markdown = $this->markdownConverter->convertHtmlToMarkdown($pageHtml);
 
             if (empty(trim($markdown))) {
+                $this->disablePageCache($request, 'Markdown conversion failed');
                 return "# Error\n\nPage rendered but conversion to Markdown failed.\n";
             }
 
@@ -91,6 +153,7 @@ class LlmsTxtController
             throw $e;
         } catch (\Exception $e) {
             $this->logger->error('Failed to render page as Markdown', ['exception' => $e]);
+            $this->disablePageCache($request, 'Markdown rendering failed');
 
             // Generic message only - exception messages can carry SQL statements and
             // absolute filesystem paths, and this endpoint is publicly reachable.

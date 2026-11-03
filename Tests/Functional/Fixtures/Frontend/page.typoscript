@@ -1,0 +1,5 @@
+# Minimal regular page object. The extension's own page types (llmstxt, markdown_page)
+# are not imported here on purpose: they must arrive through ext_localconf.php.
+page = PAGE
+page.10 = TEXT
+page.10.value = Regular page
