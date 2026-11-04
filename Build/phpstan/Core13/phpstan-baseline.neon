@@ -76,6 +76,11 @@ parameters:
 			path: ../../../Classes/Command/DownloadMarkdownCommand.php
 
 		-
+			message: "#^Call to an undefined method TYPO3\\\\CMS\\\\Frontend\\\\ContentObject\\\\ContentObjectRenderer\\:\\:updateState\\(\\)\\.$#"
+			count: 1
+			path: ../../../Classes/Controller/LlmsTxtController.php
+
+		-
 			message: "#^Method WebVision\\\\AiLlmsTxt\\\\Controller\\\\LlmsTxtController\\:\\:generateAction\\(\\) has parameter \\$conf with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: ../../../Classes/Controller/LlmsTxtController.php

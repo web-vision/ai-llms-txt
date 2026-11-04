@@ -204,11 +204,122 @@ class LlmsTxtController
                 'pidInList' => (string)$pageId,
             ],
         ];
-        $renderedContent = $cObject->cObjGetSingle('CONTENT', $contentConfiguration);
+        $renderedContent = $this->renderNonCacheableContent(
+            $request,
+            $cObject->cObjGetSingle('CONTENT', $contentConfiguration)
+        );
 
         $displayTitle = !empty($page['seo_title']) ? $page['seo_title'] : ($page['title'] ?? '');
 
         return $this->composePageHtml((string)$displayTitle, (string)($page['description'] ?? ''), $renderedContent);
+    }
+
+    /**
+     * Render the non-cacheable content objects in the HTML of the page right away.
+     *
+     * A non-cacheable content object - USER_INT, COA_INT, or a plugin whose action is not
+     * cacheable - renders as a placeholder, "<!--INT_SCRIPT.(hash)-->", which TYPO3 replaces
+     * after the page has been cached. The Markdown version is converted from the HTML before
+     * that, and the placeholder, an HTML comment, did not survive the conversion: whatever
+     * such a plugin renders, a list of study programmes for example, was missing from the
+     * Markdown of its page.
+     *
+     * The placeholders are replaced here the way TYPO3's RequestHandler does it, also those the
+     * replacement adds. What these objects render may depend on the request or the visitor, and
+     * on the HTML page it is never cached either, so a page with any of them is kept out of the
+     * page cache.
+     */
+    protected function renderNonCacheableContent(ServerRequestInterface $request, string $html): string
+    {
+        $replaced = 0;
+        do {
+            $html = (string)preg_replace_callback(
+                '/<!--(INT_SCRIPT\.[0-9a-f]{32})-->/',
+                fn (array $matches): string => $this->renderNonCacheableObject(
+                    $request,
+                    $this->takeNonCacheableObject($request, $matches[1])
+                ),
+                $html,
+                -1,
+                $count
+            );
+            $replaced += $count;
+        } while ($count > 0);
+
+        if ($replaced > 0) {
+            $this->disablePageCache($request, 'the page has non-cacheable content');
+        }
+
+        return $html;
+    }
+
+    /**
+     * What TYPO3 registered for the placeholder $key: in TYPO3 14 in the page parts of the
+     * request, in TYPO3 13 in TypoScriptFrontendController. TYPO3 13 would render it again
+     * from there, so it is removed. TYPO3 14 has no way to remove it, it just does not find
+     * the placeholder in the Markdown any more.
+     *
+     * Neither class exists in both versions, so they are only used through their methods.
+     *
+     * @return array<string, mixed>|null
+     */
+    protected function takeNonCacheableObject(ServerRequestInterface $request, string $key): ?array
+    {
+        $pageParts = $request->getAttribute('frontend.page.parts');
+        if (is_object($pageParts) && method_exists($pageParts, 'getNotCachedContentElementRegistry')) {
+            foreach ((array)$pageParts->getNotCachedContentElementRegistry() as $nonCacheable) {
+                if (is_array($nonCacheable) && ($nonCacheable['substKey'] ?? null) === $key) {
+                    return $nonCacheable;
+                }
+            }
+
+            return null;
+        }
+
+        $frontendController = $request->getAttribute('frontend.controller');
+        if (!is_object($frontendController) || !property_exists($frontendController, 'config')
+            || !is_array($frontendController->config)
+        ) {
+            return null;
+        }
+        $nonCacheable = $frontendController->config['INTincScript'][$key] ?? null;
+        unset($frontendController->config['INTincScript'][$key]);
+
+        return is_array($nonCacheable) ? $nonCacheable : null;
+    }
+
+    /**
+     * @param array<string, mixed>|null $nonCacheable
+     * @see \TYPO3\CMS\Frontend\Http\RequestHandler::processNonCacheableContentPartsAndSubstituteContentMarkers()
+     */
+    protected function renderNonCacheableObject(ServerRequestInterface $request, ?array $nonCacheable): string
+    {
+        if ($nonCacheable === null) {
+            return '';
+        }
+        if (isset($nonCacheable['cObjData'])) {
+            // TYPO3 14: the state of the ContentObjectRenderer
+            $cObject = GeneralUtility::makeInstance(ContentObjectRenderer::class);
+            $cObject->setRequest($request);
+            $cObject->updateState(unserialize((string)$nonCacheable['cObjData'], ['allowed_classes' => false]));
+        } else {
+            // TYPO3 13: the ContentObjectRenderer itself, serialized in this request while the
+            // content above was rendered - never data from outside. ContentObjectRenderer has
+            // __wakeup(), so all classes are allowed, as TYPO3 does it.
+            $cObject = unserialize((string)($nonCacheable['cObj'] ?? ''), ['allowed_classes' => true]);
+            if (!$cObject instanceof ContentObjectRenderer) {
+                return '';
+            }
+            $cObject->setRequest($request);
+        }
+        $conf = is_array($nonCacheable['conf'] ?? null) ? $nonCacheable['conf'] : [];
+
+        return (string)match ($nonCacheable['type'] ?? null) {
+            'COA' => $cObject->cObjGetSingle('COA', $conf),
+            'FUNC' => $cObject->cObjGetSingle('USER', $conf),
+            'POSTUSERFUNC' => $cObject->callUserFunction((string)$nonCacheable['postUserFunc'], $conf, (string)($nonCacheable['content'] ?? '')),
+            default => '',
+        };
     }
 
     /**

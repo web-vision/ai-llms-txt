@@ -50,6 +50,9 @@ content, so its quality depends on the markup your templates produce:
     The children of a ``b13/container`` grid are rendered by their container
     only, as on the page itself. Content that the page template renders by
     itself, such as menus or footer content, is not included.
+*   Plugins whose output is not cacheable are rendered into the Markdown
+    version on every request, and a page with such a plugin is not kept in
+    TYPO3's page cache.
 
 The result is meant to be a readable, semantic version of the content, not a
 faithful copy of the page's layout.

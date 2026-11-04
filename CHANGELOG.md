@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The Markdown version of a page had the content elements of a `b13/container` grid twice:
   inside the container, and once more on their own. They are now only rendered by their
   container
+- Content that is not cacheable - `USER_INT`, `COA_INT` and plugins whose action is not
+  cacheable, such as a list of records with filters - was missing from the Markdown version of
+  its page. It is now rendered into it, and a page with such content is no longer kept in
+  TYPO3's page cache, like that content on the HTML page
 
 ## [0.4.0] - 2026-10-26
 

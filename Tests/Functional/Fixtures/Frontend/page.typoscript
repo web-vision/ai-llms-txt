@@ -5,6 +5,27 @@ page.10 = TEXT
 page.10.value = Regular page
 
 # Content elements, as collected by the Markdown version: the HTML stored in bodytext
-# stands in for what fluid_styled_content would render.
-tt_content = TEXT
-tt_content.field = bodytext
+# stands in for what fluid_styled_content would render. Removed first: the default
+# TypoScript of TYPO3 has a CASE with an error message as default.
+tt_content >
+tt_content = CASE
+tt_content {
+    key.field = CType
+
+    default = TEXT
+    default.field = bodytext
+
+    # Non-cacheable content: a COA_INT with another one inside, and a USER_INT, which is
+    # what a plugin whose action is not cacheable becomes
+    coa_int = COA_INT
+    coa_int {
+        10 = TEXT
+        10.field = bodytext
+        20 = COA_INT
+        20.10 = TEXT
+        20.10.value = <p>Rendered inside it.</p>
+    }
+
+    user_int = USER_INT
+    user_int.userFunc = WebVision\AiLlmsTxt\Tests\Functional\Fixtures\Frontend\NonCacheablePlugin->render
+}
