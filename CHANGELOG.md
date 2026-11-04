@@ -100,6 +100,10 @@ released and not officially supported. This includes their changes in behaviour,
 - The `<link rel="alternate">` to llms.txt in the head of every page always pointed to
   `/llms.txt`: wrong for sites under a path or without the route enhancer, and present even
   where the extension is disabled. It is now built by the router and left out for disabled sites
+- Content that is not cacheable - `USER_INT`, `COA_INT` and plugins whose action is not
+  cacheable, such as a list of records with filters - was missing from the Markdown version of
+  its page. It is now rendered into it, and a page with such content is no longer kept in
+  TYPO3's page cache, like that content on the HTML page
 
 ### Security
 - The Markdown version of a page was served even when the extension was disabled for the

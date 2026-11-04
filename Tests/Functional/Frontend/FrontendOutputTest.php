@@ -176,6 +176,41 @@ final class FrontendOutputTest extends FunctionalTestCase
     }
 
     #[Test]
+    public function markdownVersionHasWhatNonCacheableContentRenders(): void
+    {
+        $this->writeSiteConfiguration([]);
+        // Element 21 is a USER_INT, element 22 a COA_INT with another COA_INT inside
+        $this->importCSVDataSet(__DIR__ . '/../Fixtures/Frontend/tt_content_non_cacheable.csv');
+
+        $body = (string)$this->requestMarkdown('/about-us')->getBody();
+
+        static::assertMatchesRegularExpression(
+            '/## Our programmes\s+[-*] Marketing \(B\.A\.\)\s+[-*] Logistics \(M\.Sc\.\)\s+Applications are open\.\s+Rendered inside it\./',
+            $body
+        );
+        static::assertStringNotContainsString('INT_SCRIPT', $body);
+    }
+
+    #[Test]
+    public function markdownVersionOfAPageWithNonCacheableContentIsNotPageCached(): void
+    {
+        $this->writeSiteConfiguration([]);
+        $this->importCSVDataSet(__DIR__ . '/../Fixtures/Frontend/tt_content_non_cacheable.csv');
+        $this->requestMarkdown('/about-us');
+        $this->requestMarkdown('/products');
+
+        $this->changeBodytextWithoutDataHandler(22, '<p>Applications are closed.</p>');
+        $this->changeBodytextWithoutDataHandler(23, '<p>No products.</p>');
+
+        static::assertStringContainsString('Applications are closed.', (string)$this->requestMarkdown('/about-us')->getBody());
+        static::assertStringContainsString(
+            'Many products.',
+            (string)$this->requestMarkdown('/products')->getBody(),
+            'A page with cacheable content only is still served from the page cache'
+        );
+    }
+
+    #[Test]
     public function markdownVersionOfAPageExcludedFromIndexingIsNotFound(): void
     {
         $this->writeSiteConfiguration([]);
@@ -209,6 +244,11 @@ final class FrontendOutputTest extends FunctionalTestCase
     private function renamePageWithoutDataHandler(int $uid, string $title): void
     {
         $this->getConnectionPool()->getConnectionForTable('pages')->update('pages', ['title' => $title], ['uid' => $uid]);
+    }
+
+    private function changeBodytextWithoutDataHandler(int $uid, string $bodytext): void
+    {
+        $this->getConnectionPool()->getConnectionForTable('tt_content')->update('tt_content', ['bodytext' => $bodytext], ['uid' => $uid]);
     }
 
     /**

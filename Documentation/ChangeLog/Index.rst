@@ -57,6 +57,9 @@ Unreleased
 *   Top-level pages in ``llms.txt`` were listed with ``+`` instead of ``-``
 *   Content following an ``<aside>`` or ``<footer>`` containing a ``<div>``
     was lost in the Markdown version
+*   Content that is not cacheable (``USER_INT``, ``COA_INT``, plugins whose
+    action is not cacheable) was missing from the Markdown version. It is now
+    rendered into it, and such a page is not kept in TYPO3's page cache
 
 **Security**
 
