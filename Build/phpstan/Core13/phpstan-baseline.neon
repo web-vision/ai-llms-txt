@@ -107,7 +107,7 @@ parameters:
 
 		-
 			message: "#^Cannot call method getConfiguration\\(\\) on TYPO3\\\\CMS\\\\Core\\\\Site\\\\Entity\\\\Site\\|null\\.$#"
-			count: 9
+			count: 8
 			path: ../../../Classes/Service/ConfigurationService.php
 
 		-
