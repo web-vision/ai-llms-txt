@@ -16,6 +16,7 @@ use TYPO3\CMS\Core\Site\SiteFinder;
 use TYPO3\TestingFramework\Core\Functional\FunctionalTestCase;
 use WebVision\AiLlmsTxt\Command\DownloadMarkdownCommand;
 use WebVision\AiLlmsTxt\Repository\PageRepository;
+use WebVision\AiLlmsTxt\Service\ConfigurationService;
 use WebVision\AiLlmsTxt\Service\MarkdownConverterService;
 use WebVision\AiLlmsTxt\Service\UrlGeneratorService;
 
@@ -63,6 +64,20 @@ final class DownloadMarkdownCommandTest extends FunctionalTestCase
         static::assertStringNotContainsString('hidden.md', $output);
         static::assertStringNotContainsString('deleted.md', $output);
         static::assertStringNotContainsString($siteDir . 'folder.md', $output);
+    }
+
+    #[Test]
+    public function dryRunLeavesOutThePageTypesExcludedForTheSite(): void
+    {
+        $siteDir = $this->outputDir . '/test-site/';
+        static::assertStringContainsString($siteDir . 'products-internal-notes.md', $this->normalizeOutput($this->runCommand([])));
+
+        $this->writeSiteConfiguration("llmsTxtExcludeDoktypes: '6'\n");
+        $output = $this->normalizeOutput($this->runCommand([]));
+
+        static::assertStringNotContainsString($siteDir . 'products-internal-notes.md', $output);
+        // As in llms.txt, the subpage of the excluded page takes its place
+        static::assertStringContainsString($siteDir . 'products-internal-notes-nested.md', $output);
     }
 
     #[Test]
@@ -141,6 +156,7 @@ final class DownloadMarkdownCommandTest extends FunctionalTestCase
             $this->get(PageRepository::class),
             $this->get(MarkdownConverterService::class),
             $this->get(UrlGeneratorService::class),
+            $this->get(ConfigurationService::class),
             new NullLogger(),
             $httpHandler
         );
@@ -161,7 +177,7 @@ final class DownloadMarkdownCommandTest extends FunctionalTestCase
         return (string)preg_replace('/\s*\n\s*/', '', $tester->getDisplay());
     }
 
-    private function writeSiteConfiguration(): void
+    private function writeSiteConfiguration(string $additionalConfiguration = ''): void
     {
         $siteDir = $this->instancePath . '/typo3conf/sites/test-site';
         @mkdir($siteDir, 0777, true);
@@ -179,7 +195,8 @@ final class DownloadMarkdownCommandTest extends FunctionalTestCase
                     base: '/'
                     locale: en_US.UTF-8
                     flag: us
-                YAML
+
+                YAML . $additionalConfiguration
         );
 
         // TYPO3 12 has no siteConfigurationChanged(): reading the sites uncached makes

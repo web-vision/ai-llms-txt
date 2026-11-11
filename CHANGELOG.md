@@ -104,6 +104,11 @@ listed under *Changed*: check them before updating.
   cacheable, such as a list of records with filters - was missing from the Markdown version of
   its page. It is now rendered into it, and a page with such content is no longer kept in
   TYPO3's page cache, like that content on the HTML page
+- `ai-llms:download-markdown` exported the page types excluded with `llmsTxtExcludeDoktypes`,
+  although it exports the pages llms.txt can list. They are now left out, and their subpages
+  take their place
+- `llmsTxtExcludeDoktypes` written into the site YAML as a number (`llmsTxtExcludeDoktypes: 3`)
+  ended llms.txt with a TypeError
 
 ### Security
 - The Markdown version of a page was served even when the extension was disabled for the

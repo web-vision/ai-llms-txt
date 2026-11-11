@@ -60,6 +60,10 @@ Unreleased
 *   Content that is not cacheable (``USER_INT``, ``COA_INT``, plugins whose
     action is not cacheable) was missing from the Markdown version. It is now
     rendered into it, and such a page is not kept in TYPO3's page cache
+*   The CLI export included the page types excluded with
+    :confval:`site-llmsTxtExcludeDoktypes`; their subpages now take their place
+*   :confval:`site-llmsTxtExcludeDoktypes` written as a number into the site
+    YAML ended ``llms.txt`` with an error
 
 **Security**
 

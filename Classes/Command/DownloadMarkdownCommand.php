@@ -21,6 +21,7 @@ use TYPO3\CMS\Core\Site\Entity\Site;
 use TYPO3\CMS\Core\Site\SiteFinder;
 use TYPO3\CMS\Core\Utility\PathUtility;
 use WebVision\AiLlmsTxt\Repository\PageRepository;
+use WebVision\AiLlmsTxt\Service\ConfigurationService;
 use WebVision\AiLlmsTxt\Service\MarkdownConverterService;
 use WebVision\AiLlmsTxt\Service\UrlGeneratorService;
 
@@ -46,6 +47,7 @@ final class DownloadMarkdownCommand extends Command
         private readonly PageRepository $pageRepository,
         private readonly MarkdownConverterService $markdownConverter,
         private readonly UrlGeneratorService $urlGenerator,
+        private readonly ConfigurationService $configurationService,
         private readonly LoggerInterface $logger,
         ?callable $httpHandler = null
     ) {
@@ -321,12 +323,14 @@ final class DownloadMarkdownCommand extends Command
      * The root page of the site and every page below it that llms.txt can list
      *
      * Pages hidden in menus or excluded from indexing are left out, as in llms.txt; the
-     * subpages of folders, spacers and shortcuts move up into their place.
+     * subpages of folders, spacers, shortcuts and the page types of the site's
+     * llmsTxtExcludeDoktypes move up into their place.
      *
      * @return array<int, array<string, mixed>>
      */
     private function getVisiblePages(Site $site): array
     {
+        $excludeDoktypes = $this->configurationService->getExcludeDoktypesForSite($site);
         $rootPage = $this->pageRepository->findById($site->getRootPageId());
         $pages = $rootPage !== [] ? [$rootPage] : [];
 
@@ -335,7 +339,7 @@ final class DownloadMarkdownCommand extends Command
         while ($parentUids !== []) {
             $nextParentUids = [];
             foreach (array_chunk($parentUids, self::PARENTS_PER_QUERY) as $parentUidsOfQuery) {
-                $childrenByParent = $this->pageRepository->findNavigationByParentsBatch($parentUidsOfQuery, 0);
+                $childrenByParent = $this->pageRepository->findNavigationByParentsBatch($parentUidsOfQuery, 0, $excludeDoktypes);
                 foreach ($parentUidsOfQuery as $parentUid) {
                     foreach ($childrenByParent[$parentUid] ?? [] as $child) {
                         $uid = (int)$child['uid'];

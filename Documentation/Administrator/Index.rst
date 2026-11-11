@@ -83,8 +83,9 @@ Exporting pages as Markdown files
 The command ``ai-llms:download-markdown`` saves the Markdown version of pages
 as ``.md`` files, for example to feed them into an AI knowledge base. It
 exports the root page of a site and every page below it that ``llms.txt`` can
-list: pages hidden in menus or excluded from indexing are left out, the
-subpages of folders are included.
+list: pages hidden in menus or excluded from indexing are left out, as are the
+page types of ``llmsTxtExcludeDoktypes``. The subpages of folders and of
+excluded page types are included.
 
 ..  code-block:: bash
 

@@ -157,8 +157,20 @@ class ConfigurationService
     {
         $site = $this->getCurrentSite();
 
-        $doktypes = $site->getConfiguration()['llmsTxtExcludeDoktypes'] ?? '';
-        if (empty($doktypes)) {
+        return $site !== null ? $this->getExcludeDoktypesForSite($site) : [];
+    }
+
+    /**
+     * The doktypes of getExcludeDoktypes() for a given site, for code that runs without a
+     * request to that site, such as the CLI export
+     *
+     * @return array<int, int>
+     */
+    public function getExcludeDoktypesForSite(Site $site): array
+    {
+        // A value written into the YAML by hand, such as "llmsTxtExcludeDoktypes: 3", is an int
+        $doktypes = (string)($site->getConfiguration()['llmsTxtExcludeDoktypes'] ?? '');
+        if (trim($doktypes) === '') {
             return [];
         }
 
