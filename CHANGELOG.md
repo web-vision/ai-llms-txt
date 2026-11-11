@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.1] - 2026-11-11
+
+### Fixed
+- `ai-llms:download-markdown` exported the page types excluded with `llmsTxtExcludeDoktypes`,
+  although it exports the pages llms.txt can list. They are now left out, and their subpages
+  take their place
+- `llmsTxtExcludeDoktypes` written into the site YAML as a number (`llmsTxtExcludeDoktypes: 3`)
+  ended llms.txt with a TypeError
+
+### Security
+- `ai-llms:download-markdown` followed redirects, so the URL of an "External URL" page or a
+  redirect record, which editors can set to any address, was requested from the server and its
+  response saved in the export. Redirects are no longer followed; such pages are skipped
+
 ## [0.5.0] - 2026-11-11
 
 ### Added
@@ -164,7 +178,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Comprehensive documentation following TYPO3 standards
 - Support for TYPO3 v12, v13, and v14 LTS
 
-[Unreleased]: https://github.com/web-vision/ai-llms-txt/compare/0.5.0...HEAD
+[Unreleased]: https://github.com/web-vision/ai-llms-txt/compare/0.5.1...HEAD
+[0.5.1]: https://github.com/web-vision/ai-llms-txt/compare/0.5.0...0.5.1
 [0.5.0]: https://github.com/web-vision/ai-llms-txt/compare/0.4.0...0.5.0
 [0.4.0]: https://github.com/web-vision/ai-llms-txt/compare/0.3.0...0.4.0
 [0.3.0]: https://github.com/web-vision/ai-llms-txt/compare/0.2.1...0.3.0

@@ -9,6 +9,24 @@ ChangeLog
 The complete history is kept in
 `CHANGELOG.md <https://github.com/web-vision/ai-llms-txt/blob/main/CHANGELOG.md>`__.
 
+..  _changelog-0-5-1:
+
+0.5.1 - 2026-11-11
+==================
+
+**Fixed**
+
+*   The CLI export included the page types excluded with
+    ``llmsTxtExcludeDoktypes``; their subpages now take their place
+*   ``llmsTxtExcludeDoktypes`` written as a number into the site YAML ended
+    ``llms.txt`` with an error
+
+**Security**
+
+*   The CLI export followed redirects, so the address of an "External URL"
+    page or a redirect record was requested from the server. Redirects are no
+    longer followed; such pages are skipped
+
 ..  _changelog-0-5-0:
 
 0.5.0 - 2026-11-11
