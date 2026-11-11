@@ -4,16 +4,25 @@ declare(strict_types=1);
 
 namespace WebVision\AiLlmsTxt\Tests\Functional\Command;
 
+use GuzzleHttp\Promise\Create;
+use GuzzleHttp\Promise\PromiseInterface;
+use GuzzleHttp\Psr7\Response;
 use PHPUnit\Framework\Attributes\Test;
+use Psr\Http\Message\RequestInterface;
+use Psr\Log\NullLogger;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Tester\CommandTester;
 use TYPO3\CMS\Core\Site\SiteFinder;
 use TYPO3\TestingFramework\Core\Functional\FunctionalTestCase;
 use WebVision\AiLlmsTxt\Command\DownloadMarkdownCommand;
+use WebVision\AiLlmsTxt\Repository\PageRepository;
+use WebVision\AiLlmsTxt\Service\MarkdownConverterService;
+use WebVision\AiLlmsTxt\Service\UrlGeneratorService;
 
 /**
  * The export itself fetches every page over HTTP, which a functional test cannot serve.
- * The dry run goes through the same page selection and file naming and lists the result.
+ * The dry run goes through the same page selection and file naming and lists the result;
+ * tests of the export answer its requests with a handler of their own.
  */
 final class DownloadMarkdownCommandTest extends FunctionalTestCase
 {
@@ -72,6 +81,35 @@ final class DownloadMarkdownCommandTest extends FunctionalTestCase
     }
 
     #[Test]
+    public function exportSkipsPagesThatRedirectWithoutFetchingTheTarget(): void
+    {
+        $requestedUrls = [];
+        $httpHandler = static function (RequestInterface $request) use (&$requestedUrls): PromiseInterface {
+            $requestedUrls[] = (string)$request->getUri();
+            if ($request->getUri()->getHost() !== 'example.com') {
+                return Create::promiseFor(new Response(200, [], 'Response of an address only the server can reach'));
+            }
+            // "About Us" stands in for an External URL page, which TYPO3 redirects to its URL
+            if ($request->getUri()->getPath() === '/about-us') {
+                return Create::promiseFor(new Response(303, ['Location' => 'http://169.254.169.254/latest/meta-data/']));
+            }
+            return Create::promiseFor(new Response(200, [], "# Page\n\nContent"));
+        };
+
+        $tester = $this->runExport($httpHandler);
+
+        static::assertSame(Command::SUCCESS, $tester->getStatusCode());
+        static::assertSame([], array_values(array_filter(
+            $requestedUrls,
+            static fn (string $url): bool => !str_starts_with($url, 'https://example.com/')
+        )));
+        $siteDir = $this->outputDir . '/test-site/';
+        static::assertFileDoesNotExist($siteDir . 'about-us.md');
+        static::assertFileExists($siteDir . 'about-us-team.md');
+        static::assertStringContainsString('Processed 12 pages successfully, 1 skipped, 0 errors', $this->normalizeOutput($tester));
+    }
+
+    #[Test]
     public function unknownSiteFails(): void
     {
         $tester = new CommandTester($this->get(DownloadMarkdownCommand::class));
@@ -92,6 +130,25 @@ final class DownloadMarkdownCommandTest extends FunctionalTestCase
             '--output-dir' => $this->outputDir,
             '--dry-run' => true,
         ], $options));
+
+        return $tester;
+    }
+
+    private function runExport(callable $httpHandler): CommandTester
+    {
+        $command = new DownloadMarkdownCommand(
+            $this->get(SiteFinder::class),
+            $this->get(PageRepository::class),
+            $this->get(MarkdownConverterService::class),
+            $this->get(UrlGeneratorService::class),
+            new NullLogger(),
+            $httpHandler
+        );
+        $tester = new CommandTester($command);
+        $tester->execute([
+            'siteIdentifier' => 'test-site',
+            '--output-dir' => $this->outputDir,
+        ]);
 
         return $tester;
     }

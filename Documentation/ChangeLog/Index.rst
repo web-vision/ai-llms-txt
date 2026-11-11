@@ -19,9 +19,9 @@ Unreleased
     *   The ``0.2`` branch supports TYPO3 12.4 LTS only. It is not released
         and not officially supported. Sites on TYPO3 13.4 or 14.3 use version
         0.5 or later.
-    *   The branch brings the fixes and features of 0.3.0, 0.4.0 and 0.5.0 to
-        TYPO3 12, including their changes in behaviour. Check them before
-        updating.
+    *   The branch brings the fixes and features of 0.3.0, 0.4.0, 0.5.0 and
+        0.5.1 to TYPO3 12, including their changes in behaviour. Check them
+        before updating.
     *   The Markdown version of a page now answers with "page not found" when
         the extension is disabled for the site, or when the page has
         :guilabel:`Index this page` switched off.
@@ -70,6 +70,9 @@ Unreleased
 *   Line breaks and Markdown syntax in titles, descriptions and settings
     could inject lines into ``llms.txt`` and keys into the CLI export's
     YAML frontmatter
+*   The CLI export followed redirects, so the address of an "External URL"
+    page or a redirect record was requested from the server. Redirects are no
+    longer followed; such pages are skipped
 
 ..  _changelog-0-2-2:
 

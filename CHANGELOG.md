@@ -7,9 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-The `0.2` branch brings the fixes and features of 0.3.0, 0.4.0 and 0.5.0 to TYPO3 12. It is not
-released and not officially supported. This includes their changes in behaviour, listed under
-*Changed*: check them before updating.
+The `0.2` branch brings the fixes and features of 0.3.0, 0.4.0, 0.5.0 and 0.5.1 to TYPO3 12.
+It is not released and not officially supported. This includes their changes in behaviour,
+listed under *Changed*: check them before updating.
 
 ### Added
 - Site setting `llmsTxtExcludeDoktypes` to leave additional page types out of llms.txt;
@@ -120,6 +120,9 @@ released and not officially supported. This includes their changes in behaviour,
   page content break out of code blocks, links and HTML attributes in the Markdown version, and
   certain content made the conversion take quadratic time (GHSA-8m5h-gv5q-jmp5,
   GHSA-vc6h-86x6-wcjg, GHSA-r2cp-59h5-vgjj, GHSA-h3wg-gqjr-jjmw, GHSA-4xjf-2r66-5r28)
+- `ai-llms:download-markdown` followed redirects, so the URL of an "External URL" page or a
+  redirect record, which editors can set to any address, was requested from the server and its
+  response saved in the export. Redirects are no longer followed; such pages are skipped
 
 ## [0.2.2] - 2026-10-30
 
