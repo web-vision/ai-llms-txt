@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace WebVision\AiLlmsTxt\Command;
 
 use GuzzleHttp\Client;
+use GuzzleHttp\HandlerStack;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -36,17 +37,27 @@ final class DownloadMarkdownCommand extends Command
     private const PARENTS_PER_QUERY = 500;
     private readonly Client $httpClient;
 
+    /**
+     * @param callable|null $httpHandler Sends the requests of the export, Guzzle's default
+     *   handler if null. Tests pass one that answers without a network.
+     */
     public function __construct(
         private readonly SiteFinder $siteFinder,
         private readonly PageRepository $pageRepository,
         private readonly MarkdownConverterService $markdownConverter,
         private readonly UrlGeneratorService $urlGenerator,
-        private readonly LoggerInterface $logger
+        private readonly LoggerInterface $logger,
+        ?callable $httpHandler = null
     ) {
         parent::__construct();
         $this->httpClient = new Client([
+            'handler' => HandlerStack::create($httpHandler),
             'timeout' => 30,
             'http_errors' => false,
+            // An "External URL" page or a redirect record sends the request wherever an editor
+            // wants, also to addresses that only this server can reach. Its target is never
+            // fetched; the page is skipped.
+            'allow_redirects' => false,
         ]);
     }
 
@@ -357,6 +368,16 @@ final class DownloadMarkdownCommand extends Command
                     'page_uid' => $page['uid'],
                     'title' => $page['title'],
                     'url' => $markdownUrl,
+                ]);
+                return null;
+            }
+
+            if ($statusCode >= 300 && $statusCode < 400) {
+                $this->logger->info('Skipping page that redirects', [
+                    'page_uid' => $page['uid'],
+                    'title' => $page['title'],
+                    'url' => $markdownUrl,
+                    'location' => $response->getHeaderLine('Location'),
                 ]);
                 return null;
             }

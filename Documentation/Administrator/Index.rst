@@ -123,8 +123,11 @@ subpages of folders are included.
           directory.
 
 The command fetches the Markdown version of each page over HTTP, so the site
-must be reachable from the server under its configured base URL. It ends with
-a non-zero exit code if a page or site could not be processed.
+must be reachable from the server under its configured base URL, without a
+redirect. Redirects are not followed: a page that redirects, such as an
+"External URL" page, is skipped, so that the server never requests the address
+an editor entered. It ends with a non-zero exit code if a page or site could
+not be processed.
 
 ..  _troubleshooting:
 
